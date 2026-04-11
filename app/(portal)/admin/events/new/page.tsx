@@ -1,0 +1,163 @@
+"use client"
+
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useCreateEvent, useAdminGyms } from "@/lib/api/hooks"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+
+const eventSchema = z.object({
+  name: z.string().min(1, "Nome obrigatorio"),
+  slug: z
+    .string()
+    .min(1, "Slug obrigatorio")
+    .regex(/^[a-z0-9-]+$/, "Apenas minusculas, numeros e hifens"),
+  gymId: z.string().min(1, "Academia obrigatoria"),
+  scoringType: z.enum(["simple", "ifsc", "redpoint"]),
+  description: z.string().optional(),
+  startsAt: z.string().optional(),
+  endsAt: z.string().optional(),
+})
+
+type EventForm = z.infer<typeof eventSchema>
+
+export default function NewEventPage() {
+  const router = useRouter()
+  const createEvent = useCreateEvent()
+  const { data: gyms } = useAdminGyms()
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<EventForm>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: {
+      scoringType: "simple",
+    },
+  })
+
+  async function onSubmit(data: EventForm) {
+    try {
+      const result = await createEvent.mutateAsync(data)
+      toast.success("Evento criado")
+      router.push(`/admin/events/${result.id}`)
+    } catch (error: any) {
+      if (error?.code === "CONFLICT") {
+        toast.error("Slug ja existe")
+      } else {
+        toast.error("Erro ao criar evento")
+      }
+    }
+  }
+
+  return (
+    <div>
+      <div className="mb-6">
+        <Link
+          href="/admin/events"
+          className="text-muted-foreground hover:text-foreground text-sm"
+        >
+          &larr; Voltar para eventos
+        </Link>
+        <h1 className="text-foreground mt-2 text-2xl font-bold">Novo Evento</h1>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-4">
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">Nome</label>
+          <input
+            {...register("name")}
+            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            placeholder="Apus Boulder Open 2026"
+          />
+          {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
+        </div>
+
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">Slug</label>
+          <input
+            {...register("slug")}
+            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            placeholder="apus-boulder-open-2026"
+          />
+          {errors.slug && <p className="mt-1 text-sm text-red-500">{errors.slug.message}</p>}
+        </div>
+
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">Academia</label>
+          <select
+            {...register("gymId")}
+            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          >
+            <option value="">Selecionar...</option>
+            {gyms?.map((gym: any) => (
+              <option key={gym.id} value={gym.id}>
+                {gym.name}
+              </option>
+            ))}
+          </select>
+          {errors.gymId && <p className="mt-1 text-sm text-red-500">{errors.gymId.message}</p>}
+        </div>
+
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">Formato</label>
+          <select
+            {...register("scoringType")}
+            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          >
+            <option value="simple">Simples (tops + tentativas)</option>
+            <option value="ifsc">IFSC (tops + zonas + tentativas)</option>
+            <option value="redpoint">Redpoint (pontos por rota)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">Descricao</label>
+          <textarea
+            {...register("description")}
+            rows={3}
+            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-foreground mb-1 block text-sm font-medium">Inicio</label>
+            <input
+              {...register("startsAt")}
+              type="datetime-local"
+              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            />
+          </div>
+          <div>
+            <label className="text-foreground mb-1 block text-sm font-medium">Fim</label>
+            <input
+              {...register("endsAt")}
+              type="datetime-local"
+              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <Button
+            type="submit"
+            disabled={createEvent.isPending}
+            className="bg-violet-600 hover:bg-violet-500"
+          >
+            {createEvent.isPending ? "Criando..." : "Criar Evento"}
+          </Button>
+          <Link href="/admin/events">
+            <Button type="button" variant="outline">
+              Cancelar
+            </Button>
+          </Link>
+        </div>
+      </form>
+    </div>
+  )
+}

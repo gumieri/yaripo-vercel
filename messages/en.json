@@ -1,0 +1,74 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next"
+  },
+  "nav": {
+    "home": "Home",
+    "events": "Events",
+    "leaderboard": "Leaderboard",
+    "profile": "Profile",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "landing": {
+    "title": "Yaripo",
+    "subtitle": "Climbing competition management platform",
+    "browseEvents": "Browse Events",
+    "browseGyms": "Browse Gyms",
+    "hero": "Manage climbing competitions with simplicity and precision",
+    "cta": "Get Started"
+  },
+  "events": {
+    "title": "Events",
+    "upcoming": "Upcoming Events",
+    "active": "Active",
+    "completed": "Completed",
+    "noEvents": "No events found",
+    "startsAt": "Starts",
+    "endsAt": "Ends",
+    "rules": "Rules",
+    "register": "Register"
+  },
+  "queue": {
+    "joinQueue": "Join Queue",
+    "inQueue": "You are in the queue",
+    "yourTurn": "Your turn!",
+    "position": "Position",
+    "leaveQueue": "Leave Queue",
+    "alreadyInQueue": "You are already in a queue",
+    "noQueue": "Queue is empty"
+  },
+  "judge": {
+    "callNext": "Call Next",
+    "top": "TOP",
+    "attempt": "Attempt",
+    "attemptCount": "Attempts",
+    "noShow": "No Show",
+    "submitting": "Submitting...",
+    "activeAthlete": "Active Athlete",
+    "noActiveAthlete": "No active athlete"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "rank": "#",
+    "athlete": "Athlete",
+    "category": "Category",
+    "tops": "Tops",
+    "attempts": "Attempts",
+    "noResults": "No results yet"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Create Account",
+    "loginWithGoogle": "Login with Google",
+    "loginWithGitHub": "Login with GitHub",
+    "logout": "Logout"
+  }
+}

@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { AdminNav } from "@/components/admin/nav"
 import { redirect } from "next/navigation"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

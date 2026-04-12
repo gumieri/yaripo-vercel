@@ -66,7 +66,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
 
   if (event.scoringType === "redpoint") {
     const brc = event.bestRoutesCount
-    const catFilter = categoryId ? sql`${ath.categoryId} = ${categoryId}::uuid` : sql`true`
+    const catFilter = categoryId ? sql`${athletes.categoryId} = ${categoryId}::uuid` : sql`true`
 
     const rawSql = brc !== null && brc > 0
       ? sql`

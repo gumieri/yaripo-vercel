@@ -66,7 +66,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
 
   if (event.scoringType === "redpoint") {
     const brc = event.bestRoutesCount
-    const catFilter = categoryId ? `ath.category_id = '${categoryId}'` : `true`
+    const catFilter = categoryId ? sql`${ath.categoryId} = ${categoryId}::uuid` : sql`true`
 
     const rawSql = brc !== null && brc > 0
       ? sql`
@@ -85,7 +85,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
           WHERE s.event_id = ${event.id}
             AND a.is_top = true
             AND a.attempt_count <= s.max_attempts
-            AND ${sql.raw(catFilter)}
+            AND ${catFilter}
           ORDER BY a.athlete_id, s.id, points DESC
         ),
         ranked_routes AS (
@@ -126,7 +126,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
           WHERE s.event_id = ${event.id}
             AND a.is_top = true
             AND a.attempt_count <= s.max_attempts
-            AND ${sql.raw(catFilter)}
+            AND ${catFilter}
           ORDER BY a.athlete_id, s.id, points DESC
         ),
         aggregated AS (

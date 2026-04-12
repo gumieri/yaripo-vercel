@@ -77,7 +77,7 @@ export const events = pgTable("events", {
     .notNull()
     .references(() => gyms.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  slug: text("slug").notNull(),
+  slug: text("slug").notNull().unique(),
   description: text("description"),
   rules: text("rules"),
   scoringType: text("scoring_type", { enum: ["simple", "ifsc", "redpoint"] })

@@ -1,11 +1,10 @@
-import { auth } from "@/lib/auth/server"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { AdminNav } from "@/components/admin/nav"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
 
-  if (!session?.user) {
+  if (!session?.user || session.user.role !== "admin") {
     redirect("/login")
   }
 

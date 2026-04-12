@@ -333,6 +333,13 @@ adminRoutes.patch(
     if (body.minAge !== undefined) updates.minAge = body.minAge ? Number(body.minAge) : null
     if (body.maxAge !== undefined) updates.maxAge = body.maxAge ? Number(body.maxAge) : null
 
+    if (Object.keys(updates).length === 0) {
+      return c.json(
+        { success: false, error: { code: "VALIDATION_FAILED", message: "No fields to update" } },
+        400,
+      )
+    }
+
     const [updated] = await db
       .update(categories)
       .set(updates)
@@ -450,6 +457,13 @@ adminRoutes.patch(
     if (body.flashPoints !== undefined) updates.flashPoints = Number(body.flashPoints)
     if (body.pointsPerAttempt !== undefined) updates.pointsPerAttempt = Number(body.pointsPerAttempt)
     if (body.maxAttempts !== undefined) updates.maxAttempts = Number(body.maxAttempts)
+
+    if (Object.keys(updates).length === 0) {
+      return c.json(
+        { success: false, error: { code: "VALIDATION_FAILED", message: "No fields to update" } },
+        400,
+      )
+    }
 
     const [updated] = await db
       .update(sectors)

@@ -169,7 +169,7 @@ function JudgeSectorView({
       {activeEntry && (
         <div className="mb-6 rounded-xl border-2 border-violet-500 bg-violet-50 p-6 text-center">
           <p className="text-sm font-medium text-violet-600">Atleta Ativo</p>
-          <p className="text-foreground mt-2 text-4xl font-extrabold">{activeEntry.athleteName}</p>
+          <p className="text-foreground mt-2 text-4xl font-extrabold">{activeEntry.athlete?.name}</p>
           <div className="mt-3 flex items-center justify-center gap-2">
             <button
               onClick={() => setAttemptCount((c) => Math.max(1, c - 1))}

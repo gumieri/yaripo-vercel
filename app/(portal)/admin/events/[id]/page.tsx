@@ -53,7 +53,7 @@ export default function AdminEventDetailPage({
   const [tab, setTab] = useState<Tab>("settings")
 
   if (isLoading || !event) {
-    return <p className="text-muted-foreground p-4">Carregando...</p>
+    return <p className="text-muted-foreground p-4"><div className="space-y-2"><div className="h-4 w-24 animate-pulse rounded bg-secondary" /><div className="h-8 w-64 animate-pulse rounded bg-secondary" /><div className="h-64 w-full animate-pulse rounded-lg bg-secondary" /></div></p>
   }
 
   const tabs: { key: Tab; label: string }[] = [
@@ -83,8 +83,8 @@ export default function AdminEventDetailPage({
             onClick={() => setTab(t.key)}
             className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
               tab === t.key
-                ? "border-violet-600 text-violet-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-violet-600 text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {t.label}
@@ -139,7 +139,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         <input
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
@@ -148,7 +148,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         <input
           value={form.slug}
           onChange={(e) => setForm({ ...form, slug: e.target.value })}
-          className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
@@ -157,7 +157,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         <select
           value={form.status}
           onChange={(e) => setForm({ ...form, status: e.target.value })}
-          className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         >
           {statusOptions.map((s) => (
             <option key={s} value={s}>
@@ -172,7 +172,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         <select
           value={form.scoringType}
           onChange={(e) => setForm({ ...form, scoringType: e.target.value })}
-          className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <option value="simple">Simples</option>
           <option value="ifsc">IFSC</option>
@@ -190,7 +190,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
             min={1}
             value={form.bestRoutesCount}
             onChange={(e) => setForm({ ...form, bestRoutesCount: e.target.value })}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="Ex: 5"
           />
           <p className="text-muted-foreground mt-1 text-xs">
@@ -205,7 +205,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           rows={3}
-          className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
@@ -216,7 +216,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
             type="datetime-local"
             value={form.startsAt}
             onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <div>
@@ -225,7 +225,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
             type="datetime-local"
             value={form.endsAt}
             onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -233,7 +233,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
       <Button
         onClick={handleSave}
         disabled={updateEvent.isPending}
-        className="bg-violet-600 hover:bg-violet-500"
+        className="bg-primary hover:bg-primary/90"
       >
         {updateEvent.isPending ? "Salvando..." : "Salvar"}
       </Button>
@@ -285,7 +285,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="Ex: Masculino 18-29"
           />
         </div>
@@ -294,7 +294,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="border-input bg-background rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="border-input bg-background rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="open">Aberto</option>
             <option value="male">Masculino</option>
@@ -307,7 +307,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
             type="number"
             value={minAge}
             onChange={(e) => setMinAge(e.target.value)}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <div className="w-20">
@@ -316,13 +316,13 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
             type="number"
             value={maxAge}
             onChange={(e) => setMaxAge(e.target.value)}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <Button
           onClick={handleCreate}
           disabled={createCategory.isPending || !name.trim()}
-          className="bg-violet-600 hover:bg-violet-500"
+          className="bg-primary hover:bg-primary/90"
         >
           Adicionar
         </Button>
@@ -344,7 +344,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-destructive hover:bg-red-50"
+                className="text-destructive hover:bg-destructive/10"
                 onClick={() => handleDelete(cat.id, cat.name)}
                 disabled={deleteCategory.isPending}
               >
@@ -405,7 +405,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
   }
 
   const inputCls =
-    "border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+    "border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
 
   return (
     <div>
@@ -423,7 +423,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
         <Button
           onClick={handleCreate}
           disabled={createSector.isPending || !name.trim()}
-          className="bg-violet-600 hover:bg-violet-500"
+          className="bg-primary hover:bg-primary/90"
         >
           Adicionar
         </Button>
@@ -437,7 +437,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
             <div key={sector.id} className="rounded-lg border p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-sm font-bold">
+                  <span className="text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-sm font-bold">
                     {idx + 1}
                   </span>
                   <p className="text-foreground font-medium">{sector.name}</p>
@@ -445,7 +445,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-destructive hover:bg-red-50"
+                  className="text-destructive hover:bg-destructive/10"
                   onClick={() => handleDelete(sector.id, sector.name)}
                   disabled={deleteSector.isPending}
                 >
@@ -574,8 +574,8 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
           onClick={() => setShowBulk(false)}
           className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
             !showBulk
-              ? "bg-violet-100 text-violet-700"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Individual
@@ -584,8 +584,8 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
           onClick={() => setShowBulk(true)}
           className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
             showBulk
-              ? "bg-violet-100 text-violet-700"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Lote
@@ -600,7 +600,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreateSingle()}
-              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Ex: Joao Silva"
             />
           </div>
@@ -609,7 +609,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Selecionar...</option>
               {categories.map((cat: any) => (
@@ -622,7 +622,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
           <Button
             onClick={handleCreateSingle}
             disabled={createAthlete.isPending || !name.trim() || !selectedCategory}
-            className="bg-violet-600 hover:bg-violet-500"
+            className="bg-primary hover:bg-primary/90"
           >
             Adicionar
           </Button>
@@ -634,7 +634,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
             <select
               value={bulkCategory}
               onChange={(e) => setBulkCategory(e.target.value)}
-              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Selecionar...</option>
               {categories.map((cat: any) => (
@@ -652,7 +652,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
               value={bulkNames}
               onChange={(e) => setBulkNames(e.target.value)}
               rows={6}
-              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder={"Joao Silva\nMaria Santos\nPedro Lima"}
             />
           </div>
@@ -661,7 +661,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
             disabled={
               bulkCreateAthletes.isPending || !bulkCategory || !bulkNames.trim()
             }
-            className="bg-violet-600 hover:bg-violet-500"
+            className="bg-primary hover:bg-primary/90"
           >
             {bulkCreateAthletes.isPending ? "Registrando..." : "Registrar Lote"}
           </Button>
@@ -686,7 +686,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-destructive hover:bg-red-50"
+                className="text-destructive hover:bg-destructive/10"
                 onClick={() => handleDelete(athlete.id, athlete.name)}
                 disabled={deleteAthlete.isPending}
               >

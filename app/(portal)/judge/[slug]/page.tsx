@@ -65,7 +65,7 @@ export default function JudgeEventPage({
           <button
             key={sector.id}
             onClick={() => setSelectedSector(sector.id)}
-            className="rounded-xl border border-slate-200 bg-white p-6 text-left transition-all hover:border-violet-300 hover:shadow-md active:scale-[0.98]"
+            className="rounded-xl border border-border/50 bg-card p-6 text-left transition-all hover:border-border hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
           >
             <p className="text-foreground text-lg font-semibold">{sector.name}</p>
             <p className="text-muted-foreground text-sm">Setor {sector.orderIndex + 1}</p>
@@ -175,13 +175,13 @@ function JudgeSectorView({
       <h1 className="text-foreground mb-2 text-2xl font-bold">{sectorName}</h1>
 
       {activeEntry && (
-        <div className="mb-6 rounded-xl border-2 border-violet-500 bg-violet-50 p-6 text-center">
-          <p className="text-sm font-medium text-violet-600">Atleta Ativo</p>
+        <div className="mb-6 rounded-xl border-2 border-primary bg-primary/10 p-6 text-center">
+          <p className="text-sm font-medium text-primary">Atleta Ativo</p>
           <p className="text-foreground mt-2 text-4xl font-extrabold">{activeEntry.athlete?.name}</p>
           <div className="mt-3 flex items-center justify-center gap-2">
             <button
               onClick={() => setAttemptCount((c) => Math.max(1, c - 1))}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-300 text-xl font-bold text-slate-700 active:bg-slate-100"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-xl font-bold text-foreground active:bg-secondary"
             >
               -
             </button>
@@ -193,7 +193,7 @@ function JudgeSectorView({
                 setAttemptCount((c) => (maxAttempts !== null ? Math.min(c + 1, maxAttempts) : c + 1))
               }
               disabled={maxAttempts !== null && attemptCount >= maxAttempts}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-300 text-xl font-bold text-slate-700 active:bg-slate-100 disabled:opacity-40"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-xl font-bold text-foreground active:bg-secondary disabled:opacity-40"
             >
               +
             </button>
@@ -203,7 +203,7 @@ function JudgeSectorView({
             {maxAttempts !== null && ` (max ${maxAttempts})`}
           </p>
           {currentPoints !== null && (
-            <p className="mt-2 text-lg font-bold text-violet-600">{currentPoints} pts</p>
+            <p className="mt-2 text-lg font-bold text-primary">{currentPoints} pts</p>
           )}
         </div>
       )}

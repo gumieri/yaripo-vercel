@@ -51,7 +51,7 @@ export default function AthleteEventPage({
       <div className="mt-8">
         <Link
           href={`/events/${slug}`}
-          className="text-sm font-medium text-violet-600 hover:text-violet-500"
+          className="text-sm font-medium text-primary hover:text-primary/80"
         >
           Ver ranking &rarr;
         </Link>
@@ -115,7 +115,7 @@ function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }
           <Button
             onClick={handleJoin}
             disabled={joinQueue.isPending || isLoading}
-            className="bg-violet-600 hover:bg-violet-500"
+            className="bg-primary hover:bg-primary/90"
           >
             ENTRAR NA FILA
           </Button>

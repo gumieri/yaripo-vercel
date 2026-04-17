@@ -1,19 +1,23 @@
 import Link from "next/link"
 import { auth, signOut } from "@/lib/auth/server"
+import { Mountain } from "lucide-react"
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="border-border/50 bg-background/80 backdrop-blur-lg sticky top-0 z-50 border-b">
         <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link href="/" className="text-2xl font-bold text-violet-600">
-            Yaripo
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-foreground">
+            <Mountain className="h-6 w-6 text-primary" />
+            <span>
+              Yari<span className="text-primary">po</span>
+            </span>
           </Link>
           {session?.user ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-600">{session.user.name}</span>
+              <span className="text-muted-foreground text-sm">{session.user.name}</span>
               <form
                 action={async () => {
                   "use server"
@@ -22,7 +26,7 @@ export default async function PortalLayout({ children }: { children: React.React
               >
                 <button
                   type="submit"
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                  className="border-border hover:bg-secondary text-muted-foreground rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
                 >
                   Sair
                 </button>
@@ -31,7 +35,7 @@ export default async function PortalLayout({ children }: { children: React.React
           ) : (
             <Link
               href="/login"
-              className="rounded-lg bg-violet-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-violet-500"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-1.5 text-sm font-medium transition-colors"
             >
               Entrar
             </Link>

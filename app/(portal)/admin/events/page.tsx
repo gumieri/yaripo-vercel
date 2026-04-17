@@ -14,11 +14,11 @@ const statusLabels: Record<string, string> = {
 }
 
 const statusColors: Record<string, string> = {
-  draft: "bg-slate-100 text-slate-700",
-  published: "bg-blue-100 text-blue-700",
-  active: "bg-green-100 text-green-700",
-  completed: "bg-slate-100 text-slate-600",
-  archived: "bg-slate-100 text-slate-500",
+  draft: "bg-secondary text-muted-foreground",
+  published: "bg-[oklch(0.72_0.15_240_/_0.15)] text-[oklch(0.72_0.15_240)]",
+  active: "bg-[oklch(0.72_0.19_150_/_0.15)] text-[oklch(0.72_0.19_150)]",
+  completed: "bg-secondary text-muted-foreground",
+  archived: "bg-secondary text-muted-foreground/60",
 }
 
 export default function AdminEventsPage() {
@@ -40,16 +40,22 @@ export default function AdminEventsPage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-foreground text-2xl font-bold">Eventos</h1>
         <Link href="/admin/events/new">
-          <Button className="bg-violet-600 hover:bg-violet-500">Novo Evento</Button>
+          <Button>Novo Evento</Button>
         </Link>
       </div>
 
-      {isLoading && <p className="text-muted-foreground">Carregando...</p>}
+      {isLoading && (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border-border/50 bg-card h-20 animate-pulse rounded-lg border" />
+          ))}
+        </div>
+      )}
 
       {!isLoading && (!events || events.length === 0) && (
-        <div className="rounded-lg border border-dashed p-8 text-center">
+        <div className="border-border/50 rounded-lg border border-dashed p-8 text-center">
           <p className="text-muted-foreground">Nenhum evento criado.</p>
-          <Link href="/admin/events/new" className="mt-2 inline-block text-sm text-violet-600">
+          <Link href="/admin/events/new" className="text-primary mt-2 inline-block text-sm">
             Criar primeiro evento
           </Link>
         </div>
@@ -60,12 +66,12 @@ export default function AdminEventsPage() {
           {events.map((event: any) => (
             <div
               key={event.id}
-              className="flex items-center justify-between rounded-lg border p-4"
+              className="border-border/50 bg-card hover:border-border flex items-center justify-between rounded-lg border p-4 transition-colors"
             >
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/admin/events/${event.id}`}
-                  className="text-foreground hover:text-violet-600 font-medium transition-colors"
+                  className="text-foreground hover:text-primary font-medium transition-colors"
                 >
                   {event.name}
                 </Link>
@@ -87,7 +93,7 @@ export default function AdminEventsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-destructive hover:bg-red-50"
+                  className="text-destructive hover:bg-destructive/10 hover:border-destructive/50"
                   onClick={() => handleDelete(event.id, event.name)}
                   disabled={deleteEvent.isPending}
                 >

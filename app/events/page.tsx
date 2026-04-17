@@ -36,10 +36,10 @@ export default function EventsPage() {
                     <span
                       className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         event.status === "active"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-[oklch(0.72_0.19_150_/_0.15)] text-[oklch(0.72_0.19_150)]"
                           : event.status === "completed"
-                            ? "bg-slate-100 text-slate-600"
-                            : "bg-blue-100 text-blue-700"
+                            ? "bg-secondary text-muted-foreground"
+                            : "bg-[oklch(0.72_0.15_240_/_0.15)] text-[oklch(0.72_0.15_240)]"
                       }`}
                     >
                       {event.status === "active"

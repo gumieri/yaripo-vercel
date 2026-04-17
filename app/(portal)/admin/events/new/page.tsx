@@ -24,6 +24,9 @@ const eventSchema = z.object({
 
 type EventForm = z.infer<typeof eventSchema>
 
+const inputCls =
+  "border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+
 export default function NewEventPage() {
   const router = useRouter()
   const createEvent = useCreateEvent()
@@ -59,7 +62,7 @@ export default function NewEventPage() {
       <div className="mb-6">
         <Link
           href="/admin/events"
-          className="text-muted-foreground hover:text-foreground text-sm"
+          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
           &larr; Voltar para eventos
         </Link>
@@ -71,28 +74,25 @@ export default function NewEventPage() {
           <label className="text-foreground mb-1 block text-sm font-medium">Nome</label>
           <input
             {...register("name")}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className={inputCls}
             placeholder="Apus Boulder Open 2026"
           />
-          {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
+          {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>}
         </div>
 
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">Slug</label>
           <input
             {...register("slug")}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className={inputCls}
             placeholder="apus-boulder-open-2026"
           />
-          {errors.slug && <p className="mt-1 text-sm text-red-500">{errors.slug.message}</p>}
+          {errors.slug && <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>}
         </div>
 
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">Academia</label>
-          <select
-            {...register("gymId")}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-          >
+          <select {...register("gymId")} className={inputCls}>
             <option value="">Selecionar...</option>
             {gyms?.map((gym: any) => (
               <option key={gym.id} value={gym.id}>
@@ -100,15 +100,12 @@ export default function NewEventPage() {
               </option>
             ))}
           </select>
-          {errors.gymId && <p className="mt-1 text-sm text-red-500">{errors.gymId.message}</p>}
+          {errors.gymId && <p className="mt-1 text-sm text-destructive">{errors.gymId.message}</p>}
         </div>
 
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">Formato</label>
-          <select
-            {...register("scoringType")}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-          >
+          <select {...register("scoringType")} className={inputCls}>
             <option value="simple">Simples (tops + tentativas)</option>
             <option value="ifsc">IFSC (tops + zonas + tentativas)</option>
             <option value="redpoint">Redpoint (pontos por rota)</option>
@@ -117,38 +114,22 @@ export default function NewEventPage() {
 
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">Descricao</label>
-          <textarea
-            {...register("description")}
-            rows={3}
-            className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-          />
+          <textarea {...register("description")} rows={3} className={inputCls} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-foreground mb-1 block text-sm font-medium">Inicio</label>
-            <input
-              {...register("startsAt")}
-              type="datetime-local"
-              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-            />
+            <input {...register("startsAt")} type="datetime-local" className={inputCls} />
           </div>
           <div>
             <label className="text-foreground mb-1 block text-sm font-medium">Fim</label>
-            <input
-              {...register("endsAt")}
-              type="datetime-local"
-              className="border-input bg-background w-full rounded-lg border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-            />
+            <input {...register("endsAt")} type="datetime-local" className={inputCls} />
           </div>
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            disabled={createEvent.isPending}
-            className="bg-violet-600 hover:bg-violet-500"
-          >
+          <Button type="submit" disabled={createEvent.isPending}>
             {createEvent.isPending ? "Criando..." : "Criar Evento"}
           </Button>
           <Link href="/admin/events">

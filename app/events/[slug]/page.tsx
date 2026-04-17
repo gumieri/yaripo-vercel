@@ -83,7 +83,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">#</th>
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">Atleta</th>
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">Categoria</th>
-                <th className="text-muted-foreground px-4 py-3 text-right font-medium">Tops</th>
+                <th className="text-muted-foreground px-4 py-3 text-right font-medium">
+                  {leaderboard.scoringType === "redpoint" ? "Pontos" : "Tops"}
+                </th>
                 {leaderboard.scoringType === "ifsc" && (
                   <th className="text-muted-foreground px-4 py-3 text-right font-medium">Zonas</th>
                 )}

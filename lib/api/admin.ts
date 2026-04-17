@@ -610,10 +610,13 @@ adminRoutes.post(
       )
     }
 
-    const values = names.map((name) => ({
-      name: name.trim(),
-      categoryId,
-    }))
+    const values = names
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0)
+      .map((name) => ({
+        name,
+        categoryId,
+      }))
 
     const created = await db.insert(athletes).values(values).returning()
 

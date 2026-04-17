@@ -62,11 +62,20 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
     )
   }
 
-  const categoryFilter = categoryId ? sql`${athletes.categoryId} = ${categoryId}::uuid` : sql`true`
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const validCategoryId = categoryId && uuidRegex.test(categoryId) ? categoryId : null
+  const categoryFilter = validCategoryId
+    ? sql`${athletes.categoryId} = ${validCategoryId}::uuid`
+    : sql`true`
 
   if (event.scoringType === "redpoint") {
     const brc = event.bestRoutesCount
-    const catFilter = categoryId ? sql`${athletes.categoryId} = ${categoryId}::uuid` : sql`true`
+    const catFilter = validCategoryId
+      ? sql`${athletes.categoryId} = ${validCategoryId}::uuid`
+      : sql`true`
+
+    // Scoring logic is implemented in SQL for performance.
+    // Equivalent TS functions in @/lib/scoring/redpoint.ts are kept for unit testing.
 
     const rawSql = brc !== null && brc > 0
       ? sql`
@@ -156,8 +165,8 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
       rn: number
     }>(rawSql)
 
-    const rankings = result.rows.map((row: any, index: number) => ({
-      rank: index + 1,
+    const rankings = result.rows.map((row: any) => ({
+      rank: Number(row.rn),
       athlete: { id: row.athlete_id, name: row.athlete_name },
       category: row.category_name,
       totalPoints: Number(row.total_points),

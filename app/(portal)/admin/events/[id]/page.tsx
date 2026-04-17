@@ -36,6 +36,13 @@ const genderLabels: Record<string, string> = {
 
 type Tab = "settings" | "categories" | "sectors" | "athletes"
 
+function formatLocalDatetime(dateStr: string): string {
+  const d = new Date(dateStr)
+  const offset = d.getTimezoneOffset()
+  const local = new Date(d.getTime() - offset * 60_000)
+  return local.toISOString().slice(0, 16)
+}
+
 export default function AdminEventDetailPage({
   params,
 }: {
@@ -100,10 +107,8 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
     slug: event.slug,
     scoringType: event.scoringType,
     description: event.description || "",
-    startsAt: event.startsAt
-      ? new Date(event.startsAt).toISOString().slice(0, 16)
-      : "",
-    endsAt: event.endsAt ? new Date(event.endsAt).toISOString().slice(0, 16) : "",
+    startsAt: event.startsAt ? formatLocalDatetime(event.startsAt) : "",
+    endsAt: event.endsAt ? formatLocalDatetime(event.endsAt) : "",
     status: event.status,
     bestRoutesCount: event.bestRoutesCount ?? "",
   })

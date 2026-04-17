@@ -20,11 +20,19 @@ export default function JudgeEventPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = use(params)
-  const { data: event } = useEvent(slug)
+  const { data: event, isLoading } = useEvent(slug)
   const { data: sectors } = useEventSectors(slug)
   const [selectedSector, setSelectedSector] = useState<string | null>(null)
 
-  if (!event) return <p className="text-muted-foreground p-4">Carregando...</p>
+  if (isLoading) return <p className="text-muted-foreground p-4">Carregando...</p>
+
+  if (!event) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-12 text-center">
+        <p className="text-muted-foreground">Evento nao encontrado.</p>
+      </div>
+    )
+  }
 
   if (selectedSector) {
     return (

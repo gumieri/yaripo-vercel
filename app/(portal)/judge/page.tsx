@@ -26,7 +26,11 @@ export default function JudgePage() {
                 <div className="hover:bg-muted rounded-lg border p-4 transition-colors">
                   <p className="text-foreground font-medium">{event.name}</p>
                   <p className="text-muted-foreground text-sm">
-                    {event.scoringType === "ifsc" ? "IFSC" : "Simples"}
+                    {event.scoringType === "ifsc"
+                      ? "IFSC"
+                      : event.scoringType === "redpoint"
+                        ? "Redpoint"
+                        : "Simples"}
                   </p>
                 </div>
               </Link>

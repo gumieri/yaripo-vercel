@@ -9,12 +9,16 @@ export async function logAudit(params: {
   oldValues?: unknown
   newValues?: unknown
 }) {
-  await db.insert(auditLogs).values({
-    userId: params.userId ?? null,
-    action: params.action,
-    resourceType: params.resourceType,
-    resourceId: params.resourceId,
-    oldValues: params.oldValues ? JSON.parse(JSON.stringify(params.oldValues)) : null,
-    newValues: params.newValues ? JSON.parse(JSON.stringify(params.newValues)) : null,
-  })
+  try {
+    await db.insert(auditLogs).values({
+      userId: params.userId ?? null,
+      action: params.action,
+      resourceType: params.resourceType,
+      resourceId: params.resourceId,
+      oldValues: params.oldValues ? JSON.parse(JSON.stringify(params.oldValues)) : null,
+      newValues: params.newValues ? JSON.parse(JSON.stringify(params.newValues)) : null,
+    })
+  } catch (error) {
+    console.error("[audit] Failed to write audit log:", error)
+  }
 }

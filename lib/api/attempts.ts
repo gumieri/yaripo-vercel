@@ -54,14 +54,17 @@ attemptRoutes.post("/", authMiddleware, requireRole("judge", "admin"), async (c)
 
     return c.json({ success: true, data: attempt }, 201)
   } catch (error: unknown) {
-    const isDuplicate =
-      (error instanceof Error && error.message.includes("unique")) ||
-      (error instanceof Error &&
-        "cause" in error &&
-        error.cause instanceof Error &&
-        error.cause.message.includes("duplicate key"))
+    const isPgUniqueError =
+      error instanceof Error &&
+      (("cause" in error &&
+        typeof error.cause === "object" &&
+        error.cause !== null &&
+        "code" in error.cause &&
+        (error.cause as { code: string }).code === "23505") ||
+        error.message.includes("unique") ||
+        error.message.includes("duplicate key"))
 
-    if (isDuplicate) {
+    if (isPgUniqueError) {
       const [existing] = await db
         .select()
         .from(attempts)

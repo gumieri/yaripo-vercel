@@ -11,7 +11,7 @@ import { adminRoutes } from "@/lib/api/admin"
 const app = new Hono().basePath("/api")
 
 app.use("*", logger())
-app.use("*", cors())
+app.use("*", cors({ origin: process.env.NEXT_PUBLIC_APP_URL || "https://yaripo.app" }))
 
 app.get("/health", (c) => c.json({ success: true, data: { status: "ok" } }))
 

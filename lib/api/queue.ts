@@ -1,26 +1,67 @@
 import { Hono } from "hono"
 import { eq, and, asc, sql } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { sectorQueues, athletes } from "@/lib/db/schema"
+import { sectorQueues, athletes, sectors, categories } from "@/lib/db/schema"
 import { authMiddleware, requireAuth, requireRole } from "@/lib/api/middleware/auth"
 
 const queueRoutes = new Hono()
 
 queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
   const body = await c.req.json()
-  const { sectorId, athleteId } = body
+  const { sectorId, athleteId: bodyAthleteId } = body
+  const userId = c.get("userId")!
 
-  if (!sectorId || !athleteId) {
+  if (!sectorId) {
     return c.json(
       {
         success: false,
         error: {
           code: "VALIDATION_FAILED",
-          message: "sector_id and athlete_id required",
+          message: "sector_id required",
         },
       },
       400,
     )
+  }
+
+  let athleteId = bodyAthleteId
+
+  if (!athleteId) {
+    const [sector] = await db
+      .select({ eventId: sectors.eventId })
+      .from(sectors)
+      .where(eq(sectors.id, sectorId))
+
+    if (!sector) {
+      return c.json(
+        {
+          success: false,
+          error: { code: "NOT_FOUND", message: "Sector not found" },
+        },
+        404,
+      )
+    }
+
+    const [athlete] = await db
+      .select({ id: athletes.id })
+      .from(athletes)
+      .innerJoin(categories, eq(athletes.categoryId, categories.id))
+      .where(and(eq(athletes.userId, userId), eq(categories.eventId, sector.eventId)))
+
+    if (!athlete) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: "NOT_FOUND",
+            message: "Athlete registration not found for this event",
+          },
+        },
+        404,
+      )
+    }
+
+    athleteId = athlete.id
   }
 
   const existing = await db
@@ -82,8 +123,14 @@ queueRoutes.post("/pop", authMiddleware, requireRole("judge", "admin"), async (c
   const [updated] = await db
     .update(sectorQueues)
     .set({ status: "active" })
-    .where(eq(sectorQueues.id, queueEntry.id))
+    .where(
+      and(eq(sectorQueues.id, queueEntry.id), eq(sectorQueues.status, "waiting")),
+    )
     .returning()
+
+  if (!updated) {
+    return c.json({ success: true, data: null })
+  }
 
   const [athlete] = await db.select().from(athletes).where(eq(athletes.id, updated.athleteId))
 

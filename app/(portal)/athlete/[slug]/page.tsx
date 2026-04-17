@@ -12,10 +12,18 @@ export default function AthleteEventPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = use(params)
-  const { data: event } = useEvent(slug)
+  const { data: event, isLoading } = useEvent(slug)
   const { data: sectors } = useEventSectors(slug)
 
-  if (!event) return <p className="text-muted-foreground p-4">Carregando...</p>
+  if (isLoading) return <p className="text-muted-foreground p-4">Carregando...</p>
+
+  if (!event) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-12 text-center">
+        <p className="text-muted-foreground">Evento nao encontrado.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -68,13 +76,10 @@ function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }
 
   async function handleJoin() {
     try {
-      await joinQueue.mutateAsync({
-        sectorId: sector.id,
-        athleteId: "placeholder",
-      })
+      await joinQueue.mutateAsync({ sectorId: sector.id })
       toast.success("Voce entrou na fila!")
     } catch (error: any) {
-      if (error?.status === 409) {
+      if (error?.code === "CONFLICT") {
         toast.error("Voce ja esta em uma fila")
       } else {
         toast.error("Erro ao entrar na fila")

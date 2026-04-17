@@ -6,6 +6,18 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    files: [
+      "./**/*.{ts,tsx,mts,cts,js,jsx}",
+      "!**/tests/**",
+      "!**/*.test.{ts,tsx}",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    },
+  },
+  {
+    files: ["**/tests/**", "**/*.test.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],

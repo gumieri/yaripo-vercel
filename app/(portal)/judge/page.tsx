@@ -9,7 +9,7 @@ export default function JudgePage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="text-foreground mb-2 text-3xl font-bold">Juiz</h1>
-      <p className="text-muted-foreground mb-8">Selecione um evento para comecar a avaliar.</p>
+      <p className="text-muted-foreground mb-8">Selecione um evento para começar a avaliar.</p>
 
       {isLoading && <p className="text-muted-foreground">Carregando...</p>}
 

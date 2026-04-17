@@ -29,7 +29,7 @@ export default function JudgeEventPage({
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">Evento nao encontrado.</p>
+        <p className="text-muted-foreground">Evento não encontrado.</p>
       </div>
     )
   }
@@ -120,7 +120,7 @@ function JudgeSectorView({
         toast.info("Fila vazia")
       }
     } catch {
-      toast.error("Erro ao chamar proximo atleta")
+      toast.error("Erro ao chamar próximo atleta")
     }
   }
 
@@ -216,7 +216,7 @@ function JudgeSectorView({
             disabled={popQueue.isPending}
             className="w-full max-w-sm bg-violet-600 text-lg font-bold shadow-lg hover:bg-violet-500 active:scale-[0.98]"
           >
-            CHAMAR PROXIMO
+            CHAMAR PRÓXIMO
           </Button>
           {waitingEntries.length > 0 && (
             <p className="text-muted-foreground text-sm">{waitingEntries.length} na fila</p>
@@ -254,7 +254,7 @@ function JudgeSectorView({
             variant="outline"
             className="text-destructive w-full text-base font-medium active:scale-[0.98]"
           >
-            NAO COMPARECEU
+            NÃO COMPARECEU
           </Button>
         </div>
       )}

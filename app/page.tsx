@@ -84,7 +84,7 @@ export default async function Home() {
             </span>
           </h1>
           <p className="text-muted-foreground mt-6 text-lg leading-8">
-            Gerencie competicoes de escalada com simplicidade e precisao. Rankings em tempo real,
+            Gerencie competições de escalada com simplicidade e precisão. Rankings em tempo real,
             gerenciamento de filas e acompanhamento de desempenho.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
@@ -118,7 +118,7 @@ export default async function Home() {
             <div className="px-6 py-4 text-center">
               <p className="text-primary text-2xl font-bold">Zero</p>
               <p className="text-muted-foreground mt-1 text-xs font-medium uppercase tracking-wider">
-                Instalacao
+                Instalação
               </p>
             </div>
           </div>

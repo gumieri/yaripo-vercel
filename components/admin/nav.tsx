@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { LayoutDashboard, Trophy } from "lucide-react"
 
 const navItems = [
-  { href: "/admin", label: "Visao Geral", icon: LayoutDashboard },
+  { href: "/admin", label: "Visão Geral", icon: LayoutDashboard },
   { href: "/admin/events", label: "Eventos", icon: Trophy },
 ]
 

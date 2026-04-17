@@ -20,7 +20,7 @@ export default function AthleteEventPage({
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">Evento nao encontrado.</p>
+        <p className="text-muted-foreground">Evento não encontrado.</p>
       </div>
     )
   }
@@ -77,10 +77,10 @@ function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }
   async function handleJoin() {
     try {
       await joinQueue.mutateAsync({ sectorId: sector.id })
-      toast.success("Voce entrou na fila!")
+      toast.success("Você entrou na fila!")
     } catch (error: any) {
       if (error?.code === "CONFLICT") {
-        toast.error("Voce ja esta em uma fila")
+        toast.error("Você já está em uma fila")
       } else {
         toast.error("Erro ao entrar na fila")
       }

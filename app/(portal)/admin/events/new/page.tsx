@@ -10,12 +10,12 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
 const eventSchema = z.object({
-  name: z.string().min(1, "Nome obrigatorio"),
+  name: z.string().min(1, "Nome obrigatório"),
   slug: z
     .string()
-    .min(1, "Slug obrigatorio")
-    .regex(/^[a-z0-9-]+$/, "Apenas minusculas, numeros e hifens"),
-  gymId: z.string().min(1, "Academia obrigatoria"),
+    .min(1, "Slug obrigatório")
+    .regex(/^[a-z0-9-]+$/, "Apenas minúsculas, números e hífens"),
+  gymId: z.string().min(1, "Academia obrigatória"),
   scoringType: z.enum(["simple", "ifsc", "redpoint"]),
   description: z.string().optional(),
   startsAt: z.string().optional(),
@@ -50,7 +50,7 @@ export default function NewEventPage() {
       router.push(`/admin/events/${result.id}`)
     } catch (error: any) {
       if (error?.code === "CONFLICT") {
-        toast.error("Slug ja existe")
+        toast.error("Slug já existe")
       } else {
         toast.error("Erro ao criar evento")
       }
@@ -113,13 +113,13 @@ export default function NewEventPage() {
         </div>
 
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Descricao</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">Descrição</label>
           <textarea {...register("description")} rows={3} className={inputCls} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Inicio</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">Início</label>
             <input {...register("startsAt")} type="datetime-local" className={inputCls} />
           </div>
           <div>

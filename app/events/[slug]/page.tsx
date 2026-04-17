@@ -24,7 +24,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">Evento nao encontrado.</p>
+        <p className="text-muted-foreground">Evento não encontrado.</p>
       </div>
     )
   }
@@ -44,7 +44,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         <div className="text-muted-foreground mt-3 flex gap-3 text-sm">
           {event.startsAt && (
             <span>
-              Inicio:{" "}
+              Início:{" "}
               {new Date(event.startsAt).toLocaleDateString("pt-BR", {
                 day: "2-digit",
                 month: "long",

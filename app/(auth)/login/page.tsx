@@ -86,7 +86,7 @@ export default async function LoginPage() {
         </div>
 
         <p className="text-muted-foreground/60 mt-6 text-center text-xs">
-          Ao entrar, voce concorda com os Termos de Uso do Yaripo.
+          Ao entrar, você concorda com os Termos de Uso do Yaripo.
         </p>
       </div>
     </div>

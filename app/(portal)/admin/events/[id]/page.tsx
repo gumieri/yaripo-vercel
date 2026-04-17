@@ -57,7 +57,7 @@ export default function AdminEventDetailPage({
   }
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "settings", label: "Configuracoes" },
+    { key: "settings", label: "Configurações" },
     { key: "categories", label: `Categorias (${event.categories?.length || 0})` },
     { key: "sectors", label: `Setores (${event.sectors?.length || 0})` },
     { key: "athletes", label: `Atletas (${event.athletes?.length || 0})` },
@@ -125,7 +125,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
       toast.success("Evento atualizado")
     } catch (error: any) {
       if (error?.code === "CONFLICT") {
-        toast.error("Slug ja existe")
+        toast.error("Slug já existe")
       } else {
         toast.error("Erro ao atualizar")
       }
@@ -194,13 +194,13 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
             placeholder="Ex: 5"
           />
           <p className="text-muted-foreground mt-1 text-xs">
-            Numero de rotas que contam para a pontuacao total. Deixe vazio para contar todas.
+            Número de rotas que contam para a pontuação total. Deixe vazio para contar todas.
           </p>
         </div>
       )}
 
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">Descricao</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">Descrição</label>
         <textarea
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -211,7 +211,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Inicio</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">Início</label>
           <input
             type="datetime-local"
             value={form.startsAt}
@@ -267,7 +267,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
   }
 
   async function handleDelete(catId: string, catName: string) {
-    if (!confirm(`Excluir categoria "${catName}"? Atletas vinculados serao removidos.`)) return
+    if (!confirm(`Excluir categoria "${catName}"? Atletas vinculados serão removidos.`)) return
     try {
       await deleteCategory.mutateAsync({ eventId, categoryId: catId })
       toast.success("Categoria excluida")
@@ -290,7 +290,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
           />
         </div>
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Genero</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">Gênero</label>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
@@ -387,10 +387,10 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
   }
 
   async function handleDelete(sectorId: string, sectorName: string) {
-    if (!confirm(`Excluir setor "${sectorName}"? Filas e tentativas serao removidas.`)) return
+    if (!confirm(`Excluir setor "${sectorName}"? Filas e tentativas serão removidas.`)) return
     try {
       await deleteSector.mutateAsync({ eventId, sectorId })
-      toast.success("Setor excluido")
+      toast.success("Setor excluído")
     } catch {
       toast.error("Erro ao excluir")
     }

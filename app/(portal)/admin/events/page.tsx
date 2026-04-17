@@ -26,10 +26,10 @@ export default function AdminEventsPage() {
   const deleteEvent = useDeleteEvent()
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Excluir evento "${name}"? Esta acao nao pode ser desfeita.`)) return
+    if (!confirm(`Excluir evento "${name}"? Esta acao não pode ser desfeita.`)) return
     try {
       await deleteEvent.mutateAsync(id)
-      toast.success("Evento excluido")
+      toast.success("Evento excluído")
     } catch {
       toast.error("Erro ao excluir evento")
     }

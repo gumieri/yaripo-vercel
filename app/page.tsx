@@ -75,10 +75,10 @@ export default async function Home() {
               <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
               <span className="bg-primary relative inline-flex h-2 w-2 rounded-full" />
             </span>
-            Competicoes ao vivo
+            Competições ao vivo
           </div>
           <h1 className="text-foreground text-5xl font-extrabold tracking-tight sm:text-6xl">
-            Competicoes de escalada,{" "}
+            Competições de escalada,{" "}
             <span className="bg-gradient-to-r from-primary via-[oklch(0.72_0.15_240)] to-[oklch(0.68_0.22_310)] bg-clip-text text-transparent">
               simplificadas.
             </span>

@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth/server"
+import { auth } from "@/lib/auth/edge"
 import { NextResponse } from "next/server"
 
 const protectedRoutes = ["/judge", "/athlete", "/admin"]

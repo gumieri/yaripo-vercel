@@ -1,13 +1,15 @@
 import { vi } from "vitest"
 
-let mockCreateCustomer: ReturnType<typeof vi.fn> | null = null
-let mockCreateCheckoutSession: ReturnType<typeof vi.fn> | null = null
-let mockConstructEvent: ReturnType<typeof vi.fn> | null = null
+type MockFn = (...args: any[]) => any
+
+let mockCreateCustomer: MockFn | null = null
+let mockCreateCheckoutSession: MockFn | null = null
+let mockConstructEvent: MockFn | null = null
 
 export function __setMockStripeFns(fns: {
-  createCustomer?: ReturnType<typeof vi.fn>
-  createCheckoutSession?: ReturnType<typeof vi.fn>
-  constructEvent?: ReturnType<typeof vi.fn>
+  createCustomer?: MockFn
+  createCheckoutSession?: MockFn
+  constructEvent?: MockFn
 }) {
   if (fns.createCustomer) mockCreateCustomer = fns.createCustomer
   if (fns.createCheckoutSession) mockCreateCheckoutSession = fns.createCheckoutSession

@@ -7,6 +7,7 @@ export const gyms = pgTable("gyms", {
   city: text("city"),
   state: text("state"),
   description: text("description"),
+  stripeCustomerId: text("stripe_customer_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
@@ -173,4 +174,24 @@ export const auditLogs = pgTable("audit_logs", {
   oldValues: jsonb("old_values"),
   newValues: jsonb("new_values"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const eventPayments = pgTable("event_payments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
+  gymId: uuid("gym_id")
+    .notNull()
+    .references(() => gyms.id, { onDelete: "cascade" }),
+  stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  athleteCount: integer("athlete_count").notNull(),
+  type: text("type", { enum: ["publish", "delta"] }).default("publish").notNull(),
+  status: text("status", { enum: ["pending", "paid", "failed", "expired"] })
+    .default("pending")
+    .notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })

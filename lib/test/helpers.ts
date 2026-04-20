@@ -5,7 +5,7 @@ import * as schema from "@/lib/db/schema"
 export async function truncateTables() {
   await db.execute(sql`
     TRUNCATE TABLE 
-      audit_logs, attempts, sector_queues, athletes, sectors, 
+      event_payments, audit_logs, attempts, sector_queues, athletes, sectors, 
       categories, events, gym_members, sessions, accounts, 
       verification_tokens, users, gyms
     RESTART IDENTITY CASCADE
@@ -44,6 +44,18 @@ export const F = {
     name: "Judge",
     email: "judge@test.com",
     role: "judge" as const,
+  },
+  gymOwner: {
+    id: "a0000000-0000-0000-0000-000000000030",
+    name: "Gym Owner",
+    email: "owner@test.com",
+    role: "athlete" as const,
+  },
+  gymAdminMember: {
+    id: "a0000000-0000-0000-0000-000000000040",
+    name: "Gym Admin",
+    email: "gymadmin@test.com",
+    role: "athlete" as const,
   },
   simpleEvent: {
     id: "b0000000-0000-0000-0000-000000000001",
@@ -123,7 +135,11 @@ export const F = {
 
 export async function seedFixtures() {
   await db.insert(schema.gyms).values(F.gym)
-  await db.insert(schema.users).values([F.admin, F.judge])
+  await db.insert(schema.users).values([F.admin, F.judge, F.gymOwner, F.gymAdminMember])
+  await db.insert(schema.gymMembers).values([
+    { gymId: F.gym.id, userId: F.gymOwner.id, role: "owner" },
+    { gymId: F.gym.id, userId: F.gymAdminMember.id, role: "admin" },
+  ])
   await db.insert(schema.events).values([F.simpleEvent, F.ifscEvent, F.redpointEvent])
   await db.insert(schema.categories).values([F.catMale, F.catFemale, F.catOpen, F.catRedOpen])
   await db.insert(schema.sectors).values(F.sectors)

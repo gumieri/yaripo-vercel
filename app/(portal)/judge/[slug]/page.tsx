@@ -214,7 +214,7 @@ function JudgeSectorView({
             size="xl"
             onClick={handlePop}
             disabled={popQueue.isPending}
-            className="w-full max-w-sm bg-violet-600 text-lg font-bold shadow-lg hover:bg-violet-500 active:scale-[0.98]"
+            className="w-full max-w-sm text-lg font-bold shadow-lg active:scale-[0.98]"
           >
             CHAMAR PRÓXIMO
           </Button>
@@ -230,7 +230,7 @@ function JudgeSectorView({
             size="xl"
             onClick={() => handleSubmit(true)}
             disabled={isSubmitting}
-            className="w-full bg-green-600 text-lg font-bold shadow-lg hover:bg-green-500 active:scale-[0.98]"
+            className="w-full text-lg font-bold shadow-lg active:scale-[0.98]"
           >
             {isSubmitting
               ? "ENVIANDO..."

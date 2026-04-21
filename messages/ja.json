@@ -1,0 +1,74 @@
+{
+  "Common": {
+    "enter": "ログイン",
+    "signOut": "ログアウト",
+    "manage": "管理",
+    "judge": "ジャッジ",
+    "athlete": "クライマー",
+    "loading": "読み込み中...",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "create": "作成",
+    "edit": "編集",
+    "back": "戻る",
+    "confirm": "よろしいですか？",
+    "noResults": "結果が見つかりません。",
+    "comingSoon": "近日公開",
+    "formats": "フォーマット",
+    "liveRankings": "ライブランキング",
+    "zeroSetup": "セットアップ不要"
+  },
+  "Nav": {
+    "events": "大会",
+    "gyms": "ジム",
+    "manage": "管理",
+    "judge": "ジャッジ",
+    "athlete": "クライマー"
+  },
+  "Home": {
+    "liveBadge": "ライブ大会",
+    "title": "クライミング大会を、",
+    "titleHighlight": "シンプルに。",
+    "description": "シンプルで正確なクライミング大会管理。リアルタイムランキング、順番管理、パフォーマンス追跡。",
+    "viewEvents": "大会を見る",
+    "viewGyms": "ジムを見る",
+    "footer": "Yaripo — クライミング大会プラットフォーム"
+  },
+  "Events": {
+    "title": "大会",
+    "noEvents": "大会が見つかりません。",
+    "statusActive": "進行中",
+    "statusCompleted": "終了",
+    "statusUpcoming": "近日公開"
+  },
+  "EventDetail": {
+    "backToEvents": "大会一覧に戻る",
+    "start": "開始",
+    "ranking": "ランキング",
+    "noResults": "まだ結果がありません。",
+    "athlete": "クライマー",
+    "category": "カテゴリー",
+    "points": "ポイント",
+    "tops": "Tops",
+    "zones": "ゾーン",
+    "flash": "Flash",
+    "attempts": "トライ"
+  },
+  "Gyms": {
+    "title": "ジム"
+  },
+  "Leaderboard": {
+    "title": "ランキング",
+    "noResults": "まだ結果がありません。"
+  },
+  "Login": {
+    "title": "ログイン",
+    "subtitle": "大会の管理、ジャッジ、パフォーマンスの追跡にログインしてください。",
+    "google": "Googleで続行",
+    "email": "メールでログイン",
+    "or": "または",
+    "noAccount": "アカウントをお持ちでないですか？",
+    "signUp": "アカウント作成"
+  }
+}

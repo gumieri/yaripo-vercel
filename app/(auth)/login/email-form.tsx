@@ -3,11 +3,13 @@
 import { useState } from "react"
 import { Mail, Loader2, Check } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 export function EmailForm() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const t = useTranslations()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -78,7 +80,7 @@ export function EmailForm() {
         ) : (
           <Mail className="h-4 w-4" />
         )}
-        {loading ? "Enviando..." : "Entrar com email"}
+        {loading ? "Enviando..." : t('Login.email')}
       </button>
     </form>
   )

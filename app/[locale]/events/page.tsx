@@ -1,16 +1,20 @@
 "use client"
 
 import Link from "next/link"
+import { useLocale } from "next-intl"
 import { useEvents } from "@/lib/api/hooks"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTranslations } from "next-intl"
 
 export default function EventsPage() {
+  const locale = useLocale()
   const { data: events, isLoading } = useEvents()
+  const t = useTranslations()
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="text-foreground mb-8 text-3xl font-bold">Eventos</h1>
+      <h1 className="text-foreground mb-8 text-3xl font-bold">{t('Events.title')}</h1>
 
       {isLoading && (
         <div className="space-y-4">
@@ -22,7 +26,7 @@ export default function EventsPage() {
 
       {!isLoading && (!events || events.length === 0) && (
         <div className="border-muted-foreground/25 rounded-lg border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">Nenhum evento encontrado.</p>
+          <p className="text-muted-foreground">{t('Events.noEvents')}</p>
         </div>
       )}
 
@@ -43,10 +47,10 @@ export default function EventsPage() {
                       }`}
                     >
                       {event.status === "active"
-                        ? "Em andamento"
+                        ? t('Events.statusActive')
                         : event.status === "completed"
-                          ? "Finalizado"
-                          : "Em breve"}
+                          ? t('Events.statusCompleted')
+                          : t('Events.statusUpcoming')}
                     </span>
                     {event.scoringType === "ifsc" && (
                       <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700">
@@ -67,7 +71,7 @@ export default function EventsPage() {
                   )}
                   {event.startsAt && (
                     <p className="text-muted-foreground mt-2 text-xs">
-                      {new Date(event.startsAt).toLocaleDateString("pt-BR", {
+                      {new Date(event.startsAt).toLocaleDateString(locale, {
                         day: "2-digit",
                         month: "long",
                         year: "numeric",

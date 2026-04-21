@@ -1,0 +1,74 @@
+{
+  "Common": {
+    "enter": "Accedi",
+    "signOut": "Esci",
+    "manage": "Gestisci",
+    "judge": "Giudice",
+    "athlete": "Arrampicatore",
+    "loading": "Caricamento...",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "create": "Crea",
+    "edit": "Modifica",
+    "back": "Indietro",
+    "confirm": "Sei sicuro?",
+    "noResults": "Nessun risultato trovato.",
+    "comingSoon": "Prossimamente",
+    "formats": "Formati",
+    "liveRankings": "Classifiche dal vivo",
+    "zeroSetup": "Zero configurazione"
+  },
+  "Nav": {
+    "events": "Competizioni",
+    "gyms": "Palestre",
+    "manage": "Gestisci",
+    "judge": "Giudice",
+    "athlete": "Arrampicatore"
+  },
+  "Home": {
+    "liveBadge": "Competizioni dal vivo",
+    "title": "Competizioni di arrampicata,",
+    "titleHighlight": "semplificate.",
+    "description": "Gestisci competizioni di arrampicata con semplicità e precisione. Classifiche in tempo reale, gestione delle code e monitoraggio delle prestazioni.",
+    "viewEvents": "Vedi Competizioni",
+    "viewGyms": "Vedi Palestre",
+    "footer": "Yaripo — Piattaforma per Competizioni di Arrampicata"
+  },
+  "Events": {
+    "title": "Competizioni",
+    "noEvents": "Nessuna competizione trovata.",
+    "statusActive": "In corso",
+    "statusCompleted": "Concluso",
+    "statusUpcoming": "Prossimamente"
+  },
+  "EventDetail": {
+    "backToEvents": "Torna alle competizioni",
+    "start": "Inizio",
+    "ranking": "Classifica",
+    "noResults": "Nessun risultato ancora.",
+    "athlete": "Arrampicatore",
+    "category": "Categoria",
+    "points": "Punti",
+    "tops": "Tops",
+    "zones": "Zone",
+    "flash": "Flash",
+    "attempts": "Tentativi"
+  },
+  "Gyms": {
+    "title": "Palestre"
+  },
+  "Leaderboard": {
+    "title": "Classifica",
+    "noResults": "Nessun risultato ancora."
+  },
+  "Login": {
+    "title": "Accedi",
+    "subtitle": "Accedi per gestire competizioni, giudicare o monitorare le tue prestazioni.",
+    "google": "Continua con Google",
+    "email": "Accedi con email",
+    "or": "o",
+    "noAccount": "Non hai un account?",
+    "signUp": "Registrati"
+  }
+}

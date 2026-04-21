@@ -1,74 +1,74 @@
 {
-  "common": {
+  "Common": {
+    "enter": "Sign in",
+    "signOut": "Sign out",
+    "manage": "Manage",
+    "judge": "Judge",
+    "athlete": "Athlete",
     "loading": "Loading...",
-    "error": "Error",
-    "retry": "Retry",
     "save": "Save",
     "cancel": "Cancel",
-    "confirm": "Confirm",
+    "delete": "Delete",
+    "create": "Create",
+    "edit": "Edit",
     "back": "Back",
-    "next": "Next"
+    "confirm": "Are you sure?",
+    "noResults": "No results found.",
+    "comingSoon": "Coming soon",
+    "formats": "Formats",
+    "liveRankings": "Live Rankings",
+    "zeroSetup": "Zero Setup"
   },
-  "nav": {
-    "home": "Home",
+  "Nav": {
     "events": "Events",
-    "leaderboard": "Leaderboard",
-    "profile": "Profile",
-    "login": "Login",
-    "logout": "Logout"
+    "gyms": "Gyms",
+    "manage": "Manage",
+    "judge": "Judge",
+    "athlete": "Athlete"
   },
-  "landing": {
-    "title": "Yaripo",
-    "subtitle": "Climbing competition management platform",
-    "browseEvents": "Browse Events",
-    "browseGyms": "Browse Gyms",
-    "hero": "Manage climbing competitions with simplicity and precision",
-    "cta": "Get Started"
+  "Home": {
+    "liveBadge": "Live competitions",
+    "title": "Climbing competitions,",
+    "titleHighlight": "simplified.",
+    "description": "Manage climbing competitions with simplicity and precision. Real-time rankings, queue management and performance tracking.",
+    "viewEvents": "View Events",
+    "viewGyms": "View Gyms",
+    "footer": "Yaripo — Climbing Competition Platform"
   },
-  "events": {
+  "Events": {
     "title": "Events",
-    "upcoming": "Upcoming Events",
-    "active": "Active",
-    "completed": "Completed",
-    "noEvents": "No events found",
-    "startsAt": "Starts",
-    "endsAt": "Ends",
-    "rules": "Rules",
-    "register": "Register"
+    "noEvents": "No events found.",
+    "statusActive": "In progress",
+    "statusCompleted": "Completed",
+    "statusUpcoming": "Coming soon"
   },
-  "queue": {
-    "joinQueue": "Join Queue",
-    "inQueue": "You are in the queue",
-    "yourTurn": "Your turn!",
-    "position": "Position",
-    "leaveQueue": "Leave Queue",
-    "alreadyInQueue": "You are already in a queue",
-    "noQueue": "Queue is empty"
-  },
-  "judge": {
-    "callNext": "Call Next",
-    "top": "TOP",
-    "attempt": "Attempt",
-    "attemptCount": "Attempts",
-    "noShow": "No Show",
-    "submitting": "Submitting...",
-    "activeAthlete": "Active Athlete",
-    "noActiveAthlete": "No active athlete"
-  },
-  "leaderboard": {
-    "title": "Leaderboard",
-    "rank": "#",
+  "EventDetail": {
+    "backToEvents": "Back to events",
+    "start": "Start",
+    "ranking": "Ranking",
+    "noResults": "No results yet.",
     "athlete": "Athlete",
     "category": "Category",
+    "points": "Points",
     "tops": "Tops",
-    "attempts": "Attempts",
-    "noResults": "No results yet"
+    "zones": "Zones",
+    "flash": "Flash",
+    "attempts": "Attempts"
   },
-  "auth": {
-    "login": "Login",
-    "register": "Create Account",
-    "loginWithGoogle": "Login with Google",
-    "loginWithGitHub": "Login with GitHub",
-    "logout": "Logout"
+  "Gyms": {
+    "title": "Gyms"
+  },
+  "Leaderboard": {
+    "title": "Ranking",
+    "noResults": "No results yet."
+  },
+  "Login": {
+    "title": "Sign in",
+    "subtitle": "Sign in to manage competitions, judge or track your performance.",
+    "google": "Continue with Google",
+    "email": "Sign in with email",
+    "or": "or",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up"
   }
 }

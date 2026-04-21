@@ -2,13 +2,15 @@
 
 import { useGyms } from "@/lib/api/hooks"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTranslations } from "next-intl"
 
 export default function GymsPage() {
   const { data: gyms, isLoading } = useGyms()
+  const t = useTranslations()
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="text-foreground mb-8 text-3xl font-bold">Ginásios</h1>
+      <h1 className="text-foreground mb-8 text-3xl font-bold">{t('Gyms.title')}</h1>
 
       {isLoading && (
         <div className="space-y-4">
@@ -20,7 +22,7 @@ export default function GymsPage() {
 
       {!isLoading && (!gyms || gyms.length === 0) && (
         <div className="border-muted-foreground/25 rounded-lg border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">Nenhuma academia parceira ainda.</p>
+          <p className="text-muted-foreground">{t('Common.noResults')}</p>
         </div>
       )}
 

@@ -1,10 +1,12 @@
 import { auth, signIn } from "@/lib/auth/server"
 import { redirect } from "next/navigation"
 import { Mountain } from "lucide-react"
-import { EmailForm } from "./email-form"
+import { EmailForm } from "@/app/(auth)/login/email-form"
+import { getTranslations } from "next-intl/server"
 
 export default async function LoginPage() {
   const session = await auth()
+  const t = await getTranslations()
 
   if (session?.user) {
     redirect("/")
@@ -20,11 +22,11 @@ export default async function LoginPage() {
           <h1 className="text-foreground text-3xl font-bold">
             Yari<span className="text-primary">po</span>
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm">Climbing Competition Platform</p>
+          <p className="text-muted-foreground mt-2 text-sm">{t('Home.footer')}</p>
         </div>
 
         <div className="border-border/50 rounded-xl border bg-card p-6 shadow-lg shadow-black/20">
-          <h2 className="text-foreground mb-6 text-center text-lg font-semibold">Entrar</h2>
+          <h2 className="text-foreground mb-6 text-center text-lg font-semibold">{t('Login.title')}</h2>
 
           <form
             action={async () => {
@@ -55,7 +57,7 @@ export default async function LoginPage() {
                   fill="#EA4335"
                 />
               </svg>
-              Entrar com Google
+              {t('Login.google')}
             </button>
           </form>
 
@@ -64,7 +66,7 @@ export default async function LoginPage() {
               <div className="w-full border-t border-border/50" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-card px-2 text-muted-foreground/60">ou</span>
+              <span className="bg-card px-2 text-muted-foreground/60">{t('Login.or')}</span>
             </div>
           </div>
 
@@ -72,7 +74,7 @@ export default async function LoginPage() {
         </div>
 
         <p className="text-muted-foreground/60 mt-6 text-center text-xs">
-          Ao entrar, você concorda com os Termos de Uso do Yaripo.
+          {t('Login.subtitle')}
         </p>
       </div>
     </div>

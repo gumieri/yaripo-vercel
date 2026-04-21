@@ -1,0 +1,74 @@
+{
+  "Common": {
+    "enter": "Se connecter",
+    "signOut": "Se déconnecter",
+    "manage": "Gérer",
+    "judge": "Juge",
+    "athlete": "Grimpeur",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "create": "Créer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "confirm": "Êtes-vous sûr ?",
+    "noResults": "Aucun résultat trouvé.",
+    "comingSoon": "Bientôt",
+    "formats": "Formats",
+    "liveRankings": "Classements en direct",
+    "zeroSetup": "Zéro installation"
+  },
+  "Nav": {
+    "events": "Compétitions",
+    "gyms": "Salles d'escalade",
+    "manage": "Gérer",
+    "judge": "Juge",
+    "athlete": "Grimpeur"
+  },
+  "Home": {
+    "liveBadge": "Compétitions en direct",
+    "title": "Compétitions d'escalade,",
+    "titleHighlight": "simplifiées.",
+    "description": "Gérez les compétitions d'escalade avec simplicité et précision. Classements en temps réel, gestion des files et suivi des performances.",
+    "viewEvents": "Voir les Compétitions",
+    "viewGyms": "Voir les Salles",
+    "footer": "Yaripo — Plateforme de Compétitions d'Escalade"
+  },
+  "Events": {
+    "title": "Compétitions",
+    "noEvents": "Aucune compétition trouvée.",
+    "statusActive": "En cours",
+    "statusCompleted": "Terminé",
+    "statusUpcoming": "Bientôt"
+  },
+  "EventDetail": {
+    "backToEvents": "Retour aux compétitions",
+    "start": "Début",
+    "ranking": "Classement",
+    "noResults": "Pas encore de résultats.",
+    "athlete": "Grimpeur",
+    "category": "Catégorie",
+    "points": "Points",
+    "tops": "Tops",
+    "zones": "Zones",
+    "flash": "Flash",
+    "attempts": "Tentatives"
+  },
+  "Gyms": {
+    "title": "Salles d'escalade"
+  },
+  "Leaderboard": {
+    "title": "Classement",
+    "noResults": "Pas encore de résultats."
+  },
+  "Login": {
+    "title": "Se connecter",
+    "subtitle": "Connectez-vous pour gérer des compétitions, juger ou suivre vos performances.",
+    "google": "Continuer avec Google",
+    "email": "Se connecter par email",
+    "or": "ou",
+    "noAccount": "Pas encore de compte ?",
+    "signUp": "S'inscrire"
+  }
+}

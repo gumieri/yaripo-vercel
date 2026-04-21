@@ -1,0 +1,74 @@
+{
+  "Common": {
+    "enter": "Entrar",
+    "signOut": "Sair",
+    "manage": "Gerenciar",
+    "judge": "Juiz",
+    "athlete": "Atleta",
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "create": "Criar",
+    "edit": "Editar",
+    "back": "Voltar",
+    "confirm": "Tem certeza?",
+    "noResults": "Nenhum resultado encontrado.",
+    "comingSoon": "Em breve",
+    "formats": "Formatos",
+    "liveRankings": "Rankings ao vivo",
+    "zeroSetup": "Zero instalação"
+  },
+  "Nav": {
+    "events": "Eventos",
+    "gyms": "Ginásios",
+    "manage": "Gerenciar",
+    "judge": "Juiz",
+    "athlete": "Atleta"
+  },
+  "Home": {
+    "liveBadge": "Competições ao vivo",
+    "title": "Competições de escalada,",
+    "titleHighlight": "simplificadas.",
+    "description": "Gerencie competições de escalada com simplicidade e precisão. Rankings em tempo real, gerenciamento de filas e acompanhamento de desempenho.",
+    "viewEvents": "Ver Eventos",
+    "viewGyms": "Ver Ginásios",
+    "footer": "Yaripo — Plataforma de Competições de Escalada"
+  },
+  "Events": {
+    "title": "Eventos",
+    "noEvents": "Nenhum evento encontrado.",
+    "statusActive": "Em andamento",
+    "statusCompleted": "Finalizado",
+    "statusUpcoming": "Em breve"
+  },
+  "EventDetail": {
+    "backToEvents": "Voltar para eventos",
+    "start": "Início",
+    "ranking": "Ranking",
+    "noResults": "Nenhum resultado ainda.",
+    "athlete": "Atleta",
+    "category": "Categoria",
+    "points": "Pontos",
+    "tops": "Tops",
+    "zones": "Zonas",
+    "flash": "Flash",
+    "attempts": "Tentativas"
+  },
+  "Gyms": {
+    "title": "Ginásios"
+  },
+  "Leaderboard": {
+    "title": "Ranking",
+    "noResults": "Nenhum resultado ainda."
+  },
+  "Login": {
+    "title": "Entrar",
+    "subtitle": "Entre para gerenciar competições, julgar ou acompanhar seu desempenho.",
+    "google": "Entrar com Google",
+    "email": "Entrar com email",
+    "or": "ou",
+    "noAccount": "Não tem uma conta?",
+    "signUp": "Criar conta"
+  }
+}

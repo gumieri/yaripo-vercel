@@ -4,11 +4,14 @@ import { useEvent, useLeaderboard } from "@/lib/api/hooks"
 import { use } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const { data: event, isLoading } = useEvent(slug)
   const { data: leaderboard, isLoading: lbLoading } = useLeaderboard(slug)
+  const t = useTranslations()
+  const locale = useLocale()
 
   if (isLoading) {
     return (
@@ -24,7 +27,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">Evento não encontrado.</p>
+        <p className="text-muted-foreground">{t('Common.noResults')}</p>
       </div>
     )
   }
@@ -35,7 +38,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         href="/events"
         className="text-muted-foreground hover:text-foreground mb-6 inline-block text-sm"
       >
-        &larr; Voltar para eventos
+        &larr; {t('EventDetail.backToEvents')}
       </Link>
 
       <div className="mb-8">
@@ -44,8 +47,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         <div className="text-muted-foreground mt-3 flex gap-3 text-sm">
           {event.startsAt && (
             <span>
-              Início:{" "}
-              {new Date(event.startsAt).toLocaleDateString("pt-BR", {
+              {t('EventDetail.start')}:{" "}
+              {new Date(event.startsAt).toLocaleDateString(locale, {
                 day: "2-digit",
                 month: "long",
                 year: "numeric",
@@ -65,13 +68,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         </div>
       </div>
 
-      <h2 className="text-foreground mb-4 text-xl font-semibold">Ranking</h2>
+      <h2 className="text-foreground mb-4 text-xl font-semibold">{t('Leaderboard.title')}</h2>
 
       {lbLoading && <Skeleton className="h-64 w-full" />}
 
       {!lbLoading && (!leaderboard?.rankings || leaderboard.rankings.length === 0) && (
         <div className="border-muted-foreground/25 rounded-lg border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">Nenhum resultado ainda.</p>
+          <p className="text-muted-foreground">{t('Leaderboard.noResults')}</p>
         </div>
       )}
 
@@ -81,19 +84,19 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             <thead>
               <tr className="bg-muted/50 border-b">
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">#</th>
-                <th className="text-muted-foreground px-4 py-3 text-left font-medium">Atleta</th>
-                <th className="text-muted-foreground px-4 py-3 text-left font-medium">Categoria</th>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">{t('EventDetail.athlete')}</th>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">{t('EventDetail.category')}</th>
                 <th className="text-muted-foreground px-4 py-3 text-right font-medium">
-                  {leaderboard.scoringType === "redpoint" ? "Pontos" : "Tops"}
+                  {leaderboard.scoringType === "redpoint" ? t('EventDetail.points') : t('EventDetail.tops')}
                 </th>
                 {leaderboard.scoringType === "ifsc" && (
-                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">Zonas</th>
+                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">{t('EventDetail.zones')}</th>
                 )}
                 {leaderboard.scoringType === "redpoint" && (
-                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">Flash</th>
+                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">{t('EventDetail.flash')}</th>
                 )}
                 <th className="text-muted-foreground px-4 py-3 text-right font-medium">
-                  Tentativas
+                  {t('EventDetail.attempts')}
                 </th>
               </tr>
             </thead>

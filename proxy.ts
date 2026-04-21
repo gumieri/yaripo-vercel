@@ -1,25 +1,41 @@
-import { auth } from "@/lib/auth/edge"
-import { NextResponse } from "next/server"
+import createMiddleware from 'next-intl/middleware';
+import {NextRequest, NextResponse} from 'next/server';
+import {auth} from '@/lib/auth/edge';
+import {routing} from './i18n/routing';
 
-const protectedRoutes = ["/judge", "/athlete", "/manage"]
-const authRoutes = ["/login"]
+const handleI18nRouting = createMiddleware(routing);
 
-export default auth((req) => {
-  const { nextUrl } = req
-  const isLoggedIn = !!req.auth
-  const pathname = nextUrl.pathname
+const protectedRoutes = ['/judge', '/athlete', '/manage'];
+const authRoutes = ['/login'];
 
-  if (authRoutes.some((route) => pathname.startsWith(route)) && isLoggedIn) {
-    return NextResponse.redirect(new URL("/", nextUrl))
+export default function proxy(request: NextRequest) {
+  const {nextUrl} = request;
+  const pathname = nextUrl.pathname;
+
+  const response = handleI18nRouting(request);
+
+  const locale = response.headers.get('x-next-intl-locale') || routing.defaultLocale;
+
+  const authResult = response.headers.get('x-middleware-next');
+  const isLoggedIn = !!authResult && !authResult.includes('rewrite');
+
+  if (isLoggedIn) {
+    if (authRoutes.some((route) => pathname.includes(route))) {
+      const redirectUrl = new URL(`/${locale}`, nextUrl);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
-  if (protectedRoutes.some((route) => pathname.startsWith(route)) && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", nextUrl))
+  if (!isLoggedIn) {
+    if (protectedRoutes.some((route) => pathname.includes(route))) {
+      const redirectUrl = new URL(`/${locale}/login`, nextUrl);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
-  return NextResponse.next()
-})
+  return response;
+}
 
 export const config = {
-  matcher: ["/judge/:path*", "/athlete/:path*", "/manage/:path*", "/login"],
-}
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
+};

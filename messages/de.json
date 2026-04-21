@@ -1,0 +1,74 @@
+{
+  "Common": {
+    "enter": "Anmelden",
+    "signOut": "Abmelden",
+    "manage": "Verwalten",
+    "judge": "Kampfrichter",
+    "athlete": "Kletterer",
+    "loading": "Laden...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "create": "Erstellen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "confirm": "Bist du sicher?",
+    "noResults": "Keine Ergebnisse gefunden.",
+    "comingSoon": "Demnächst",
+    "formats": "Formate",
+    "liveRankings": "Live-Ranglisten",
+    "zeroSetup": "Null Konfiguration"
+  },
+  "Nav": {
+    "events": "Wettbewerbe",
+    "gyms": "Kletterhallen",
+    "manage": "Verwalten",
+    "judge": "Kampfrichter",
+    "athlete": "Kletterer"
+  },
+  "Home": {
+    "liveBadge": "Live-Wettbewerbe",
+    "title": "Kletterwettbewerbe,",
+    "titleHighlight": "vereinfacht.",
+    "description": "Verwalte Kletterwettbewerbe mit Einfachheit und Präzision. Echtzeit-Ranglisten, Warteschlangenverwaltung und Leistungstracking.",
+    "viewEvents": "Wettbewerbe ansehen",
+    "viewGyms": "Kletterhallen ansehen",
+    "footer": "Yaripo — Kletterwettbewerbe-Plattform"
+  },
+  "Events": {
+    "title": "Wettbewerbe",
+    "noEvents": "Keine Wettbewerbe gefunden.",
+    "statusActive": "Läuft",
+    "statusCompleted": "Beendet",
+    "statusUpcoming": "Demnächst"
+  },
+  "EventDetail": {
+    "backToEvents": "Zurück zu Wettbewerben",
+    "start": "Start",
+    "ranking": "Rangliste",
+    "noResults": "Noch keine Ergebnisse.",
+    "athlete": "Kletterer",
+    "category": "Kategorie",
+    "points": "Punkte",
+    "tops": "Tops",
+    "zones": "Zonen",
+    "flash": "Flash",
+    "attempts": "Versuche"
+  },
+  "Gyms": {
+    "title": "Kletterhallen"
+  },
+  "Leaderboard": {
+    "title": "Rangliste",
+    "noResults": "Noch keine Ergebnisse."
+  },
+  "Login": {
+    "title": "Anmelden",
+    "subtitle": "Melde dich an, um Wettbewerbe zu verwalten, zu richten oder deine Leistung zu verfolgen.",
+    "google": "Weiter mit Google",
+    "email": "Mit E-Mail anmelden",
+    "or": "oder",
+    "noAccount": "Noch kein Konto?",
+    "signUp": "Registrieren"
+  }
+}

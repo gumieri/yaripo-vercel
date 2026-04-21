@@ -1,0 +1,74 @@
+{
+  "Common": {
+    "athlete": "Atleta",
+    "back": "Volver",
+    "cancel": "Cancelar",
+    "comingSoon": "Próximamente",
+    "confirm": "¿Estás seguro?",
+    "create": "Crear",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "enter": "Iniciar sesión",
+    "formats": "Formatos",
+    "judge": "Juez",
+    "liveRankings": "Clasificaciones en vivo",
+    "loading": "Cargando...",
+    "manage": "Gestionar",
+    "noResults": "No se encontraron resultados.",
+    "save": "Guardar",
+    "signOut": "Cerrar sesión",
+    "zeroSetup": "Sin instalación"
+  },
+  "EventDetail": {
+    "athlete": "Atleta",
+    "attempts": "Intentos",
+    "backToEvents": "Volver a eventos",
+    "category": "Categoría",
+    "flash": "Flash",
+    "noResults": "Aún no hay resultados.",
+    "points": "Puntos",
+    "ranking": "Clasificación",
+    "start": "Inicio",
+    "tops": "Tops",
+    "zones": "Zonas"
+  },
+  "Events": {
+    "noEvents": "No se encontraron eventos.",
+    "statusActive": "En curso",
+    "statusCompleted": "Finalizado",
+    "statusUpcoming": "Próximamente",
+    "title": "Eventos"
+  },
+  "Gyms": {
+    "title": "Gimnasios"
+  },
+  "Home": {
+    "description": "Gestiona competiciones de escalada con simplicidad y precisión. Clasificaciones en tiempo real, gestión de colas y seguimiento de rendimiento.",
+    "footer": "Yaripo — Plataforma de Competiciones de Escalada",
+    "liveBadge": "Competiciones en vivo",
+    "title": "Competiciones de escalada,",
+    "titleHighlight": "simplificadas.",
+    "viewEvents": "Ver Eventos",
+    "viewGyms": "Ver Gimnasios"
+  },
+  "Leaderboard": {
+    "noResults": "Aún no hay resultados.",
+    "title": "Clasificación"
+  },
+  "Login": {
+    "email": "Iniciar sesión con email",
+    "google": "Continuar con Google",
+    "noAccount": "¿No tienes cuenta?",
+    "or": "o",
+    "signUp": "Regístrate",
+    "subtitle": "Inicia sesión para gestionar competiciones, juzgar o seguimiento de rendimiento.",
+    "title": "Iniciar sesión"
+  },
+  "Nav": {
+    "athlete": "Atleta",
+    "events": "Eventos",
+    "gyms": "Gimnasios",
+    "judge": "Juez",
+    "manage": "Gestionar"
+  }
+}

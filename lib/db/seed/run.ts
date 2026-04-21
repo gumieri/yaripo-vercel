@@ -67,7 +67,7 @@ async function seed() {
     slug: "gym-example",
     city: "Sao Paulo",
     state: "SP",
-    description: "Academia de escalada indoor em Sao Paulo.",
+    description: "Ginásio de escalada indoor em Sao Paulo.",
   })
 
   await db.insert(users).values([

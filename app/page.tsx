@@ -26,7 +26,7 @@ export default async function Home() {
               href="/gyms"
               className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
             >
-              Academias
+              Ginásios
             </Link>
             {session?.user ? (
               <div className="flex items-center gap-3">
@@ -104,7 +104,7 @@ export default async function Home() {
               href="/gyms"
               className="border-border hover:border-primary/50 hover:text-primary text-muted-foreground rounded-full border px-6 py-3 text-sm font-semibold transition-colors"
             >
-              Ver Academias
+              Ver Ginásios
             </Link>
           </div>
 

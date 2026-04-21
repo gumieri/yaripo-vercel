@@ -8,7 +8,7 @@ export default function GymsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="text-foreground mb-8 text-3xl font-bold">Academias</h1>
+      <h1 className="text-foreground mb-8 text-3xl font-bold">Ginásios</h1>
 
       {isLoading && (
         <div className="space-y-4">

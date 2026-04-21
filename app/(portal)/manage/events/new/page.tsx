@@ -100,7 +100,7 @@ export default function NewEventPage() {
          </div>
 
          <div>
-           <label className="text-foreground mb-1 block text-sm font-medium">Academia (opcional)</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">Ginásio (opcional)</label>
            <select {...register("gymId")} className={inputCls}>
              <option value="">Nenhuma</option>
              {gyms?.map((gym: any) => (

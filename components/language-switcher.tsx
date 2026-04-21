@@ -14,6 +14,7 @@ const locales = [
   { code: "it", label: "Italiano", flag: "IT" },
   { code: "ja", label: "Japanese", flag: "JA" },
   { code: "ko", label: "Korean", flag: "KO" },
+  { code: "uk", label: "Ukrainian", flag: "UA" },
 ]
 
 export function LanguageSwitcher() {

@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory"
 import { eq, and } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { gymMembers, gyms } from "@/lib/db/schema"
+import { gymMembers, gyms, eventMembers, events } from "@/lib/db/schema"
 import { auth } from "@/lib/auth/server"
 import type { Session } from "next-auth"
 
@@ -9,9 +9,12 @@ type AuthEnv = {
   Variables: {
     session: Session | null
     userId: string | null
-    userRole: string | null
+    userEmail: string | null
     gymId: string | null
     gymRole: string | null
+    eventId: string | null
+    eventRole: string | null
+    isPlatformAdmin: boolean
   }
 }
 
@@ -20,7 +23,8 @@ export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
 
   c.set("session", session)
   c.set("userId", session?.user?.id ?? null)
-  c.set("userRole", (session?.user as { role?: string } | null)?.role ?? null)
+  c.set("userEmail", session?.user?.email ?? null)
+  c.set("isPlatformAdmin", session?.user?.email === "admin@yaripo.app")
 
   await next()
 })
@@ -41,10 +45,10 @@ export function requireAuth() {
   })
 }
 
-export function requireRole(...roles: string[]) {
+export function requirePlatformAdmin() {
   return createMiddleware<AuthEnv>(async (c, next) => {
     const userId = c.get("userId")
-    const userRole = c.get("userRole")
+    const isPlatformAdmin = c.get("isPlatformAdmin")
 
     if (!userId) {
       return c.json(
@@ -56,11 +60,11 @@ export function requireRole(...roles: string[]) {
       )
     }
 
-    if (!userRole || !roles.includes(userRole)) {
+    if (!isPlatformAdmin) {
       return c.json(
         {
           success: false,
-          error: { code: "FORBIDDEN", message: "Insufficient permissions" },
+          error: { code: "FORBIDDEN", message: "Platform admin access required" },
         },
         403,
       )
@@ -68,6 +72,72 @@ export function requireRole(...roles: string[]) {
 
     await next()
   })
+}
+
+export function requireEventMember(eventIdParam: string, roles: string[]) {
+  return createMiddleware<AuthEnv>(async (c, next) => {
+    const userId = c.get("userId")
+
+    if (!userId) {
+      return c.json(
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Authentication required" },
+        },
+        401,
+      )
+    }
+
+    const eventId = c.req.param(eventIdParam)
+
+    if (!eventId) {
+      return c.json(
+        {
+          success: false,
+          error: { code: "BAD_REQUEST", message: "Event ID is required" },
+        },
+        400,
+      )
+    }
+
+    const [membership] = await db
+      .select({ role: eventMembers.role })
+      .from(eventMembers)
+      .where(and(eq(eventMembers.eventId, eventId), eq(eventMembers.userId, userId)))
+
+    if (!membership) {
+      return c.json(
+        {
+          success: false,
+          error: { code: "FORBIDDEN", message: "Not a member of this event" },
+        },
+        403,
+      )
+    }
+
+    if (!roles.includes(membership.role)) {
+      return c.json(
+        {
+          success: false,
+          error: { code: "FORBIDDEN", message: "Insufficient event permissions" },
+        },
+        403,
+      )
+    }
+
+    c.set("eventId", eventId)
+    c.set("eventRole", membership.role)
+
+    await next()
+  })
+}
+
+export function requireEventOrganizer(eventIdParam: string) {
+  return requireEventMember(eventIdParam, ["organizer"])
+}
+
+export function requireEventJudge(eventIdParam: string) {
+  return requireEventMember(eventIdParam, ["organizer", "judge"])
 }
 
 export function requireGymMember(slugParam: string, roles: string[]) {

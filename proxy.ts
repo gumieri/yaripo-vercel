@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/edge"
 import { NextResponse } from "next/server"
 
-const protectedRoutes = ["/judge", "/athlete", "/admin"]
+const protectedRoutes = ["/judge", "/athlete", "/manage"]
 const authRoutes = ["/login"]
 
 export default auth((req) => {
@@ -21,5 +21,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ["/judge/:path*", "/athlete/:path*", "/admin/:path*", "/login"],
+  matcher: ["/judge/:path*", "/athlete/:path*", "/manage/:path*", "/login"],
 }

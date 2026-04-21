@@ -6,7 +6,7 @@ import { queueRoutes } from "@/lib/api/queue"
 import { attemptRoutes } from "@/lib/api/attempts"
 import { eventRoutes } from "@/lib/api/events"
 import { gymRoutes } from "@/lib/api/gyms"
-import { adminRoutes } from "@/lib/api/admin"
+import { manageRoutes } from "@/lib/api/manage"
 import { gymManagementRoutes } from "@/lib/api/gym-management"
 
 const app = new Hono().basePath("/api")
@@ -21,7 +21,7 @@ app.route("/attempts", attemptRoutes)
 app.route("/events", eventRoutes)
 app.route("/gyms", gymRoutes)
 app.route("/gym", gymManagementRoutes)
-app.route("/admin", adminRoutes)
+app.route("/manage", manageRoutes)
 
 export const GET = handle(app)
 export const POST = handle(app)

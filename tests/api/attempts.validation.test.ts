@@ -10,7 +10,7 @@ vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
 describe("Attempts API Validation", () => {
   let app: ReturnType<typeof createTestApp>
 
-  const judgeHeaders = authHeaders(F.judge.id, "judge")
+  const judgeHeaders = authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" })
 
   beforeAll(async () => {
     app = createTestApp()
@@ -166,7 +166,7 @@ describe("Attempts API Validation", () => {
 
       const queueRes = await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(F.athletes[0].id, "athlete"),
+        headers: authHeaders(F.athletes[0].id, F.user.email),
         body: JSON.stringify({
           sectorId: F.sectors[0].id,
           athleteId: F.athletes[0].id,

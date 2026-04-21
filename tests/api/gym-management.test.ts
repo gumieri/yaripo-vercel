@@ -50,17 +50,17 @@ vi.mock("@/lib/stripe/client", () => {
 describe("Gym Management API", () => {
   let app: ReturnType<typeof createTestApp>
 
-  const ownerHeaders = authHeaders(F.gymOwner.id, "athlete", {
+  const ownerHeaders = authHeaders(F.gymOwner.id, F.gymOwner.email, {
     "x-test-gym-id": F.gym.id,
     "x-test-gym-role": "owner",
   })
 
-  const adminMemberHeaders = authHeaders(F.gymAdminMember.id, "athlete", {
+  const adminMemberHeaders = authHeaders(F.gymAdminMember.id, F.gymAdminMember.email, {
     "x-test-gym-id": F.gym.id,
     "x-test-gym-role": "admin",
   })
 
-  const judgeHeaders = authHeaders(F.judge.id, "judge", {
+  const judgeHeaders = authHeaders(F.judge.id, F.judge.email, {
     "x-test-gym-id": F.gym.id,
     "x-test-gym-role": "judge",
   })
@@ -90,7 +90,7 @@ describe("Gym Management API", () => {
     })
 
     it("returns 403 if not a gym member", async () => {
-      const headers = authHeaders(F.judge.id, "judge")
+      const headers = authHeaders(F.judge.id, F.judge.email)
       const res = await app.request(
         `/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`,
         { method: "POST", headers },

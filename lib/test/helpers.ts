@@ -5,6 +5,7 @@ import * as schema from "@/lib/db/schema"
 export async function truncateTables() {
   await db.execute(sql`
     TRUNCATE TABLE 
+      event_judge_invitations, event_members,
       event_payments, audit_logs, attempts, sector_queues, athletes, sectors, 
       categories, events, gym_members, sessions, accounts, 
       verification_tokens, users, gyms
@@ -14,13 +15,13 @@ export async function truncateTables() {
 
 export function authHeaders(
   userId: string,
-  role: string,
+  email: string,
   extra: Record<string, string> = {},
 ): Record<string, string> {
   return {
     "Content-Type": "application/json",
     "x-test-user-id": userId,
-    "x-test-user-role": role,
+    "x-test-user-email": email,
     ...extra,
   }
 }
@@ -36,30 +37,32 @@ export const F = {
   admin: {
     id: "a0000000-0000-0000-0000-000000000010",
     name: "Admin",
-    email: "admin@test.com",
-    role: "admin" as const,
+    email: "admin@yaripo.app",
   },
   judge: {
     id: "a0000000-0000-0000-0000-000000000020",
     name: "Judge",
     email: "judge@test.com",
-    role: "judge" as const,
+  },
+  user: {
+    id: "a0000000-0000-0000-0000-000000000050",
+    name: "Regular User",
+    email: "user@test.com",
   },
   gymOwner: {
     id: "a0000000-0000-0000-0000-000000000030",
     name: "Gym Owner",
     email: "owner@test.com",
-    role: "athlete" as const,
   },
   gymAdminMember: {
     id: "a0000000-0000-0000-0000-000000000040",
     name: "Gym Admin",
     email: "gymadmin@test.com",
-    role: "athlete" as const,
   },
   simpleEvent: {
     id: "b0000000-0000-0000-0000-000000000001",
     gymId: "a0000000-0000-0000-0000-000000000001",
+    createdBy: "a0000000-0000-0000-0000-000000000010",
     name: "Simple Event",
     slug: "simple-event",
     scoringType: "simple" as const,
@@ -70,6 +73,7 @@ export const F = {
   ifscEvent: {
     id: "b0000000-0000-0000-0000-000000000002",
     gymId: "a0000000-0000-0000-0000-000000000001",
+    createdBy: "a0000000-0000-0000-0000-000000000010",
     name: "IFSC Event",
     slug: "ifsc-event",
     scoringType: "ifsc" as const,
@@ -78,6 +82,7 @@ export const F = {
   redpointEvent: {
     id: "b0000000-0000-0000-0000-000000000003",
     gymId: "a0000000-0000-0000-0000-000000000001",
+    createdBy: "a0000000-0000-0000-0000-000000000010",
     name: "Redpoint Event",
     slug: "redpoint-event",
     scoringType: "redpoint" as const,
@@ -135,12 +140,18 @@ export const F = {
 
 export async function seedFixtures() {
   await db.insert(schema.gyms).values(F.gym)
-  await db.insert(schema.users).values([F.admin, F.judge, F.gymOwner, F.gymAdminMember])
+  await db.insert(schema.users).values([F.admin, F.judge, F.user, F.gymOwner, F.gymAdminMember])
   await db.insert(schema.gymMembers).values([
     { gymId: F.gym.id, userId: F.gymOwner.id, role: "owner" },
     { gymId: F.gym.id, userId: F.gymAdminMember.id, role: "admin" },
   ])
   await db.insert(schema.events).values([F.simpleEvent, F.ifscEvent, F.redpointEvent])
+  await db.insert(schema.eventMembers).values([
+    { eventId: F.simpleEvent.id, userId: F.admin.id, role: "organizer" },
+    { eventId: F.ifscEvent.id, userId: F.admin.id, role: "organizer" },
+    { eventId: F.redpointEvent.id, userId: F.admin.id, role: "organizer" },
+    { eventId: F.simpleEvent.id, userId: F.judge.id, role: "judge" },
+  ])
   await db.insert(schema.categories).values([F.catMale, F.catFemale, F.catOpen, F.catRedOpen])
   await db.insert(schema.sectors).values(F.sectors)
   await db.insert(schema.athletes).values(F.athletes)

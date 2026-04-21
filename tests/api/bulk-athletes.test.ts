@@ -9,7 +9,7 @@ vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
 describe("Bulk Athletes Edge Cases", () => {
   let app: ReturnType<typeof createTestApp>
 
-  const adminHeaders = authHeaders(F.admin.id, "admin")
+  const adminHeaders = authHeaders(F.admin.id, F.admin.email, { "x-test-event-role": "organizer" })
 
   beforeAll(async () => {
     app = createTestApp()
@@ -20,9 +20,9 @@ describe("Bulk Athletes Edge Cases", () => {
     await seedFixtures()
   })
 
-  describe("POST /api/admin/events/:eventId/athletes/bulk", () => {
+  describe("POST /api/manage/events/:eventId/athletes/bulk", () => {
     it("handles all names being empty after trim", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -39,7 +39,7 @@ describe("Bulk Athletes Edge Cases", () => {
     })
 
     it("handles names with leading/trailing whitespace", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -61,7 +61,7 @@ describe("Bulk Athletes Edge Cases", () => {
 
     it("handles exactly 200 athletes", async () => {
       const names = Array.from({ length: 200 }, (_, i) => `Athlete ${i + 1}`)
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -78,7 +78,7 @@ describe("Bulk Athletes Edge Cases", () => {
 
     it("rejects 201 athletes", async () => {
       const names = Array.from({ length: 201 }, (_, i) => `Athlete ${i + 1}`)
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -95,7 +95,7 @@ describe("Bulk Athletes Edge Cases", () => {
     })
 
     it("handles duplicate names", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -111,7 +111,7 @@ describe("Bulk Athletes Edge Cases", () => {
     })
 
     it("handles special characters in names", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -128,7 +128,7 @@ describe("Bulk Athletes Edge Cases", () => {
 
     it("handles very long names", async () => {
       const longName = "A".repeat(100)
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -145,7 +145,7 @@ describe("Bulk Athletes Edge Cases", () => {
 
     it("rejects names exceeding max length", async () => {
       const tooLongName = "A".repeat(101)
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -161,7 +161,7 @@ describe("Bulk Athletes Edge Cases", () => {
     })
 
     it("handles single athlete", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -178,7 +178,7 @@ describe("Bulk Athletes Edge Cases", () => {
 
     it("preserves order of athletes", async () => {
       const names = ["Zebra", "Alpha", "Beta", "Gamma"]
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({

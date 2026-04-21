@@ -2,14 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Trophy } from "lucide-react"
+import { LayoutDashboard, Trophy, Users } from "lucide-react"
 
 const navItems = [
-  { href: "/admin", label: "Visão Geral", icon: LayoutDashboard },
-  { href: "/admin/events", label: "Eventos", icon: Trophy },
+  { href: "/manage", label: "Visão Geral", icon: LayoutDashboard },
+  { href: "/manage/events", label: "Eventos", icon: Trophy },
+  { href: "/manage/invitations", label: "Convites", icon: Users },
 ]
 
-export function AdminNav() {
+export function ManageNav() {
   const pathname = usePathname()
 
   return (
@@ -17,8 +18,8 @@ export function AdminNav() {
       <nav className="space-y-1">
         {navItems.map((item) => {
           const isActive =
-            item.href === "/admin"
-              ? pathname === "/admin"
+            item.href === "/manage"
+              ? pathname === "/manage"
               : pathname.startsWith(item.href)
           const Icon = item.icon
           return (

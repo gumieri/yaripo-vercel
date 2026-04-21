@@ -1,7 +1,7 @@
 import { Hono } from "hono"
 import { eq, and, count as countFn } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { events, categories, athletes, eventPayments, gyms } from "@/lib/db/schema"
+import { events, categories, athletes, eventPayments, gyms, users } from "@/lib/db/schema"
 import { authMiddleware, requireGymMember } from "@/lib/api/middleware/auth"
 import { createStripeCustomer, createEventCheckoutSession } from "@/lib/stripe/client"
 import { logAudit } from "@/lib/db/audit"
@@ -43,20 +43,20 @@ gymRoutes.post(
       return validationErrorResponse(c, "Event must have at least one athlete")
     }
 
-    const [gym] = await db.select().from(gyms).where(eq(gyms.id, gymId))
-    if (!gym) {
-      return notFoundResponse(c, "Gym")
+    const [user] = await db.select().from(users).where(eq(users.id, userId))
+    if (!user) {
+      return notFoundResponse(c, "User")
     }
 
-    let customerId = gym.stripeCustomerId
+    let customerId = user.stripeCustomerId
     if (!customerId) {
       const customer = await createStripeCustomer({
-        email: `contact@${gym.slug}.yaripo.app`,
-        name: gym.name,
-        metadata: { gymId },
+        email: user.email,
+        name: user.name,
+        metadata: { userId },
       })
       customerId = customer.id
-      await db.update(gyms).set({ stripeCustomerId: customerId }).where(eq(gyms.id, gymId))
+      await db.update(users).set({ stripeCustomerId: customerId }).where(eq(users.id, userId))
     }
 
     const session = await createEventCheckoutSession({
@@ -143,16 +143,16 @@ gymRoutes.post(
       return c.json({ success: true, data: { noCharge: true, athleteCount: currentAthleteCount } })
     }
 
-    const [gym] = await db.select().from(gyms).where(eq(gyms.id, gymId))
-    if (!gym || !gym.stripeCustomerId) {
+    const [user] = await db.select().from(users).where(eq(users.id, userId))
+    if (!user || !user.stripeCustomerId) {
       return c.json(
-        { success: false, error: { code: "PAYMENT_REQUIRED", message: "Gym has no payment method" } },
+        { success: false, error: { code: "PAYMENT_REQUIRED", message: "User has no payment method" } },
         402,
       )
     }
 
     const session = await createEventCheckoutSession({
-      customerId: gym.stripeCustomerId,
+      customerId: user.stripeCustomerId,
       gymId,
       eventId,
       eventName: event.name,
@@ -167,7 +167,7 @@ gymRoutes.post(
       athleteCount: delta,
       type: "delta",
       status: "pending",
-      stripeCustomerId: gym.stripeCustomerId,
+      stripeCustomerId: user.stripeCustomerId,
     })
 
     await logAudit({

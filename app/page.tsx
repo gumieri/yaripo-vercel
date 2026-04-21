@@ -31,6 +31,12 @@ export default async function Home() {
             {session?.user ? (
               <div className="flex items-center gap-3">
                 <Link
+                  href="/manage"
+                  className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+                >
+                  Gerenciar
+                </Link>
+                <Link
                   href="/judge"
                   className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
                 >

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useAdminEvents, useDeleteEvent } from "@/lib/api/hooks"
+import { useManageEvents, useDeleteEvent } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
@@ -21,8 +21,8 @@ const statusColors: Record<string, string> = {
   archived: "bg-secondary text-muted-foreground/60",
 }
 
-export default function AdminEventsPage() {
-  const { data: events, isLoading } = useAdminEvents()
+export default function ManageEventsPage() {
+  const { data: events, isLoading } = useManageEvents()
   const deleteEvent = useDeleteEvent()
 
   async function handleDelete(id: string, name: string) {
@@ -39,7 +39,7 @@ export default function AdminEventsPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-foreground text-2xl font-bold">Eventos</h1>
-        <Link href="/admin/events/new">
+        <Link href="/manage/events/new">
           <Button>Novo Evento</Button>
         </Link>
       </div>
@@ -55,7 +55,7 @@ export default function AdminEventsPage() {
       {!isLoading && (!events || events.length === 0) && (
         <div className="border-border/50 rounded-lg border border-dashed p-8 text-center">
           <p className="text-muted-foreground">Nenhum evento criado.</p>
-          <Link href="/admin/events/new" className="text-primary mt-2 inline-block text-sm">
+          <Link href="/manage/events/new" className="text-primary mt-2 inline-block text-sm">
             Criar primeiro evento
           </Link>
         </div>
@@ -70,7 +70,7 @@ export default function AdminEventsPage() {
             >
               <div className="min-w-0 flex-1">
                 <Link
-                  href={`/admin/events/${event.id}`}
+                  href={`/manage/events/${event.id}`}
                   className="text-foreground hover:text-primary font-medium transition-colors"
                 >
                   {event.name}

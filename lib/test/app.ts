@@ -3,7 +3,7 @@ import { eventRoutes } from "@/lib/api/events"
 import { queueRoutes } from "@/lib/api/queue"
 import { attemptRoutes } from "@/lib/api/attempts"
 import { gymRoutes } from "@/lib/api/gyms"
-import { adminRoutes } from "@/lib/api/admin"
+import { manageRoutes } from "@/lib/api/manage"
 import { gymManagementRoutes } from "@/lib/api/gym-management"
 
 export function createTestApp() {
@@ -13,6 +13,6 @@ export function createTestApp() {
   app.route("/events", eventRoutes)
   app.route("/gyms", gymRoutes)
   app.route("/gym", gymManagementRoutes)
-  app.route("/admin", adminRoutes)
+  app.route("/manage", manageRoutes)
   return app
 }

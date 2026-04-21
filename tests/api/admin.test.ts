@@ -6,8 +6,9 @@ vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
 
 describe("Admin API", () => {
   let app: ReturnType<typeof createTestApp>
-  const adminHeaders = authHeaders(F.admin.id, "admin")
-  const judgeHeaders = authHeaders(F.judge.id, "judge")
+  const adminHeaders = authHeaders(F.admin.id, F.admin.email, { "x-test-event-role": "organizer" })
+  const judgeHeaders = authHeaders(F.judge.id, F.judge.email)
+  const userHeaders = authHeaders(F.user.id, F.user.email)
   const noAuthHeaders = { "Content-Type": "application/json" }
 
   beforeAll(() => {
@@ -20,29 +21,29 @@ describe("Admin API", () => {
   })
 
   describe("Auth guards", () => {
-    it("GET /admin/events returns 401 if not authenticated", async () => {
-      const res = await app.request("/api/admin/events", { headers: noAuthHeaders })
+    it("GET /manage/events returns 401 if not authenticated", async () => {
+      const res = await app.request("/api/manage/events", { headers: noAuthHeaders })
       expect(res.status).toBe(401)
     })
 
-    it("GET /admin/events returns 403 if not admin", async () => {
-      const res = await app.request("/api/admin/events", { headers: judgeHeaders })
-      expect(res.status).toBe(403)
+    it("GET /manage/events returns 200 for any authenticated user (their events)", async () => {
+      const res = await app.request("/api/manage/events", { headers: userHeaders })
+      expect(res.status).toBe(200)
     })
 
-    it("POST /admin/events returns 403 if not admin", async () => {
-      const res = await app.request("/api/admin/events", {
+    it("POST /manage/events returns 201 for any authenticated user", async () => {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
-        headers: judgeHeaders,
-        body: JSON.stringify({ name: "x", slug: "x", gymId: F.gym.id }),
+        headers: userHeaders,
+        body: JSON.stringify({ name: "x", slug: "x" }),
       })
-      expect(res.status).toBe(403)
+      expect(res.status).toBe(201)
     })
   })
 
-  describe("GET /admin/events", () => {
+  describe("GET /manage/events", () => {
     it("returns all events including drafts", async () => {
-      const res = await app.request("/api/admin/events", { headers: adminHeaders })
+      const res = await app.request("/api/manage/events", { headers: adminHeaders })
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.success).toBe(true)
@@ -50,7 +51,7 @@ describe("Admin API", () => {
     })
 
     it("returns events with all fields", async () => {
-      const res = await app.request("/api/admin/events", { headers: adminHeaders })
+      const res = await app.request("/api/manage/events", { headers: adminHeaders })
       const json = await res.json()
       const event = json.data.find((e: any) => e.id === F.simpleEvent.id)
       expect(event.scoringType).toBe("simple")
@@ -59,9 +60,9 @@ describe("Admin API", () => {
     })
   })
 
-  describe("POST /admin/events", () => {
+  describe("POST /manage/events", () => {
     it("creates a new event", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -80,7 +81,7 @@ describe("Admin API", () => {
     })
 
     it("returns 400 if name is missing", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ slug: "x", gymId: F.gym.id }),
@@ -89,7 +90,7 @@ describe("Admin API", () => {
     })
 
     it("returns 400 if slug is missing", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "Test", gymId: F.gym.id }),
@@ -97,17 +98,8 @@ describe("Admin API", () => {
       expect(res.status).toBe(400)
     })
 
-    it("returns 400 if gymId is missing", async () => {
-      const res = await app.request("/api/admin/events", {
-        method: "POST",
-        headers: adminHeaders,
-        body: JSON.stringify({ name: "Test", slug: "test" }),
-      })
-      expect(res.status).toBe(400)
-    })
-
     it("returns 400 if slug has invalid characters", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "Test", slug: "Invalid Slug!", gymId: F.gym.id }),
@@ -116,7 +108,7 @@ describe("Admin API", () => {
     })
 
     it("returns 409 if slug already exists", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -129,7 +121,7 @@ describe("Admin API", () => {
     })
 
     it("writes audit log", async () => {
-      await app.request("/api/admin/events", {
+      await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -147,9 +139,9 @@ describe("Admin API", () => {
     })
   })
 
-  describe("GET /admin/events/:id", () => {
+  describe("GET /manage/events/:id", () => {
     it("returns event with categories, sectors, and athletes", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         headers: adminHeaders,
       })
       const json = await res.json()
@@ -160,16 +152,16 @@ describe("Admin API", () => {
     })
 
     it("returns 404 for non-existent event", async () => {
-      const res = await app.request("/api/admin/events/00000000-0000-0000-0000-000000000000", {
+      const res = await app.request("/api/manage/events/00000000-0000-0000-0000-000000000000", {
         headers: adminHeaders,
       })
       expect(res.status).toBe(404)
     })
   })
 
-  describe("PATCH /admin/events/:id", () => {
+  describe("PATCH /manage/events/:id", () => {
     it("updates event fields", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ name: "Updated Event", status: "published" }),
@@ -181,7 +173,7 @@ describe("Admin API", () => {
     })
 
     it("returns 404 for non-existent event", async () => {
-      const res = await app.request("/api/admin/events/00000000-0000-0000-0000-000000000000", {
+      const res = await app.request("/api/manage/events/00000000-0000-0000-0000-000000000000", {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ name: "X" }),
@@ -190,7 +182,7 @@ describe("Admin API", () => {
     })
 
     it("writes audit log with old and new values", async () => {
-      await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ status: "completed" }),
@@ -204,22 +196,22 @@ describe("Admin API", () => {
     })
   })
 
-  describe("DELETE /admin/events/:id", () => {
+  describe("DELETE /manage/events/:id", () => {
     it("deletes event and cascading data", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "DELETE",
         headers: adminHeaders,
       })
       expect(res.status).toBe(200)
 
-      const getRes = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const getRes = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         headers: adminHeaders,
       })
       expect(getRes.status).toBe(404)
     })
 
     it("returns 404 for non-existent event", async () => {
-      const res = await app.request("/api/admin/events/00000000-0000-0000-0000-000000000000", {
+      const res = await app.request("/api/manage/events/00000000-0000-0000-0000-000000000000", {
         method: "DELETE",
         headers: adminHeaders,
       })
@@ -227,7 +219,7 @@ describe("Admin API", () => {
     })
 
     it("writes audit log", async () => {
-      await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "DELETE",
         headers: adminHeaders,
       })
@@ -241,7 +233,7 @@ describe("Admin API", () => {
 
   describe("Categories CRUD", () => {
     it("creates a category", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/categories`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/categories`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "Open", gender: "open" }),
@@ -253,7 +245,7 @@ describe("Admin API", () => {
     })
 
     it("returns 400 if name is missing", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/categories`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/categories`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ gender: "male" }),
@@ -263,7 +255,7 @@ describe("Admin API", () => {
 
     it("updates a category", async () => {
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/categories/${F.catMale.id}`,
+        `/api/manage/events/${F.simpleEvent.id}/categories/${F.catMale.id}`,
         {
           method: "PATCH",
           headers: adminHeaders,
@@ -277,7 +269,7 @@ describe("Admin API", () => {
 
     it("deletes a category", async () => {
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/categories/${F.catMale.id}`,
+        `/api/manage/events/${F.simpleEvent.id}/categories/${F.catMale.id}`,
         {
           method: "DELETE",
           headers: adminHeaders,
@@ -289,7 +281,7 @@ describe("Admin API", () => {
 
   describe("Sectors CRUD", () => {
     it("creates a sector", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/sectors`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/sectors`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "Problema 4", orderIndex: 3 }),
@@ -301,7 +293,7 @@ describe("Admin API", () => {
     })
 
     it("returns 400 if name is missing", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/sectors`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/sectors`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ orderIndex: 99 }),
@@ -311,7 +303,7 @@ describe("Admin API", () => {
 
     it("updates a sector", async () => {
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/sectors/${F.sectors[0].id}`,
+        `/api/manage/events/${F.simpleEvent.id}/sectors/${F.sectors[0].id}`,
         {
           method: "PATCH",
           headers: adminHeaders,
@@ -325,7 +317,7 @@ describe("Admin API", () => {
 
     it("deletes a sector", async () => {
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/sectors/${F.sectors[0].id}`,
+        `/api/manage/events/${F.simpleEvent.id}/sectors/${F.sectors[0].id}`,
         {
           method: "DELETE",
           headers: adminHeaders,
@@ -337,7 +329,7 @@ describe("Admin API", () => {
 
   describe("Athletes CRUD", () => {
     it("creates an athlete", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -351,7 +343,7 @@ describe("Admin API", () => {
     })
 
     it("returns 400 if name or categoryId missing", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "X" }),
@@ -361,7 +353,7 @@ describe("Admin API", () => {
 
     it("bulk creates athletes", async () => {
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/athletes/bulk`,
+        `/api/manage/events/${F.simpleEvent.id}/athletes/bulk`,
         {
           method: "POST",
           headers: adminHeaders,
@@ -378,7 +370,7 @@ describe("Admin API", () => {
 
     it("returns 400 if bulk names is empty", async () => {
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/athletes/bulk`,
+        `/api/manage/events/${F.simpleEvent.id}/athletes/bulk`,
         {
           method: "POST",
           headers: adminHeaders,
@@ -391,7 +383,7 @@ describe("Admin API", () => {
     it("returns 400 if bulk exceeds 200", async () => {
       const names = Array.from({ length: 201 }, (_, i) => `Athlete ${i}`)
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/athletes/bulk`,
+        `/api/manage/events/${F.simpleEvent.id}/athletes/bulk`,
         {
           method: "POST",
           headers: adminHeaders,
@@ -403,7 +395,7 @@ describe("Admin API", () => {
 
     it("deletes an athlete", async () => {
       const res = await app.request(
-        `/api/admin/events/${F.simpleEvent.id}/athletes/${F.athletes[0].id}`,
+        `/api/manage/events/${F.simpleEvent.id}/athletes/${F.athletes[0].id}`,
         {
           method: "DELETE",
           headers: adminHeaders,
@@ -413,24 +405,24 @@ describe("Admin API", () => {
     })
   })
 
-  describe("GET /admin/gyms", () => {
+  describe("GET /manage/gyms", () => {
     it("returns gyms for admin", async () => {
-      const res = await app.request("/api/admin/gyms", { headers: adminHeaders })
+      const res = await app.request("/api/manage/gyms", { headers: adminHeaders })
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.data.length).toBe(1)
     })
   })
 
-  describe("GET /admin/audit-logs", () => {
+  describe("GET /manage/audit-logs", () => {
     it("returns audit logs", async () => {
-      await app.request("/api/admin/events", {
+      await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "X", slug: "x", gymId: F.gym.id }),
       })
 
-      const res = await app.request("/api/admin/audit-logs", { headers: adminHeaders })
+      const res = await app.request("/api/manage/audit-logs", { headers: adminHeaders })
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.data.logs.length).toBeGreaterThanOrEqual(1)
@@ -440,13 +432,13 @@ describe("Admin API", () => {
     })
 
     it("filters by resource_type", async () => {
-      await app.request("/api/admin/events", {
+      await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "X", slug: "x", gymId: F.gym.id }),
       })
 
-      const res = await app.request("/api/admin/audit-logs?resource_type=event", {
+      const res = await app.request("/api/manage/audit-logs?resource_type=event", {
         headers: adminHeaders,
       })
       const json = await res.json()

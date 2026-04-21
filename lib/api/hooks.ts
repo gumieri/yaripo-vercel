@@ -207,25 +207,25 @@ export function useGyms() {
   })
 }
 
-export function useAdminEvents() {
+export function useManageEvents() {
   return useQuery({
-    queryKey: ["admin", "events"],
-    queryFn: () => apiFetch<EventSummary[]>("/admin/events"),
+    queryKey: ["manage", "events"],
+    queryFn: () => apiFetch<EventSummary[]>("/manage/events"),
   })
 }
 
-export function useAdminEvent(id: string) {
+export function useManageEvent(id: string) {
   return useQuery({
-    queryKey: ["admin", "events", id],
-    queryFn: () => apiFetch<EventDetail>(`/admin/events/${id}`),
+    queryKey: ["manage", "events", id],
+    queryFn: () => apiFetch<EventDetail>(`/manage/events/${id}`),
     enabled: !!id,
   })
 }
 
-export function useAdminGyms() {
+export function useManageGyms() {
   return useQuery({
-    queryKey: ["admin", "gyms"],
-    queryFn: () => apiFetch<GymSummary[]>("/admin/gyms"),
+    queryKey: ["manage", "gyms"],
+    queryFn: () => apiFetch<GymSummary[]>("/manage/gyms"),
   })
 }
 
@@ -233,9 +233,9 @@ export function useCreateEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (body: Record<string, unknown>) =>
-      apiFetch<EventDetail>("/admin/events", { method: "POST", body: JSON.stringify(body) }),
+      apiFetch<EventDetail>("/manage/events", { method: "POST", body: JSON.stringify(body) }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin", "events"] })
+      qc.invalidateQueries({ queryKey: ["manage", "events"] })
     },
   })
 }
@@ -244,10 +244,10 @@ export function useUpdateEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
-      apiFetch<EventDetail>(`/admin/events/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+      apiFetch<EventDetail>(`/manage/events/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events"] })
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.id] })
+      qc.invalidateQueries({ queryKey: ["manage", "events"] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.id] })
     },
   })
 }
@@ -256,9 +256,9 @@ export function useDeleteEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) =>
-      apiFetch<{ id: string }>(`/admin/events/${id}`, { method: "DELETE" }),
+      apiFetch<{ id: string }>(`/manage/events/${id}`, { method: "DELETE" }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin", "events"] })
+      qc.invalidateQueries({ queryKey: ["manage", "events"] })
     },
   })
 }
@@ -267,12 +267,12 @@ export function useCreateCategory() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ eventId, ...body }: { eventId: string } & Record<string, unknown>) =>
-      apiFetch<Category>(`/admin/events/${eventId}/categories`, {
+      apiFetch<Category>(`/manage/events/${eventId}/categories`, {
         method: "POST",
         body: JSON.stringify(body),
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -285,12 +285,12 @@ export function useUpdateCategory() {
       categoryId,
       ...body
     }: { eventId: string; categoryId: string } & Record<string, unknown>) =>
-      apiFetch<Category>(`/admin/events/${eventId}/categories/${categoryId}`, {
+      apiFetch<Category>(`/manage/events/${eventId}/categories/${categoryId}`, {
         method: "PATCH",
         body: JSON.stringify(body),
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -299,11 +299,11 @@ export function useDeleteCategory() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ eventId, categoryId }: { eventId: string; categoryId: string }) =>
-      apiFetch<{ id: string }>(`/admin/events/${eventId}/categories/${categoryId}`, {
+      apiFetch<{ id: string }>(`/manage/events/${eventId}/categories/${categoryId}`, {
         method: "DELETE",
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -312,12 +312,12 @@ export function useCreateSector() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ eventId, ...body }: { eventId: string } & Record<string, unknown>) =>
-      apiFetch<Sector>(`/admin/events/${eventId}/sectors`, {
+      apiFetch<Sector>(`/manage/events/${eventId}/sectors`, {
         method: "POST",
         body: JSON.stringify(body),
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -330,12 +330,12 @@ export function useUpdateSector() {
       sectorId,
       ...body
     }: { eventId: string; sectorId: string } & Record<string, unknown>) =>
-      apiFetch<Sector>(`/admin/events/${eventId}/sectors/${sectorId}`, {
+      apiFetch<Sector>(`/manage/events/${eventId}/sectors/${sectorId}`, {
         method: "PATCH",
         body: JSON.stringify(body),
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -344,11 +344,11 @@ export function useDeleteSector() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ eventId, sectorId }: { eventId: string; sectorId: string }) =>
-      apiFetch<{ id: string }>(`/admin/events/${eventId}/sectors/${sectorId}`, {
+      apiFetch<{ id: string }>(`/manage/events/${eventId}/sectors/${sectorId}`, {
         method: "DELETE",
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -357,12 +357,12 @@ export function useCreateAthlete() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ eventId, ...body }: { eventId: string } & Record<string, unknown>) =>
-      apiFetch<Athlete>(`/admin/events/${eventId}/athletes`, {
+      apiFetch<Athlete>(`/manage/events/${eventId}/athletes`, {
         method: "POST",
         body: JSON.stringify(body),
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -371,12 +371,12 @@ export function useBulkCreateAthletes() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ eventId, ...body }: { eventId: string } & Record<string, unknown>) =>
-      apiFetch<BulkCreateResult>(`/admin/events/${eventId}/athletes/bulk`, {
+      apiFetch<BulkCreateResult>(`/manage/events/${eventId}/athletes/bulk`, {
         method: "POST",
         body: JSON.stringify(body),
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }
@@ -385,11 +385,11 @@ export function useDeleteAthlete() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ eventId, athleteId }: { eventId: string; athleteId: string }) =>
-      apiFetch<{ id: string }>(`/admin/events/${eventId}/athletes/${athleteId}`, {
+      apiFetch<{ id: string }>(`/manage/events/${eventId}/athletes/${athleteId}`, {
         method: "DELETE",
       }),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ["admin", "events", variables.eventId] })
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
     },
   })
 }

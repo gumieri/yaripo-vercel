@@ -2,7 +2,6 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import Nodemailer from "next-auth/providers/nodemailer"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
-import { eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import * as schema from "@/lib/db/schema"
 
@@ -13,7 +12,7 @@ declare module "next-auth" {
       name: string
       email: string
       image?: string | null
-      role?: string
+      isPlatformAdmin: boolean
     }
   }
 }
@@ -50,14 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token?.sub) {
         session.user.id = token.sub
-        const [user] = await db
-          .select({ role: schema.users.role })
-          .from(schema.users)
-          .where(eq(schema.users.id, token.sub))
-          .limit(1)
-        if (user) {
-          session.user.role = user.role
-        }
+        session.user.isPlatformAdmin = session.user.email === "admin@yaripo.app"
       }
       return session
     },

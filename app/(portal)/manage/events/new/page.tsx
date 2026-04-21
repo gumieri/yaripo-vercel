@@ -5,9 +5,10 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useCreateEvent, useAdminGyms } from "@/lib/api/hooks"
+import { useCreateEvent, useManageGyms } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { useState } from "react"
 
 const eventSchema = z.object({
   name: z.string().min(1, "Nome obrigatório"),
@@ -15,7 +16,7 @@ const eventSchema = z.object({
     .string()
     .min(1, "Slug obrigatório")
     .regex(/^[a-z0-9-]+$/, "Apenas minúsculas, números e hífens"),
-  gymId: z.string().min(1, "Academia obrigatória"),
+  gymId: z.string().optional(),
   scoringType: z.enum(["simple", "ifsc", "redpoint"]),
   description: z.string().optional(),
   startsAt: z.string().optional(),
@@ -30,7 +31,8 @@ const inputCls =
 export default function NewEventPage() {
   const router = useRouter()
   const createEvent = useCreateEvent()
-  const { data: gyms } = useAdminGyms()
+  const { data: gyms } = useManageGyms()
+  const [slugPreview, setSlugPreview] = useState("")
 
   const {
     register,
@@ -47,7 +49,7 @@ export default function NewEventPage() {
     try {
       const result = await createEvent.mutateAsync(data)
       toast.success("Evento criado")
-      router.push(`/admin/events/${result.id}`)
+      router.push(`/manage/events/${result.id}`)
     } catch (error: any) {
       if (error?.code === "CONFLICT") {
         toast.error("Slug já existe")
@@ -61,7 +63,7 @@ export default function NewEventPage() {
     <div>
       <div className="mb-6">
         <Link
-          href="/admin/events"
+          href="/manage/events"
           className="text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
           &larr; Voltar para eventos
@@ -72,36 +74,42 @@ export default function NewEventPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-4">
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">Nome</label>
-          <input
-            {...register("name")}
-            className={inputCls}
-            placeholder="Apus Boulder Open 2026"
-          />
-          {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>}
-        </div>
+           <input
+             {...register("name")}
+             className={inputCls}
+             placeholder="Boulder Open 2026"
+           />
+           {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>}
+         </div>
 
-        <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Slug</label>
-          <input
-            {...register("slug")}
-            className={inputCls}
-            placeholder="apus-boulder-open-2026"
-          />
-          {errors.slug && <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>}
-        </div>
+         <div>
+            <label className="text-foreground mb-1 block text-sm font-medium">Link Único do Evento</label>
+            <input
+              {...register("slug", {
+                onChange: (e) => setSlugPreview(e.target.value),
+              })}
+              className={inputCls}
+              placeholder="boulder-open-2026"
+            />
+            {slugPreview && (
+              <p className="text-muted-foreground mt-1 text-sm">
+                yaripo.app/events/{slugPreview}
+              </p>
+            )}
+           {errors.slug && <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>}
+         </div>
 
-        <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Academia</label>
-          <select {...register("gymId")} className={inputCls}>
-            <option value="">Selecionar...</option>
-            {gyms?.map((gym: any) => (
-              <option key={gym.id} value={gym.id}>
-                {gym.name}
-              </option>
-            ))}
-          </select>
-          {errors.gymId && <p className="mt-1 text-sm text-destructive">{errors.gymId.message}</p>}
-        </div>
+         <div>
+           <label className="text-foreground mb-1 block text-sm font-medium">Academia (opcional)</label>
+           <select {...register("gymId")} className={inputCls}>
+             <option value="">Nenhuma</option>
+             {gyms?.map((gym: any) => (
+               <option key={gym.id} value={gym.id}>
+                 {gym.name}
+               </option>
+             ))}
+           </select>
+         </div>
 
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">Formato</label>
@@ -132,7 +140,7 @@ export default function NewEventPage() {
           <Button type="submit" disabled={createEvent.isPending}>
             {createEvent.isPending ? "Criando..." : "Criar Evento"}
           </Button>
-          <Link href="/admin/events">
+          <Link href="/manage/events">
             <Button type="button" variant="outline">
               Cancelar
             </Button>

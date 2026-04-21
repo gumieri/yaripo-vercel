@@ -2,12 +2,13 @@ import { z } from "zod"
 
 export const eventScoringTypeEnum = z.enum(["simple", "ifsc", "redpoint"])
 export const eventStatusEnum = z.enum(["draft", "published", "active", "completed", "archived"])
-export const userRoleEnum = z.enum(["admin", "judge", "athlete"])
 export const gymMemberRoleEnum = z.enum(["owner", "admin", "judge"])
 export const categoryGenderEnum = z.enum(["male", "female", "open"])
 export const queueStatusEnum = z.enum(["waiting", "active", "completed", "dropped"])
 export const paymentTypeEnum = z.enum(["publish", "delta"])
 export const paymentStatusEnum = z.enum(["pending", "paid", "failed", "expired"])
+export const eventMemberRoleEnum = z.enum(["organizer", "judge"])
+export const invitationStatusEnum = z.enum(["pending", "accepted", "declined"])
 
 export const positiveIntSchema = z.preprocess(
   (val) => (typeof val === "string" ? parseInt(val, 10) : val),
@@ -37,7 +38,7 @@ export const createEventSchema = z.object({
     .min(1, "Slug is required")
     .max(100, "Slug too long")
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes only"),
-  gymId: z.string().uuid("Invalid gym ID"),
+  gymId: z.string().uuid("Invalid gym ID").nullish(),
   scoringType: eventScoringTypeEnum.default("simple"),
   description: z.string().trim().max(2000, "Description too long").nullish().default(null),
   startsAt: z.string().datetime("Invalid start date").nullish().default(null),

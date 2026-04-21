@@ -10,7 +10,7 @@ vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
 describe("Gym Management Validation", () => {
   let app: ReturnType<typeof createTestApp>
 
-  const ownerHeaders = authHeaders(F.gymOwner.id, "athlete", {
+  const ownerHeaders = authHeaders(F.gymOwner.id, F.gymOwner.email, {
     "x-test-gym-id": F.gym.id,
     "x-test-gym-role": "owner",
   })
@@ -35,6 +35,7 @@ describe("Gym Management Validation", () => {
         name: "Empty Event",
         slug: "empty-event",
         gymId: F.gym.id,
+        createdBy: F.gymOwner.id,
         status: "draft",
         scoringType: "simple",
       })
@@ -76,6 +77,7 @@ describe("Gym Management Validation", () => {
         name: "Other Gym Event",
         slug: "other-gym-event",
         gymId: "a0000001-0000-0000-0000-000000000098",
+        createdBy: F.gymOwner.id,
         status: "draft",
         scoringType: "simple",
       })
@@ -145,6 +147,7 @@ describe("Gym Management Validation", () => {
         name: "Other Gym Published",
         slug: "other-gym-published",
         gymId: "a0000001-0000-0000-0000-000000000098",
+        createdBy: F.gymOwner.id,
         status: "published",
         scoringType: "simple",
       })

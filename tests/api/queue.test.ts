@@ -22,7 +22,7 @@ describe("Queue API", () => {
     it("creates queue entry", async () => {
       const res = await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(F.athletes[0].id, "athlete"),
+        headers: authHeaders(F.athletes[0].id, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const json = await res.json()
@@ -36,7 +36,7 @@ describe("Queue API", () => {
     it("returns 400 if missing sectorId", async () => {
       const res = await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ athleteId }),
       })
       expect(res.status).toBe(400)
@@ -45,7 +45,7 @@ describe("Queue API", () => {
     it("returns 400 if missing athleteId", async () => {
       const res = await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId }),
       })
       expect(res.status).toBe(400)
@@ -54,12 +54,12 @@ describe("Queue API", () => {
     it("returns 409 if athlete already in queue", async () => {
       await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const res = await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const json = await res.json()
@@ -79,7 +79,7 @@ describe("Queue API", () => {
     it("allows rejoin after queue entry is completed", async () => {
       await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const { db } = await import("@/lib/db")
@@ -92,7 +92,7 @@ describe("Queue API", () => {
 
       const res = await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       expect(res.status).toBe(201)
@@ -103,12 +103,12 @@ describe("Queue API", () => {
     it("pops first waiting entry and marks as active", async () => {
       await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const res = await app.request("/api/queue/pop", {
         method: "POST",
-        headers: authHeaders(F.judge.id, "judge"),
+        headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
         body: JSON.stringify({ sectorId }),
       })
       const json = await res.json()
@@ -121,7 +121,7 @@ describe("Queue API", () => {
     it("returns null if queue is empty", async () => {
       const res = await app.request("/api/queue/pop", {
         method: "POST",
-        headers: authHeaders(F.judge.id, "judge"),
+        headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
         body: JSON.stringify({ sectorId }),
       })
       const json = await res.json()
@@ -132,7 +132,7 @@ describe("Queue API", () => {
     it("returns 400 if missing sectorId", async () => {
       const res = await app.request("/api/queue/pop", {
         method: "POST",
-        headers: authHeaders(F.judge.id, "judge"),
+        headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
         body: JSON.stringify({}),
       })
       expect(res.status).toBe(400)
@@ -147,10 +147,10 @@ describe("Queue API", () => {
       expect(res.status).toBe(401)
     })
 
-    it("returns 403 if not judge or admin", async () => {
+    it("returns 403 if not event member (judge/organizer)", async () => {
       const res = await app.request("/api/queue/pop", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId }),
       })
       expect(res.status).toBe(403)
@@ -161,18 +161,18 @@ describe("Queue API", () => {
       const a2 = F.athletes[1].id
       await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(a1, "athlete"),
+        headers: authHeaders(a1, F.user.email),
         body: JSON.stringify({ sectorId, athleteId: a1 }),
       })
       await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(a2, "athlete"),
+        headers: authHeaders(a2, F.user.email),
         body: JSON.stringify({ sectorId, athleteId: a2 }),
       })
 
       const pop1 = await app.request("/api/queue/pop", {
         method: "POST",
-        headers: authHeaders(F.judge.id, "judge"),
+        headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
         body: JSON.stringify({ sectorId }),
       })
       const json1 = await pop1.json()
@@ -180,7 +180,7 @@ describe("Queue API", () => {
 
       const pop2 = await app.request("/api/queue/pop", {
         method: "POST",
-        headers: authHeaders(F.judge.id, "judge"),
+        headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
         body: JSON.stringify({ sectorId }),
       })
       const json2 = await pop2.json()
@@ -192,14 +192,14 @@ describe("Queue API", () => {
     it("marks queue entry as dropped", async () => {
       const joinRes = await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const { data: queueEntry } = await joinRes.json()
 
       const res = await app.request("/api/queue/drop", {
         method: "POST",
-        headers: authHeaders(F.judge.id, "judge"),
+        headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
         body: JSON.stringify({ queueId: queueEntry.id }),
       })
       const json = await res.json()
@@ -210,16 +210,16 @@ describe("Queue API", () => {
     it("returns 404 for non-existent queue entry", async () => {
       const res = await app.request("/api/queue/drop", {
         method: "POST",
-        headers: authHeaders(F.judge.id, "judge"),
+        headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
         body: JSON.stringify({ queueId: "00000000-0000-0000-0000-000000000000" }),
       })
       expect(res.status).toBe(404)
     })
 
-    it("returns 403 if not judge or admin", async () => {
+    it("returns 403 if not event member (judge/organizer)", async () => {
       const res = await app.request("/api/queue/drop", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ queueId: "any-id" }),
       })
       expect(res.status).toBe(403)
@@ -230,11 +230,11 @@ describe("Queue API", () => {
     it("returns waiting and active entries", async () => {
       await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const res = await app.request(`/api/queue/status?sector_id=${sectorId}`, {
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
       })
       const json = await res.json()
       expect(res.status).toBe(200)
@@ -246,7 +246,7 @@ describe("Queue API", () => {
 
     it("returns 400 if missing sector_id", async () => {
       const res = await app.request("/api/queue/status", {
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
       })
       expect(res.status).toBe(400)
     })
@@ -259,7 +259,7 @@ describe("Queue API", () => {
     it("excludes completed and dropped entries", async () => {
       await app.request("/api/queue/join", {
         method: "POST",
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
         body: JSON.stringify({ sectorId, athleteId }),
       })
       const { db } = await import("@/lib/db")
@@ -271,7 +271,7 @@ describe("Queue API", () => {
         .where(eq(sectorQueues.athleteId, athleteId))
 
       const res = await app.request(`/api/queue/status?sector_id=${sectorId}`, {
-        headers: authHeaders(athleteId, "athlete"),
+        headers: authHeaders(athleteId, F.user.email),
       })
       const json = await res.json()
       expect(json.data).toEqual([])

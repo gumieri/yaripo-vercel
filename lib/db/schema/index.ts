@@ -20,9 +20,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: timestamp("email_verified", { withTimezone: true }),
   image: text("image"),
-  role: text("role", { enum: ["admin", "judge", "athlete"] })
-    .default("athlete")
-    .notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
@@ -76,9 +74,10 @@ export const gymMembers = pgTable("gym_members", {
 
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
-  gymId: uuid("gym_id")
+  gymId: uuid("gym_id").references(() => gyms.id, { onDelete: "cascade" }),
+  createdBy: text("created_by")
     .notNull()
-    .references(() => gyms.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
@@ -93,6 +92,34 @@ export const events = pgTable("events", {
     enum: ["draft", "published", "active", "completed", "archived"],
   })
     .default("draft")
+    .notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const eventMembers = pgTable("event_members", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  role: text("role", { enum: ["organizer", "judge"] }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  uniqueEventUser: uniqueIndex("event_members_event_id_user_id_idx").on(table.eventId, table.userId),
+}))
+
+export const eventJudgeInvitations = pgTable("event_judge_invitations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  invitedBy: text("invited_by").references(() => users.id, { onDelete: "set null" }),
+  status: text("status", { enum: ["pending", "accepted", "declined"] })
+    .default("pending")
     .notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

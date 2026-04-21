@@ -1,8 +1,8 @@
 import { Hono } from "hono"
 import { eq, and, asc, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { sectorQueues, athletes, sectors, categories } from "@/lib/db/schema"
-import { authMiddleware, requireAuth, requireRole } from "@/lib/api/middleware/auth"
+import { sectorQueues, athletes, sectors, categories, eventMembers } from "@/lib/db/schema"
+import { authMiddleware, requireAuth, requireEventJudge } from "@/lib/api/middleware/auth"
 import { joinQueueSchema, popQueueSchema, dropQueueSchema } from "@/lib/api/validations"
 import { validationErrorResponse, notFoundResponse, conflictResponse } from "@/lib/api/helpers"
 
@@ -66,7 +66,8 @@ queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
   return c.json({ success: true, data: queue }, 201)
 })
 
-queueRoutes.post("/pop", authMiddleware, requireRole("judge", "admin"), async (c) => {
+queueRoutes.post("/pop", authMiddleware, requireAuth(), async (c) => {
+  const userId = c.get("userId")!
   const body = await c.req.json()
 
   const result = popQueueSchema.safeParse(body)
@@ -75,6 +76,30 @@ queueRoutes.post("/pop", authMiddleware, requireRole("judge", "admin"), async (c
   }
 
   const { sectorId } = result.data
+
+  const [sector] = await db
+    .select({ eventId: sectors.eventId })
+    .from(sectors)
+    .where(eq(sectors.id, sectorId))
+
+  if (!sector) {
+    return notFoundResponse(c, "Sector")
+  }
+
+  const [membership] = await db
+    .select({ role: eventMembers.role })
+    .from(eventMembers)
+    .where(and(eq(eventMembers.eventId, sector.eventId), eq(eventMembers.userId, userId)))
+
+  if (!membership || (membership.role !== "organizer" && membership.role !== "judge")) {
+    return c.json(
+      {
+        success: false,
+        error: { code: "FORBIDDEN", message: "Judge access required" },
+      },
+      403,
+    )
+  }
 
   const [queueEntry] = await db
     .select()
@@ -111,7 +136,8 @@ queueRoutes.post("/pop", authMiddleware, requireRole("judge", "admin"), async (c
   })
 })
 
-queueRoutes.post("/drop", authMiddleware, requireRole("judge", "admin"), async (c) => {
+queueRoutes.post("/drop", authMiddleware, requireAuth(), async (c) => {
+  const userId = c.get("userId")!
   const body = await c.req.json()
 
   const result = dropQueueSchema.safeParse(body)
@@ -120,6 +146,39 @@ queueRoutes.post("/drop", authMiddleware, requireRole("judge", "admin"), async (
   }
 
   const { queueId } = result.data
+
+  const [queueEntry] = await db
+    .select({ sectorId: sectorQueues.sectorId })
+    .from(sectorQueues)
+    .where(eq(sectorQueues.id, queueId))
+
+  if (!queueEntry) {
+    return notFoundResponse(c, "Queue entry")
+  }
+
+  const [sector] = await db
+    .select({ eventId: sectors.eventId })
+    .from(sectors)
+    .where(eq(sectors.id, queueEntry.sectorId))
+
+  if (!sector) {
+    return notFoundResponse(c, "Sector")
+  }
+
+  const [membership] = await db
+    .select({ role: eventMembers.role })
+    .from(eventMembers)
+    .where(and(eq(eventMembers.eventId, sector.eventId), eq(eventMembers.userId, userId)))
+
+  if (!membership || (membership.role !== "organizer" && membership.role !== "judge")) {
+    return c.json(
+      {
+        success: false,
+        error: { code: "FORBIDDEN", message: "Judge access required" },
+      },
+      403,
+    )
+  }
 
   const [updated] = await db
     .update(sectorQueues)

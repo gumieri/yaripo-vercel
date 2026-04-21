@@ -4,7 +4,7 @@ import { useState } from "react"
 import { use } from "react"
 import Link from "next/link"
 import {
-  useAdminEvent,
+  useManageEvent,
   useUpdateEvent,
   useCreateCategory,
   useDeleteCategory,
@@ -49,7 +49,7 @@ export default function AdminEventDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const { data: event, isLoading } = useAdminEvent(id)
+  const { data: event, isLoading } = useManageEvent(id)
   const [tab, setTab] = useState<Tab>("settings")
 
   if (isLoading || !event) {
@@ -67,13 +67,13 @@ export default function AdminEventDetailPage({
     <div>
       <div className="mb-6">
         <Link
-          href="/admin/events"
+          href="/manage/events"
           className="text-muted-foreground hover:text-foreground text-sm"
         >
           &larr; Voltar para eventos
         </Link>
         <h1 className="text-foreground mt-2 text-2xl font-bold">{event.name}</h1>
-        <p className="text-muted-foreground mt-1 text-sm">{event.slug}</p>
+        <p className="text-muted-foreground mt-1 text-sm">yaripo.app/events/{event.slug}</p>
       </div>
 
       <div className="mb-6 flex gap-1 border-b">
@@ -143,14 +143,19 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         />
       </div>
 
-      <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">Slug</label>
-        <input
-          value={form.slug}
-          onChange={(e) => setForm({ ...form, slug: e.target.value })}
-          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </div>
+       <div>
+         <label className="text-foreground mb-1 block text-sm font-medium">Link Único do Evento</label>
+         <input
+           value={form.slug}
+           onChange={(e) => setForm({ ...form, slug: e.target.value })}
+           className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+         />
+         {form.slug && (
+           <p className="text-muted-foreground mt-1 text-sm">
+             yaripo.app/events/{form.slug}
+           </p>
+         )}
+       </div>
 
       <div>
         <label className="text-foreground mb-1 block text-sm font-medium">Status</label>

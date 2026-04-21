@@ -9,7 +9,7 @@ vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
 describe("Admin API Validation", () => {
   let app: ReturnType<typeof createTestApp>
 
-  const adminHeaders = authHeaders(F.admin.id, "admin")
+  const adminHeaders = authHeaders(F.admin.id, F.admin.email, { "x-test-event-role": "organizer" })
 
   beforeAll(async () => {
     app = createTestApp()
@@ -20,9 +20,9 @@ describe("Admin API Validation", () => {
     await seedFixtures()
   })
 
-  describe("POST /api/admin/events", () => {
+  describe("POST /api/manage/events", () => {
     it("rejects missing required fields", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ name: "Test Event" }),
@@ -34,7 +34,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects invalid slug format", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -55,10 +55,11 @@ describe("Admin API Validation", () => {
         name: "Existing Event",
         slug: "existing-event",
         gymId: F.gym.id,
+        createdBy: F.admin.id,
         status: "draft",
       })
 
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -73,7 +74,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects invalid date format", async () => {
-      const res = await app.request("/api/admin/events", {
+      const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -89,9 +90,9 @@ describe("Admin API Validation", () => {
     })
   })
 
-  describe("PATCH /api/admin/events/:id", () => {
+  describe("PATCH /api/manage/events/:id", () => {
     it("rejects invalid scoringType", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ scoringType: "invalid-type" }),
@@ -102,7 +103,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects invalid status", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ status: "invalid-status" }),
@@ -113,7 +114,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects bestRoutesCount = 0", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ bestRoutesCount: 0 }),
@@ -124,7 +125,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects negative bestRoutesCount", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ bestRoutesCount: -5 }),
@@ -135,7 +136,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects NaN for numeric fields", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}`, {
         method: "PATCH",
         headers: adminHeaders,
         body: JSON.stringify({ bestRoutesCount: "not-a-number" }),
@@ -146,9 +147,9 @@ describe("Admin API Validation", () => {
     })
   })
 
-  describe("POST /api/admin/events/:eventId/categories", () => {
+  describe("POST /api/manage/events/:eventId/categories", () => {
     it("rejects missing name", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/categories`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/categories`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ gender: "male" }),
@@ -159,7 +160,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects invalid gender", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/categories`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/categories`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -173,7 +174,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects negative minAge", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/categories`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/categories`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -187,9 +188,9 @@ describe("Admin API Validation", () => {
     })
   })
 
-  describe("POST /api/admin/events/:eventId/sectors", () => {
+  describe("POST /api/manage/events/:eventId/sectors", () => {
     it("rejects missing name", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/sectors`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/sectors`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({ orderIndex: 0 }),
@@ -200,7 +201,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects negative flashPoints", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/sectors`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/sectors`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -214,7 +215,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects maxAttempts = 0", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/sectors`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/sectors`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -228,9 +229,9 @@ describe("Admin API Validation", () => {
     })
   })
 
-  describe("POST /api/admin/events/:eventId/athletes/bulk", () => {
+  describe("POST /api/manage/events/:eventId/athletes/bulk", () => {
     it("rejects empty names array", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -244,7 +245,7 @@ describe("Admin API Validation", () => {
     })
 
     it("rejects names array with only whitespace", async () => {
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({
@@ -259,7 +260,7 @@ describe("Admin API Validation", () => {
 
     it("rejects more than 200 athletes", async () => {
       const names = Array.from({ length: 201 }, (_, i) => `Athlete ${i}`)
-      const res = await app.request(`/api/admin/events/${F.simpleEvent.id}/athletes/bulk`, {
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
         method: "POST",
         headers: adminHeaders,
         body: JSON.stringify({

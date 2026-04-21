@@ -22,7 +22,7 @@ describe("Attempts API", () => {
   it("creates attempt successfully", async () => {
     const res = await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify({
         sectorId,
         athleteId,
@@ -52,14 +52,14 @@ describe("Attempts API", () => {
 
     const res1 = await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify(body),
     })
     expect(res1.status).toBe(201)
 
     const res2 = await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify(body),
     })
     expect(res2.status).toBe(200)
@@ -71,7 +71,7 @@ describe("Attempts API", () => {
   it("returns 400 if missing required fields", async () => {
     const res = await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify({ sectorId, athleteId }),
     })
     expect(res.status).toBe(400)
@@ -86,10 +86,10 @@ describe("Attempts API", () => {
     expect(res.status).toBe(401)
   })
 
-  it("returns 403 if not judge or admin", async () => {
+  it("returns 403 if not event member (judge/organizer)", async () => {
     const res = await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(athleteId, "athlete"),
+      headers: authHeaders(athleteId, F.user.email),
       body: JSON.stringify({ sectorId, athleteId, idempotencyKey }),
     })
     expect(res.status).toBe(403)
@@ -98,18 +98,18 @@ describe("Attempts API", () => {
   it("auto-marks active queue as completed", async () => {
     await app.request("/api/queue/join", {
       method: "POST",
-      headers: authHeaders(athleteId, "athlete"),
+      headers: authHeaders(athleteId, F.user.email),
       body: JSON.stringify({ sectorId, athleteId }),
     })
     await app.request("/api/queue/pop", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify({ sectorId }),
     })
 
     await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify({
         sectorId,
         athleteId,
@@ -135,7 +135,7 @@ describe("Attempts API", () => {
     const resultData = { top: true, zone: true, attempts: 2, attempts_to_top: 2 }
     const res = await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify({
         sectorId,
         athleteId,
@@ -153,7 +153,7 @@ describe("Attempts API", () => {
   it("defaults isTop to false and attemptCount to 1", async () => {
     const res = await app.request("/api/attempts", {
       method: "POST",
-      headers: authHeaders(F.judge.id, "judge"),
+      headers: authHeaders(F.judge.id, F.judge.email, { "x-test-event-role": "judge" }),
       body: JSON.stringify({
         sectorId,
         athleteId,

@@ -1,10 +1,13 @@
 import { Trophy, Users, Target } from "lucide-react"
+import { auth } from "@/lib/auth/server"
 
-export default function AdminPage() {
+export default async function ManagePage() {
+  const session = await auth()
+
   return (
     <div className="flex flex-1 flex-col px-4 py-12">
-      <h1 className="text-foreground text-2xl font-bold">Admin</h1>
-      <p className="text-muted-foreground mt-2">Gerencie eventos, setores e atletas.</p>
+      <h1 className="text-foreground text-2xl font-bold">Gerenciar</h1>
+      <p className="text-muted-foreground mt-2">Gerencie seus eventos, setores e atletas.</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <div className="border-border/50 rounded-xl border bg-card p-6">

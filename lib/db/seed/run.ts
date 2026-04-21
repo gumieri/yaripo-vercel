@@ -4,6 +4,7 @@ import {
   users,
   gymMembers,
   events,
+  eventMembers,
   categories,
   sectors,
   athletes,
@@ -12,6 +13,8 @@ import {
 import { eq } from "drizzle-orm"
 
 const GYM_ID = "00000000-0000-4000-8000-000000000001"
+const ADMIN_ID = "00000000-0000-4000-8000-000000000008"
+const JUDGE_ID = "00000000-0000-4000-8000-000000000999"
 const EVENT_ID = "00000000-0000-4000-8000-000000000010"
 const CAT_MALE = "00000000-0000-4000-8000-000000000100"
 const CAT_FEMALE = "00000000-0000-4000-8000-000000000101"
@@ -60,19 +63,39 @@ async function seed() {
 
   await db.insert(gyms).values({
     id: GYM_ID,
-    name: "Apus Escalada",
-    slug: "apus-escalada",
+    name: "Gym Example",
+    slug: "gym-example",
     city: "Sao Paulo",
     state: "SP",
     description: "Academia de escalada indoor em Sao Paulo.",
   })
 
+  await db.insert(users).values([
+    {
+      id: ADMIN_ID,
+      name: "Admin",
+      email: "admin@yaripo.app",
+    },
+    {
+      id: JUDGE_ID,
+      name: "Juiz Seed",
+      email: "judge@example.yaripo.app",
+    },
+  ])
+
+  await db.insert(gymMembers).values({
+    gymId: GYM_ID,
+    userId: ADMIN_ID,
+    role: "owner",
+  })
+
   await db.insert(events).values({
     id: EVENT_ID,
     gymId: GYM_ID,
-    name: "Apus Boulder Open 2026",
-    slug: "apus-boulder-open-2026",
-    description: "Competicao de escalada boulder da Apus Escalada.",
+    createdBy: ADMIN_ID,
+    name: "Boulder Open 2026",
+    slug: "boulder-open-2026",
+    description: "Competicao de escalada boulder.",
     rules:
       "Formato simples: contabiliza tops e tentativas. Maior numero de tops vence, desempate por menor tentativas.",
     startsAt: new Date("2026-06-15T09:00:00-03:00"),
@@ -80,6 +103,11 @@ async function seed() {
     status: "active",
     scoringType: "simple",
   })
+
+  await db.insert(eventMembers).values([
+    { eventId: EVENT_ID, userId: ADMIN_ID, role: "organizer" },
+    { eventId: EVENT_ID, userId: JUDGE_ID, role: "judge" },
+  ])
 
   await db.insert(categories).values([
     { id: CAT_MALE, eventId: EVENT_ID, name: "Masculino", gender: "male" },
@@ -89,15 +117,6 @@ async function seed() {
   await db.insert(sectors).values(SECTORS.map((s) => ({ ...s, eventId: EVENT_ID })))
 
   await db.insert(athletes).values(ATHLETES)
-
-  await db.insert(users).values({
-    id: "00000000-0000-4000-8000-000000000999",
-    name: "Juiz Seed",
-    email: "judge@apus-escalada.yaripo.app",
-    role: "judge",
-  })
-
-  const JUDGE_ID = "00000000-0000-4000-8000-000000000999"
 
   await db.insert(attempts).values(
     SAMPLE_ATTEMPTS.map((a) => ({

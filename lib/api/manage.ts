@@ -1,8 +1,8 @@
 import { Hono } from "hono"
-import { desc, sql, and, eq, asc } from "drizzle-orm"
+import { desc, sql, and, eq, asc, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { auditLogs, events, categories, sectors, athletes, gyms } from "@/lib/db/schema"
-import { authMiddleware, requireRole } from "@/lib/api/middleware/auth"
+import { auditLogs, events, categories, sectors, athletes, gyms, eventMembers, eventJudgeInvitations } from "@/lib/db/schema"
+import { authMiddleware, requireAuth, requirePlatformAdmin, requireEventOrganizer } from "@/lib/api/middleware/auth"
 import { logAudit } from "@/lib/db/audit"
 import {
   notFoundResponse,
@@ -20,9 +20,9 @@ import {
   bulkCreateAthletesSchema,
 } from "@/lib/api/validations"
 
-const adminRoutes = new Hono()
+const manageRoutes = new Hono()
 
-adminRoutes.get("/audit-logs", authMiddleware, requireRole("admin"), async (c) => {
+manageRoutes.get("/audit-logs", authMiddleware, requirePlatformAdmin, async (c) => {
   const page = Number(c.req.query("page") || "1")
   const perPage = Number(c.req.query("per_page") || "50")
   const resourceType = c.req.query("resource_type")
@@ -62,27 +62,54 @@ adminRoutes.get("/audit-logs", authMiddleware, requireRole("admin"), async (c) =
   })
 })
 
-adminRoutes.get("/events", authMiddleware, requireRole("admin"), async (c) => {
-  const eventList = await db
-    .select({
-      id: events.id,
-      name: events.name,
-      slug: events.slug,
-      description: events.description,
-      scoringType: events.scoringType,
-      startsAt: events.startsAt,
-      endsAt: events.endsAt,
-      status: events.status,
-      gymId: events.gymId,
-      createdAt: events.createdAt,
-    })
-    .from(events)
-    .orderBy(desc(events.createdAt))
+manageRoutes.get("/events", authMiddleware, requireAuth, async (c) => {
+  const userId = c.get("userId")
+  const isPlatformAdmin = c.get("isPlatformAdmin")
+
+  let eventList
+
+  if (isPlatformAdmin) {
+    eventList = await db
+      .select({
+        id: events.id,
+        name: events.name,
+        slug: events.slug,
+        description: events.description,
+        scoringType: events.scoringType,
+        startsAt: events.startsAt,
+        endsAt: events.endsAt,
+        status: events.status,
+        gymId: events.gymId,
+        createdBy: events.createdBy,
+        createdAt: events.createdAt,
+      })
+      .from(events)
+      .orderBy(desc(events.createdAt))
+  } else {
+    eventList = await db
+      .select({
+        id: events.id,
+        name: events.name,
+        slug: events.slug,
+        description: events.description,
+        scoringType: events.scoringType,
+        startsAt: events.startsAt,
+        endsAt: events.endsAt,
+        status: events.status,
+        gymId: events.gymId,
+        createdBy: events.createdBy,
+        createdAt: events.createdAt,
+      })
+      .from(events)
+      .innerJoin(eventMembers, eq(events.id, eventMembers.eventId))
+      .where(and(eq(eventMembers.userId, userId!), eq(eventMembers.role, "organizer")))
+      .orderBy(desc(events.createdAt))
+  }
 
   return c.json({ success: true, data: eventList })
 })
 
-adminRoutes.post("/events", authMiddleware, requireRole("admin"), async (c) => {
+manageRoutes.post("/events", authMiddleware, requireAuth, async (c) => {
   const userId = c.get("userId")
   const body = await c.req.json()
 
@@ -103,7 +130,8 @@ adminRoutes.post("/events", authMiddleware, requireRole("admin"), async (c) => {
     .values({
       name,
       slug,
-      gymId,
+      gymId: gymId ?? null,
+      createdBy: userId!,
       scoringType,
       description,
       startsAt: startsAt ? new Date(startsAt) : null,
@@ -111,6 +139,12 @@ adminRoutes.post("/events", authMiddleware, requireRole("admin"), async (c) => {
       status: "draft",
     })
     .returning()
+
+  await db.insert(eventMembers).values({
+    eventId: created.id,
+    userId: userId!,
+    role: "organizer",
+  })
 
   await logAudit({
     userId,
@@ -123,7 +157,7 @@ adminRoutes.post("/events", authMiddleware, requireRole("admin"), async (c) => {
   return c.json({ success: true, data: created }, 201)
 })
 
-adminRoutes.get("/events/:id", authMiddleware, requireRole("admin"), async (c) => {
+manageRoutes.get("/events/:id", authMiddleware, requireEventOrganizer("id"), async (c) => {
   const id = c.req.param("id")
 
   const [event] = await db.select().from(events).where(eq(events.id, id))
@@ -163,7 +197,7 @@ adminRoutes.get("/events/:id", authMiddleware, requireRole("admin"), async (c) =
   })
 })
 
-adminRoutes.patch("/events/:id", authMiddleware, requireRole("admin"), async (c) => {
+manageRoutes.patch("/events/:id", authMiddleware, requireEventOrganizer("id"), async (c) => {
   const id = c.req.param("id")
   const body = await c.req.json()
   const userId = c.get("userId")
@@ -209,7 +243,7 @@ adminRoutes.patch("/events/:id", authMiddleware, requireRole("admin"), async (c)
   return c.json({ success: true, data: updated })
 })
 
-adminRoutes.delete("/events/:id", authMiddleware, requireRole("admin"), async (c) => {
+manageRoutes.delete("/events/:id", authMiddleware, requireEventOrganizer("id"), async (c) => {
   const id = c.req.param("id")
   const userId = c.get("userId")
 
@@ -231,10 +265,10 @@ adminRoutes.delete("/events/:id", authMiddleware, requireRole("admin"), async (c
   return c.json({ success: true, data: { id } })
 })
 
-adminRoutes.post(
+manageRoutes.post(
   "/events/:eventId/categories",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const eventId = c.req.param("eventId")
     const body = await c.req.json()
@@ -264,10 +298,10 @@ adminRoutes.post(
   },
 )
 
-adminRoutes.patch(
+manageRoutes.patch(
   "/events/:eventId/categories/:categoryId",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const categoryId = c.req.param("categoryId")
     const body = await c.req.json()
@@ -311,10 +345,10 @@ adminRoutes.patch(
   },
 )
 
-adminRoutes.delete(
+manageRoutes.delete(
   "/events/:eventId/categories/:categoryId",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const categoryId = c.req.param("categoryId")
     const userId = c.get("userId")
@@ -341,10 +375,10 @@ adminRoutes.delete(
   },
 )
 
-adminRoutes.post(
+manageRoutes.post(
   "/events/:eventId/sectors",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const eventId = c.req.param("eventId")
     const body = await c.req.json()
@@ -374,10 +408,10 @@ adminRoutes.post(
   },
 )
 
-adminRoutes.patch(
+manageRoutes.patch(
   "/events/:eventId/sectors/:sectorId",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const sectorId = c.req.param("sectorId")
     const body = await c.req.json()
@@ -418,10 +452,10 @@ adminRoutes.patch(
   },
 )
 
-adminRoutes.delete(
+manageRoutes.delete(
   "/events/:eventId/sectors/:sectorId",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const sectorId = c.req.param("sectorId")
     const userId = c.get("userId")
@@ -445,10 +479,10 @@ adminRoutes.delete(
   },
 )
 
-adminRoutes.post(
+manageRoutes.post(
   "/events/:eventId/athletes",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const body = await c.req.json()
     const userId = c.get("userId")
@@ -485,10 +519,10 @@ adminRoutes.post(
   },
 )
 
-adminRoutes.post(
+manageRoutes.post(
   "/events/:eventId/athletes/bulk",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const eventId = c.req.param("eventId")
     const body = await c.req.json()
@@ -528,10 +562,10 @@ adminRoutes.post(
   },
 )
 
-adminRoutes.delete(
+manageRoutes.delete(
   "/events/:eventId/athletes/:athleteId",
   authMiddleware,
-  requireRole("admin"),
+  requireEventOrganizer("eventId"),
   async (c) => {
     const athleteId = c.req.param("athleteId")
     const userId = c.get("userId")
@@ -555,7 +589,7 @@ adminRoutes.delete(
   },
 )
 
-adminRoutes.get("/gyms", authMiddleware, requireRole("admin"), async (c) => {
+manageRoutes.get("/gyms", authMiddleware, requirePlatformAdmin, async (c) => {
   const gymList = await db
     .select({
       id: gyms.id,
@@ -570,4 +604,178 @@ adminRoutes.get("/gyms", authMiddleware, requireRole("admin"), async (c) => {
   return c.json({ success: true, data: gymList })
 })
 
-export { adminRoutes }
+manageRoutes.get("/events/:eventId/judges", authMiddleware, requireEventOrganizer("eventId"), async (c) => {
+  const eventId = c.req.param("eventId")
+
+  const [judges, invitations] = await Promise.all([
+    db
+      .select({
+        id: eventMembers.id,
+        userId: eventMembers.userId,
+        role: eventMembers.role,
+        createdAt: eventMembers.createdAt,
+      })
+      .from(eventMembers)
+      .where(and(eq(eventMembers.eventId, eventId), eq(eventMembers.role, "judge"))),
+    db
+      .select({
+        id: eventJudgeInvitations.id,
+        email: eventJudgeInvitations.email,
+        status: eventJudgeInvitations.status,
+        invitedBy: eventJudgeInvitations.invitedBy,
+        createdAt: eventJudgeInvitations.createdAt,
+      })
+      .from(eventJudgeInvitations)
+      .where(eq(eventJudgeInvitations.eventId, eventId)),
+  ])
+
+  return c.json({ success: true, data: { judges, invitations } })
+})
+
+manageRoutes.post("/events/:eventId/judges/invite", authMiddleware, requireEventOrganizer("eventId"), async (c) => {
+  const eventId = c.req.param("eventId")
+  const body = await c.req.json()
+  const userId = c.get("userId")
+
+  const { email } = body
+
+  if (!email || typeof email !== "string") {
+    return validationErrorResponse(c, "Email is required")
+  }
+
+  const [existingMember] = await db
+    .select()
+    .from(eventMembers)
+    .where(and(eq(eventMembers.eventId, eventId), eq(eventMembers.userId, email)))
+  if (existingMember) {
+    return conflictResponse(c, "User is already a member of this event")
+  }
+
+  const [existingInvitation] = await db
+    .select()
+    .from(eventJudgeInvitations)
+    .where(and(eq(eventJudgeInvitations.eventId, eventId), eq(eventJudgeInvitations.email, email), inArray(eventJudgeInvitations.status, ["pending", "accepted"])))
+  if (existingInvitation) {
+    return conflictResponse(c, "Invitation already exists")
+  }
+
+  const [created] = await db
+    .insert(eventJudgeInvitations)
+    .values({
+      eventId,
+      email,
+      invitedBy: userId,
+      status: "pending",
+    })
+    .returning()
+
+  return c.json({ success: true, data: created }, 201)
+})
+
+manageRoutes.delete("/events/:eventId/judges/:memberId", authMiddleware, requireEventOrganizer("eventId"), async (c) => {
+  const memberId = c.req.param("memberId")
+  const userId = c.get("userId")
+
+  const [existing] = await db
+    .select()
+    .from(eventMembers)
+    .where(and(eq(eventMembers.id, memberId), eq(eventMembers.role, "judge")))
+  if (!existing) {
+    return notFoundResponse(c, "Judge")
+  }
+
+  await db.delete(eventMembers).where(eq(eventMembers.id, memberId))
+
+  return c.json({ success: true, data: { id: memberId } })
+})
+
+manageRoutes.get("/invitations", authMiddleware, requireAuth, async (c) => {
+  const userEmail = c.get("userEmail")
+
+  if (!userEmail) {
+    return validationErrorResponse(c, "User email not found")
+  }
+
+  const invitations = await db
+    .select({
+      id: eventJudgeInvitations.id,
+      eventId: eventJudgeInvitations.eventId,
+      eventName: events.name,
+      eventSlug: events.slug,
+      email: eventJudgeInvitations.email,
+      status: eventJudgeInvitations.status,
+      invitedBy: eventJudgeInvitations.invitedBy,
+      createdAt: eventJudgeInvitations.createdAt,
+    })
+    .from(eventJudgeInvitations)
+    .innerJoin(events, eq(eventJudgeInvitations.eventId, events.id))
+    .where(eq(eventJudgeInvitations.email, userEmail))
+    .orderBy(desc(eventJudgeInvitations.createdAt))
+
+  return c.json({ success: true, data: invitations })
+})
+
+manageRoutes.post("/invitations/:id/accept", authMiddleware, requireAuth, async (c) => {
+  const id = c.req.param("id")
+  const userId = c.get("userId")
+  const userEmail = c.get("userEmail")
+
+  const [invitation] = await db
+    .select()
+    .from(eventJudgeInvitations)
+    .where(eq(eventJudgeInvitations.id, id))
+  if (!invitation) {
+    return notFoundResponse(c, "Invitation")
+  }
+
+  if (invitation.status !== "pending") {
+    return validationErrorResponse(c, "Invitation is not pending")
+  }
+
+  if (invitation.email !== userEmail) {
+    return validationErrorResponse(c, "This invitation is not for you")
+  }
+
+  await db
+    .update(eventJudgeInvitations)
+    .set({ status: "accepted", updatedAt: new Date() })
+    .where(eq(eventJudgeInvitations.id, id))
+
+  await db.insert(eventMembers).values({
+    eventId: invitation.eventId,
+    userId: userId!,
+    role: "judge",
+  })
+
+  return c.json({ success: true, data: { id } })
+})
+
+manageRoutes.post("/invitations/:id/decline", authMiddleware, requireAuth, async (c) => {
+  const id = c.req.param("id")
+  const userEmail = c.get("userEmail")
+
+  const [invitation] = await db
+    .select()
+    .from(eventJudgeInvitations)
+    .where(eq(eventJudgeInvitations.id, id))
+  if (!invitation) {
+    return notFoundResponse(c, "Invitation")
+  }
+
+  if (invitation.status !== "pending") {
+    return validationErrorResponse(c, "Invitation is not pending")
+  }
+
+  if (invitation.email !== userEmail) {
+    return validationErrorResponse(c, "This invitation is not for you")
+  }
+
+  await db
+    .update(eventJudgeInvitations)
+    .set({ status: "declined", updatedAt: new Date() })
+    .where(eq(eventJudgeInvitations.id, id))
+
+  return c.json({ success: true, data: { id } })
+})
+
+export { manageRoutes }

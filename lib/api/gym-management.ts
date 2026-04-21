@@ -5,6 +5,7 @@ import { events, categories, athletes, eventPayments, gyms } from "@/lib/db/sche
 import { authMiddleware, requireGymMember } from "@/lib/api/middleware/auth"
 import { createStripeCustomer, createEventCheckoutSession } from "@/lib/stripe/client"
 import { logAudit } from "@/lib/db/audit"
+import { notFoundResponse, validationErrorResponse, forbiddenResponse } from "@/lib/api/helpers"
 
 const gymRoutes = new Hono()
 
@@ -20,27 +21,15 @@ gymRoutes.post(
 
     const [event] = await db.select().from(events).where(eq(events.id, eventId))
     if (!event) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Event not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Event")
     }
 
     if (event.gymId !== gymId) {
-      return c.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Event does not belong to this gym" } },
-        403,
-      )
+      return forbiddenResponse(c, "Event does not belong to this gym")
     }
 
     if (event.status !== "draft") {
-      return c.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Only draft events can be published" },
-        },
-        400,
-      )
+      return validationErrorResponse(c, "Only draft events can be published")
     }
 
     const athleteCount = await db
@@ -51,27 +40,18 @@ gymRoutes.post(
       .then((rows) => Number(rows[0].count))
 
     if (athleteCount === 0) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Event must have at least one athlete" },
-        },
-        400,
-      )
+      return validationErrorResponse(c, "Event must have at least one athlete")
     }
 
     const [gym] = await db.select().from(gyms).where(eq(gyms.id, gymId))
     if (!gym) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Gym not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Gym")
     }
 
     let customerId = gym.stripeCustomerId
     if (!customerId) {
       const customer = await createStripeCustomer({
-        email: gym.name,
+        email: `contact@${gym.slug}.yaripo.app`,
         name: gym.name,
         metadata: { gymId },
       })
@@ -120,27 +100,15 @@ gymRoutes.post(
 
     const [event] = await db.select().from(events).where(eq(events.id, eventId))
     if (!event) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Event not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Event")
     }
 
     if (event.gymId !== gymId) {
-      return c.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Event does not belong to this gym" } },
-        403,
-      )
+      return forbiddenResponse(c, "Event does not belong to this gym")
     }
 
     if (event.status !== "published") {
-      return c.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Only published events can be activated" },
-        },
-        400,
-      )
+      return validationErrorResponse(c, "Only published events can be activated")
     }
 
     const currentAthleteCount = await db

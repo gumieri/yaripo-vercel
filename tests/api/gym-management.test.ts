@@ -12,7 +12,7 @@ vi.mock("@/lib/stripe/client", () => {
   let _createCheckoutSession = (...args: any[]) =>
     Promise.resolve({ id: "cs_mock", url: "https://checkout.stripe.com/mock" })
 
-  return {
+  const mockModule = {
     stripe: {
       customers: {
         create: (...args: any[]) => _createCustomer(...args),
@@ -43,6 +43,8 @@ vi.mock("@/lib/stripe/client", () => {
         Promise.resolve({ id: "cs_mock", url: "https://checkout.stripe.com/mock" })
     },
   }
+
+  return mockModule
 })
 
 describe("Gym Management API", () => {
@@ -72,8 +74,10 @@ describe("Gym Management API", () => {
   beforeEach(async () => {
     await truncateTables()
     await seedFixtures()
-    const stripe = await import("@/lib/stripe/client")
-    stripe.__reset()
+    const stripeModule: any = await import("@/lib/stripe/client")
+    if (stripeModule.__reset) {
+      stripeModule.__reset()
+    }
   })
 
   describe("Auth guards", () => {
@@ -103,7 +107,7 @@ describe("Gym Management API", () => {
     })
 
     it("allows owner to publish", async () => {
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: () =>
           Promise.resolve({ id: "cs_test", url: "https://checkout.stripe.com/test" }),
       })
@@ -116,7 +120,7 @@ describe("Gym Management API", () => {
     })
 
     it("allows admin member to publish", async () => {
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: () =>
           Promise.resolve({ id: "cs_test", url: "https://checkout.stripe.com/test" }),
       })
@@ -131,7 +135,7 @@ describe("Gym Management API", () => {
 
   describe("POST /api/gym/:gymSlug/events/:eventId/publish", () => {
     it("creates checkout session and event payment record", async () => {
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: () =>
           Promise.resolve({ id: "cs_publish_1", url: "https://checkout.stripe.com/pay" }),
       })
@@ -157,7 +161,7 @@ describe("Gym Management API", () => {
     })
 
     it("creates Stripe customer if gym has none", async () => {
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCustomer: () =>
           Promise.resolve({ id: "cus_new_123", email: "test@test.com", name: "Test Gym" }),
         createCheckoutSession: () =>
@@ -181,7 +185,7 @@ describe("Gym Management API", () => {
         .where(eq(gyms.id, F.gym.id))
 
       let customerCreated = false
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCustomer: () => {
           customerCreated = true
           return Promise.resolve({ id: "cus_should_not", name: "test" })
@@ -213,7 +217,7 @@ describe("Gym Management API", () => {
     })
 
     it("returns 403 if event belongs to different gym", async () => {
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: () =>
           Promise.resolve({ id: "cs_test", url: "https://checkout.stripe.com/test" }),
       })
@@ -255,7 +259,7 @@ describe("Gym Management API", () => {
 
     it("passes correct line items to Stripe (1 base + N athletes)", async () => {
       let capturedLineItems: any[] = []
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: (params: any) => {
           capturedLineItems = params.line_items
           return Promise.resolve({ id: "cs_items", url: "https://checkout.stripe.com/items" })
@@ -276,7 +280,7 @@ describe("Gym Management API", () => {
 
     it("includes event name in statement_descriptor_suffix", async () => {
       let capturedDescriptor: string | undefined
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: (params: any) => {
           capturedDescriptor = params.payment_intent_data?.statement_descriptor_suffix
           return Promise.resolve({ id: "cs_desc", url: "https://checkout.stripe.com/desc" })
@@ -293,7 +297,7 @@ describe("Gym Management API", () => {
 
     it("truncates long event name in statement_descriptor_suffix to 22 chars", async () => {
       let capturedDescriptor: string | undefined
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: (params: any) => {
           capturedDescriptor = params.payment_intent_data?.statement_descriptor_suffix
           return Promise.resolve({ id: "cs_long", url: "https://checkout.stripe.com/long" })
@@ -315,7 +319,7 @@ describe("Gym Management API", () => {
 
     it("includes metadata in checkout session", async () => {
       let capturedMetadata: Record<string, string> | undefined
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: (params: any) => {
           capturedMetadata = params.metadata
           return Promise.resolve({ id: "cs_meta", url: "https://checkout.stripe.com/meta" })
@@ -334,7 +338,7 @@ describe("Gym Management API", () => {
     })
 
     it("writes audit log", async () => {
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: () =>
           Promise.resolve({ id: "cs_audit", url: "https://checkout.stripe.com/audit" }),
       })
@@ -409,7 +413,7 @@ describe("Gym Management API", () => {
         stripeCustomerId: "cus_activate",
       })
 
-      stripe.__setFns({
+      const stripeModule: any = await import("@/lib/stripe/client"); stripeModule.__setFns({
         createCheckoutSession: (params: any) => {
           expect(params.metadata.type).toBe("delta")
           expect(params.line_items).toHaveLength(1)

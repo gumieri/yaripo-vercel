@@ -3,29 +3,21 @@ import { eq, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { attempts, sectorQueues } from "@/lib/db/schema"
 import { authMiddleware, requireRole } from "@/lib/api/middleware/auth"
+import { createAttemptSchema } from "@/lib/api/validations"
+import { validationErrorResponse } from "@/lib/api/helpers"
 
 const attemptRoutes = new Hono()
 
 attemptRoutes.post("/", authMiddleware, requireRole("judge", "admin"), async (c) => {
   const userId = c.get("userId")
   const body = await c.req.json()
-  const { sectorId, athleteId, isTop, attemptCount, resultData, idempotencyKey } = body
 
-  if (!sectorId || !athleteId || !idempotencyKey) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          code: "VALIDATION_FAILED",
-          message: "Missing required fields",
-        },
-      },
-      400,
-    )
+  const result = createAttemptSchema.safeParse(body)
+  if (!result.success) {
+    return validationErrorResponse(c, result.error.issues[0].message)
   }
 
-  const isTopBool = isTop !== undefined ? Boolean(isTop) : false
-  const count = attemptCount !== undefined ? Number(attemptCount) : 1
+  const { sectorId, athleteId, isTop, attemptCount, resultData, idempotencyKey } = result.data
 
   try {
     const [attempt] = await db
@@ -34,9 +26,9 @@ attemptRoutes.post("/", authMiddleware, requireRole("judge", "admin"), async (c)
         sectorId,
         athleteId,
         judgeId: userId!,
-        isTop: isTopBool,
-        attemptCount: count,
-        resultData: resultData ?? null,
+        isTop,
+        attemptCount,
+        resultData,
         idempotencyKey,
       })
       .returning()

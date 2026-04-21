@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, uuid, jsonb } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, uniqueIndex } from "drizzle-orm/pg-core"
 
 export const gyms = pgTable("gyms", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -70,7 +70,9 @@ export const gymMembers = pgTable("gym_members", {
     .references(() => users.id, { onDelete: "cascade" }),
   role: text("role", { enum: ["owner", "admin", "judge"] }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => ({
+  uniqueGymUser: uniqueIndex("gym_members_gym_id_user_id_idx").on(table.gymId, table.userId),
+}))
 
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),

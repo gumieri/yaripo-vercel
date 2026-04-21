@@ -1,28 +1,23 @@
 import { Hono } from "hono"
-import { eq, and, asc, sql } from "drizzle-orm"
+import { eq, and, asc, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { sectorQueues, athletes, sectors, categories } from "@/lib/db/schema"
 import { authMiddleware, requireAuth, requireRole } from "@/lib/api/middleware/auth"
+import { joinQueueSchema, popQueueSchema, dropQueueSchema } from "@/lib/api/validations"
+import { validationErrorResponse, notFoundResponse, conflictResponse } from "@/lib/api/helpers"
 
 const queueRoutes = new Hono()
 
 queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
-  const body = await c.req.json()
-  const { sectorId, athleteId: bodyAthleteId } = body
   const userId = c.get("userId")!
+  const body = await c.req.json()
 
-  if (!sectorId) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          code: "VALIDATION_FAILED",
-          message: "sector_id required",
-        },
-      },
-      400,
-    )
+  const result = joinQueueSchema.safeParse(body)
+  if (!result.success) {
+    return validationErrorResponse(c, result.error.issues[0].message)
   }
+
+  const { sectorId, athleteId: bodyAthleteId } = result.data
 
   let athleteId = bodyAthleteId
 
@@ -33,13 +28,7 @@ queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
       .where(eq(sectors.id, sectorId))
 
     if (!sector) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Sector not found" },
-        },
-        404,
-      )
+      return notFoundResponse(c, "Sector")
     }
 
     const [athlete] = await db
@@ -49,16 +38,7 @@ queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
       .where(and(eq(athletes.userId, userId), eq(categories.eventId, sector.eventId)))
 
     if (!athlete) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            code: "NOT_FOUND",
-            message: "Athlete registration not found for this event",
-          },
-        },
-        404,
-      )
+      return notFoundResponse(c, "Athlete registration for this event")
     }
 
     athleteId = athlete.id
@@ -70,21 +50,12 @@ queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
     .where(
       and(
         eq(sectorQueues.athleteId, athleteId),
-        sql`${sectorQueues.status} IN ('waiting', 'active')`,
+        inArray(sectorQueues.status, ["waiting", "active"]),
       ),
     )
 
   if (existing.length > 0) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          code: "CONFLICT",
-          message: "Athlete is already in a queue",
-        },
-      },
-      409,
-    )
+    return conflictResponse(c, "Athlete is already in a queue")
   }
 
   const [queue] = await db
@@ -97,17 +68,13 @@ queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
 
 queueRoutes.post("/pop", authMiddleware, requireRole("judge", "admin"), async (c) => {
   const body = await c.req.json()
-  const { sectorId } = body
 
-  if (!sectorId) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "VALIDATION_FAILED", message: "sector_id required" },
-      },
-      400,
-    )
+  const result = popQueueSchema.safeParse(body)
+  if (!result.success) {
+    return validationErrorResponse(c, result.error.issues[0].message)
   }
+
+  const { sectorId } = result.data
 
   const [queueEntry] = await db
     .select()
@@ -146,17 +113,13 @@ queueRoutes.post("/pop", authMiddleware, requireRole("judge", "admin"), async (c
 
 queueRoutes.post("/drop", authMiddleware, requireRole("judge", "admin"), async (c) => {
   const body = await c.req.json()
-  const { queueId } = body
 
-  if (!queueId) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "VALIDATION_FAILED", message: "queue_id required" },
-      },
-      400,
-    )
+  const result = dropQueueSchema.safeParse(body)
+  if (!result.success) {
+    return validationErrorResponse(c, result.error.issues[0].message)
   }
+
+  const { queueId } = result.data
 
   const [updated] = await db
     .update(sectorQueues)
@@ -165,13 +128,7 @@ queueRoutes.post("/drop", authMiddleware, requireRole("judge", "admin"), async (
     .returning()
 
   if (!updated) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "NOT_FOUND", message: "Queue entry not found" },
-      },
-      404,
-    )
+    return notFoundResponse(c, "Queue entry")
   }
 
   return c.json({ success: true, data: updated })
@@ -181,16 +138,7 @@ queueRoutes.get("/status", authMiddleware, requireAuth(), async (c) => {
   const sectorId = c.req.query("sector_id")
 
   if (!sectorId) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          code: "VALIDATION_FAILED",
-          message: "sector_id query param required",
-        },
-      },
-      400,
-    )
+    return validationErrorResponse(c, "sector_id query param required")
   }
 
   const queue = await db
@@ -206,7 +154,7 @@ queueRoutes.get("/status", authMiddleware, requireAuth(), async (c) => {
     .where(
       and(
         eq(sectorQueues.sectorId, sectorId),
-        sql`${sectorQueues.status} IN ('waiting', 'active')`,
+        inArray(sectorQueues.status, ["waiting", "active"]),
       ),
     )
     .orderBy(asc(sectorQueues.createdAt))

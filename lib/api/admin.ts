@@ -4,6 +4,21 @@ import { db } from "@/lib/db"
 import { auditLogs, events, categories, sectors, athletes, gyms } from "@/lib/db/schema"
 import { authMiddleware, requireRole } from "@/lib/api/middleware/auth"
 import { logAudit } from "@/lib/db/audit"
+import {
+  notFoundResponse,
+  validationErrorResponse,
+  conflictResponse,
+} from "@/lib/api/helpers"
+import {
+  createEventSchema,
+  updateEventSchema,
+  createCategorySchema,
+  updateCategorySchema,
+  createSectorSchema,
+  updateSectorSchema,
+  createAthleteSchema,
+  bulkCreateAthletesSchema,
+} from "@/lib/api/validations"
 
 const adminRoutes = new Hono()
 
@@ -68,50 +83,19 @@ adminRoutes.get("/events", authMiddleware, requireRole("admin"), async (c) => {
 })
 
 adminRoutes.post("/events", authMiddleware, requireRole("admin"), async (c) => {
-  const body = await c.req.json()
   const userId = c.get("userId")
+  const body = await c.req.json()
 
-  const name = body.name?.trim()
-  const slug = body.slug?.trim()
-  const gymId = body.gymId
-  const scoringType = body.scoringType || "simple"
-  const description = body.description?.trim() || null
-  const startsAt = body.startsAt ? new Date(body.startsAt) : null
-  const endsAt = body.endsAt ? new Date(body.endsAt) : null
-
-  if (!name || !slug || !gymId) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "VALIDATION_ERROR", message: "name, slug, and gymId are required" },
-      },
-      400,
-    )
+  const result = createEventSchema.safeParse(body)
+  if (!result.success) {
+    return validationErrorResponse(c, result.error.issues[0].message)
   }
 
-  const slugRegex = /^[a-z0-9-]+$/
-  if (!slugRegex.test(slug)) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          code: "VALIDATION_ERROR",
-          message: "slug must be lowercase alphanumeric with dashes only",
-        },
-      },
-      400,
-    )
-  }
+  const { name, slug, gymId, scoringType, description, startsAt, endsAt } = result.data
 
   const [existing] = await db.select({ id: events.id }).from(events).where(eq(events.slug, slug))
   if (existing) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "CONFLICT", message: "Event slug already exists" },
-      },
-      409,
-    )
+    return conflictResponse(c, "Event slug already exists")
   }
 
   const [created] = await db
@@ -122,8 +106,8 @@ adminRoutes.post("/events", authMiddleware, requireRole("admin"), async (c) => {
       gymId,
       scoringType,
       description,
-      startsAt,
-      endsAt,
+      startsAt: startsAt ? new Date(startsAt) : null,
+      endsAt: endsAt ? new Date(endsAt) : null,
       status: "draft",
     })
     .returning()
@@ -144,10 +128,7 @@ adminRoutes.get("/events/:id", authMiddleware, requireRole("admin"), async (c) =
 
   const [event] = await db.select().from(events).where(eq(events.id, id))
   if (!event) {
-    return c.json(
-      { success: false, error: { code: "NOT_FOUND", message: "Event not found" } },
-      404,
-    )
+    return notFoundResponse(c, "Event")
   }
 
   const categoryList = await db
@@ -189,43 +170,30 @@ adminRoutes.patch("/events/:id", authMiddleware, requireRole("admin"), async (c)
 
   const [existing] = await db.select().from(events).where(eq(events.id, id))
   if (!existing) {
-    return c.json(
-      { success: false, error: { code: "NOT_FOUND", message: "Event not found" } },
-      404,
-    )
+    return notFoundResponse(c, "Event")
   }
 
-  const updates: Record<string, any> = {}
-  if (body.name !== undefined) updates.name = body.name.trim()
-  if (body.slug !== undefined) {
-    const slugRegex = /^[a-z0-9-]+$/
-    if (!slugRegex.test(body.slug)) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "slug must be lowercase alphanumeric with dashes only",
-          },
-        },
-        400,
-      )
-    }
-    updates.slug = body.slug.trim()
+  const result = updateEventSchema.safeParse(body)
+  if (!result.success) {
+    return validationErrorResponse(c, result.error.issues[0].message)
   }
-  if (body.description !== undefined) updates.description = body.description?.trim() || null
-  if (body.scoringType !== undefined) updates.scoringType = body.scoringType
-  if (body.startsAt !== undefined)
-    updates.startsAt = body.startsAt ? new Date(body.startsAt) : null
-  if (body.endsAt !== undefined) updates.endsAt = body.endsAt ? new Date(body.endsAt) : null
-  if (body.status !== undefined) updates.status = body.status
-  if (body.bestRoutesCount !== undefined)
-    updates.bestRoutesCount = body.bestRoutesCount !== null ? Number(body.bestRoutesCount) : null
-  updates.updatedAt = new Date()
+
+  const updates = result.data
+
+  const finalUpdates: Record<string, unknown> = {}
+  if (updates.name !== undefined) finalUpdates.name = updates.name
+  if (updates.slug !== undefined) finalUpdates.slug = updates.slug
+  if (updates.description !== undefined) finalUpdates.description = updates.description
+  if (updates.scoringType !== undefined) finalUpdates.scoringType = updates.scoringType
+  if (updates.startsAt !== undefined) finalUpdates.startsAt = updates.startsAt ? new Date(updates.startsAt) : null
+  if (updates.endsAt !== undefined) finalUpdates.endsAt = updates.endsAt ? new Date(updates.endsAt) : null
+  if (updates.status !== undefined) finalUpdates.status = updates.status
+  if (updates.bestRoutesCount !== undefined) finalUpdates.bestRoutesCount = updates.bestRoutesCount
+  finalUpdates.updatedAt = new Date()
 
   const [updated] = await db
     .update(events)
-    .set(updates)
+    .set(finalUpdates)
     .where(eq(events.id, id))
     .returning()
 
@@ -247,10 +215,7 @@ adminRoutes.delete("/events/:id", authMiddleware, requireRole("admin"), async (c
 
   const [existing] = await db.select().from(events).where(eq(events.id, id))
   if (!existing) {
-    return c.json(
-      { success: false, error: { code: "NOT_FOUND", message: "Event not found" } },
-      404,
-    )
+    return notFoundResponse(c, "Event")
   }
 
   await db.delete(events).where(eq(events.id, id))
@@ -275,20 +240,12 @@ adminRoutes.post(
     const body = await c.req.json()
     const userId = c.get("userId")
 
-    const name = body.name?.trim()
-    const gender = body.gender || "open"
-    const minAge = body.minAge ? Number(body.minAge) : null
-    const maxAge = body.maxAge ? Number(body.maxAge) : null
-
-    if (!name) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "name is required" },
-        },
-        400,
-      )
+    const result = createCategorySchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(c, result.error.issues[0].message)
     }
+
+    const { name, gender, minAge, maxAge } = result.data
 
     const [created] = await db
       .insert(categories)
@@ -321,23 +278,18 @@ adminRoutes.patch(
       .from(categories)
       .where(eq(categories.id, categoryId))
     if (!existing) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Category not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Category")
     }
 
-    const updates: Record<string, any> = {}
-    if (body.name !== undefined) updates.name = body.name.trim()
-    if (body.gender !== undefined) updates.gender = body.gender
-    if (body.minAge !== undefined) updates.minAge = body.minAge ? Number(body.minAge) : null
-    if (body.maxAge !== undefined) updates.maxAge = body.maxAge ? Number(body.maxAge) : null
+    const result = updateCategorySchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(c, result.error.issues[0].message)
+    }
+
+    const updates = result.data
 
     if (Object.keys(updates).length === 0) {
-      return c.json(
-        { success: false, error: { code: "VALIDATION_FAILED", message: "No fields to update" } },
-        400,
-      )
+      return validationErrorResponse(c, "No fields to update")
     }
 
     const [updated] = await db
@@ -372,10 +324,7 @@ adminRoutes.delete(
       .from(categories)
       .where(eq(categories.id, categoryId))
     if (!existing) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Category not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Category")
     }
 
     await db.delete(categories).where(eq(categories.id, categoryId))
@@ -401,21 +350,12 @@ adminRoutes.post(
     const body = await c.req.json()
     const userId = c.get("userId")
 
-    const name = body.name?.trim()
-    const orderIndex = body.orderIndex !== undefined ? Number(body.orderIndex) : 0
-    const flashPoints = body.flashPoints !== undefined ? Number(body.flashPoints) : 1000
-    const pointsPerAttempt = body.pointsPerAttempt !== undefined ? Number(body.pointsPerAttempt) : 100
-    const maxAttempts = body.maxAttempts !== undefined ? Number(body.maxAttempts) : 5
-
-    if (!name) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "name is required" },
-        },
-        400,
-      )
+    const result = createSectorSchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(c, result.error.issues[0].message)
     }
+
+    const { name, orderIndex, flashPoints, pointsPerAttempt, maxAttempts } = result.data
 
     const [created] = await db
       .insert(sectors)
@@ -445,24 +385,18 @@ adminRoutes.patch(
 
     const [existing] = await db.select().from(sectors).where(eq(sectors.id, sectorId))
     if (!existing) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Sector not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Sector")
     }
 
-    const updates: Record<string, any> = {}
-    if (body.name !== undefined) updates.name = body.name.trim()
-    if (body.orderIndex !== undefined) updates.orderIndex = Number(body.orderIndex)
-    if (body.flashPoints !== undefined) updates.flashPoints = Number(body.flashPoints)
-    if (body.pointsPerAttempt !== undefined) updates.pointsPerAttempt = Number(body.pointsPerAttempt)
-    if (body.maxAttempts !== undefined) updates.maxAttempts = Number(body.maxAttempts)
+    const result = updateSectorSchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(c, result.error.issues[0].message)
+    }
+
+    const updates = result.data
 
     if (Object.keys(updates).length === 0) {
-      return c.json(
-        { success: false, error: { code: "VALIDATION_FAILED", message: "No fields to update" } },
-        400,
-      )
+      return validationErrorResponse(c, "No fields to update")
     }
 
     const [updated] = await db
@@ -494,10 +428,7 @@ adminRoutes.delete(
 
     const [existing] = await db.select().from(sectors).where(eq(sectors.id, sectorId))
     if (!existing) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Sector not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Sector")
     }
 
     await db.delete(sectors).where(eq(sectors.id, sectorId))
@@ -522,29 +453,19 @@ adminRoutes.post(
     const body = await c.req.json()
     const userId = c.get("userId")
 
-    const categoryId = body.categoryId
-    const name = body.name?.trim()
-    const externalId = body.externalId?.trim() || null
-
-    if (!categoryId || !name) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "categoryId and name are required" },
-        },
-        400,
-      )
+    const result = createAthleteSchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(c, result.error.issues[0].message)
     }
+
+    const { categoryId, name, externalId } = result.data
 
     const [categoryExists] = await db
       .select({ id: categories.id })
       .from(categories)
       .where(eq(categories.id, categoryId))
     if (!categoryExists) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Category not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Category")
     }
 
     const [created] = await db
@@ -573,50 +494,25 @@ adminRoutes.post(
     const body = await c.req.json()
     const userId = c.get("userId")
 
-    const categoryId = body.categoryId
-    const names: string[] = body.names
-
-    if (!categoryId || !Array.isArray(names) || names.length === 0) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "categoryId and non-empty names array are required",
-          },
-        },
-        400,
-      )
+    const result = bulkCreateAthletesSchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(c, result.error.issues[0].message)
     }
 
-    if (names.length > 200) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Maximum 200 athletes per batch" },
-        },
-        400,
-      )
-    }
+    const { categoryId, names } = result.data
 
     const [categoryExists] = await db
       .select({ id: categories.id })
       .from(categories)
       .where(eq(categories.id, categoryId))
     if (!categoryExists) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Category not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Category")
     }
 
-    const values = names
-      .map((name) => name.trim())
-      .filter((name) => name.length > 0)
-      .map((name) => ({
-        name,
-        categoryId,
-      }))
+    const values = names.map((name) => ({
+      name,
+      categoryId,
+    }))
 
     const created = await db.insert(athletes).values(values).returning()
 
@@ -628,7 +524,7 @@ adminRoutes.post(
       newValues: { count: created.length, categoryId },
     })
 
-    return c.json({ success: true, data: { created: created, count: created.length } }, 201)
+    return c.json({ success: true, data: { created, count: created.length } }, 201)
   },
 )
 
@@ -642,10 +538,7 @@ adminRoutes.delete(
 
     const [existing] = await db.select().from(athletes).where(eq(athletes.id, athleteId))
     if (!existing) {
-      return c.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Athlete not found" } },
-        404,
-      )
+      return notFoundResponse(c, "Athlete")
     }
 
     await db.delete(athletes).where(eq(athletes.id, athleteId))

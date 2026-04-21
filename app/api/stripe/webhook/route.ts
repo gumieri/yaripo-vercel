@@ -1,3 +1,4 @@
+import type Stripe from "stripe"
 import { headers } from "next/headers"
 import { stripe } from "@/lib/stripe/client"
 import { handleCheckoutCompleted, handleCheckoutExpired } from "@/lib/stripe/webhooks"
@@ -52,5 +53,3 @@ export async function POST(req: Request) {
 
   return new Response(JSON.stringify({ received: true }), { status: 200 })
 }
-
-import type Stripe from "stripe"

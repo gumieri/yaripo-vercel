@@ -15,6 +15,13 @@
       "when": 1776645489458,
       "tag": "0001_low_betty_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776690590525,
+      "tag": "0002_lyrical_synch",
+      "breakpoints": true
     }
   ]
 }

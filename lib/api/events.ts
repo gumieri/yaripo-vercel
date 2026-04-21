@@ -1,7 +1,8 @@
 import { Hono } from "hono"
-import { eq, sql } from "drizzle-orm"
+import { eq, sql, inArray, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { events, sectors, categories, athletes, attempts } from "@/lib/db/schema"
+import { notFoundResponse } from "@/lib/api/helpers"
 
 const eventRoutes = new Hono()
 
@@ -18,7 +19,7 @@ eventRoutes.get("/", async (c) => {
       scoringType: events.scoringType,
     })
     .from(events)
-    .where(sql`${events.status} IN ('published', 'active', 'completed')`)
+    .where(inArray(events.status, ["published", "active", "completed"]))
     .orderBy(events.startsAt)
 
   return c.json({ success: true, data: eventList }, 200, {
@@ -29,16 +30,13 @@ eventRoutes.get("/", async (c) => {
 eventRoutes.get("/:slug", async (c) => {
   const slug = c.req.param("slug")
 
-  const [event] = await db.select().from(events).where(eq(events.slug, slug))
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(and(eq(events.slug, slug), inArray(events.status, ["published", "active", "completed"])))
 
   if (!event) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "NOT_FOUND", message: "Event not found" },
-      },
-      404,
-    )
+    return notFoundResponse(c, "Event")
   }
 
   return c.json({ success: true, data: event }, 200, {
@@ -50,16 +48,13 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
   const slug = c.req.param("slug")
   const categoryId = c.req.query("category_id")
 
-  const [event] = await db.select().from(events).where(eq(events.slug, slug))
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(and(eq(events.slug, slug), inArray(events.status, ["published", "active", "completed"])))
 
   if (!event) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "NOT_FOUND", message: "Event not found" },
-      },
-      404,
-    )
+    return notFoundResponse(c, "Event")
   }
 
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -73,9 +68,6 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
     const catFilter = validCategoryId
       ? sql`${athletes.categoryId} = ${validCategoryId}::uuid`
       : sql`true`
-
-    // Scoring logic is implemented in SQL for performance.
-    // Equivalent TS functions in @/lib/scoring/redpoint.ts are kept for unit testing.
 
     const rawSql = brc !== null && brc > 0
       ? sql`
@@ -258,16 +250,13 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
 eventRoutes.get("/:slug/sectors", async (c) => {
   const slug = c.req.param("slug")
 
-  const [event] = await db.select().from(events).where(eq(events.slug, slug))
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(and(eq(events.slug, slug), inArray(events.status, ["published", "active", "completed"])))
 
   if (!event) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "NOT_FOUND", message: "Event not found" },
-      },
-      404,
-    )
+    return notFoundResponse(c, "Event")
   }
 
   const sectorList = await db

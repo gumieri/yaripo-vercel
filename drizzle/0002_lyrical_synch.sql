@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "gym_members_gym_id_user_id_idx" ON "gym_members" USING btree ("gym_id","user_id");

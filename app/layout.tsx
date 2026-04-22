@@ -1,12 +1,5 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import { Providers } from "./providers"
 import "./globals.css"
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-})
 
 export const metadata: Metadata = {
   title: "Yaripo - Climbing Competition Platform",
@@ -26,5 +19,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return <Providers>{children}</Providers>
+  return children
 }

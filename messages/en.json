@@ -69,6 +69,13 @@
     "email": "Sign in with email",
     "or": "or",
     "noAccount": "Don't have an account?",
-    "signUp": "Sign up"
+    "signUp": "Sign up",
+    "emailSent": "Email sent! Check your inbox.",
+    "emailError": "Error sending email. Please try again.",
+    "checkEmail": "Check your email",
+    "emailSentDesc": "We sent an access link to",
+    "useAnotherEmail": "Use another email",
+    "emailPlaceholder": "your@email.com",
+    "sending": "Sending..."
   }
 }

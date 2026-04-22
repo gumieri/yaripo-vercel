@@ -1,4 +1,4 @@
-import Link from "next/link"
+import {Link} from "@/i18n/routing"
 import { auth, signOut } from "@/lib/auth/server"
 import { Mountain } from "lucide-react"
 import { getTranslations } from "next-intl/server"

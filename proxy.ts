@@ -8,29 +8,21 @@ const handleI18nRouting = createMiddleware(routing);
 const protectedRoutes = ['/judge', '/athlete', '/manage'];
 const authRoutes = ['/login'];
 
-export default function proxy(request: NextRequest) {
-  const {nextUrl} = request;
-  const pathname = nextUrl.pathname;
-
+export default async function proxy(request: NextRequest) {
   const response = handleI18nRouting(request);
-
   const locale = response.headers.get('x-next-intl-locale') || routing.defaultLocale;
 
-  const authResult = response.headers.get('x-middleware-next');
-  const isLoggedIn = !!authResult && !authResult.includes('rewrite');
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
 
-  if (isLoggedIn) {
-    if (authRoutes.some((route) => pathname.includes(route))) {
-      const redirectUrl = new URL(`/${locale}`, nextUrl);
-      return NextResponse.redirect(redirectUrl);
-    }
+  const pathname = request.nextUrl.pathname;
+
+  if (isLoggedIn && authRoutes.some((route) => pathname.includes(route))) {
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
 
-  if (!isLoggedIn) {
-    if (protectedRoutes.some((route) => pathname.includes(route))) {
-      const redirectUrl = new URL(`/${locale}/login`, nextUrl);
-      return NextResponse.redirect(redirectUrl);
-    }
+  if (!isLoggedIn && protectedRoutes.some((route) => pathname.includes(route))) {
+    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 
   return response;

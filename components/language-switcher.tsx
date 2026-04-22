@@ -45,17 +45,24 @@ export function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-label="Change language"
         className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm transition-colors"
       >
         <Globe className="h-4 w-4" />
         <span className="hidden sm:inline">{current?.flag}</span>
       </button>
       {open && (
-        <div className="bg-popover text-popover-foreground border-border absolute right-0 top-full z-50 mt-1 min-w-[160px] overflow-hidden rounded-lg border shadow-md">
+        <div
+          role="menu"
+          aria-label="Language selection"
+          className="bg-popover text-popover-foreground border-border absolute right-0 top-full z-50 mt-1 min-w-[160px] overflow-hidden rounded-lg border shadow-md"
+        >
           {locales.map((l) => (
             <button
               key={l.code}
               onClick={() => switchLocale(l.code)}
+              role="menuitem"
               className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent ${
                 l.code === locale ? "bg-accent" : ""
               }`}

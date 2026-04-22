@@ -3,7 +3,7 @@
 import { useEvent, useLeaderboard } from "@/lib/api/hooks"
 import { use } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { useTranslations, useLocale } from "next-intl"
 
 export default function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {

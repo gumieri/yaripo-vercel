@@ -1,11 +1,10 @@
 "use client"
 
-import Link from "next/link"
-import { useLocale } from "next-intl"
+import { Link } from "@/i18n/routing"
 import { useEvents } from "@/lib/api/hooks"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function EventsPage() {
   const locale = useLocale()

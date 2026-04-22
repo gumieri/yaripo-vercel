@@ -25,12 +25,12 @@ export function EmailForm() {
 
       if (res.ok) {
         setSent(true)
-        toast.success("Email enviado! Verifique sua caixa de entrada.")
+        toast.success(t('Login.emailSent'))
       } else {
-        toast.error("Erro ao enviar email. Tente novamente.")
+        toast.error(t('Login.emailError'))
       }
     } catch {
-      toast.error("Erro ao enviar email. Tente novamente.")
+      toast.error(t('Login.emailError'))
     } finally {
       setLoading(false)
     }
@@ -42,16 +42,16 @@ export function EmailForm() {
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
           <Check className="h-6 w-6 text-primary" />
         </div>
-        <p className="text-foreground text-sm font-medium">Verifique seu email</p>
+        <p className="text-foreground text-sm font-medium">{t('Login.checkEmail')}</p>
         <p className="text-muted-foreground text-xs">
-          Enviamos um link de acesso para <span className="font-medium">{email}</span>
+          {t('Login.emailSentDesc')} <span className="font-medium">{email}</span>
         </p>
         <button
           type="button"
           onClick={() => setSent(false)}
           className="text-primary hover:underline text-xs mt-2"
         >
-          Usar outro email
+          {t('Login.useAnotherEmail')}
         </button>
       </div>
     )
@@ -66,7 +66,7 @@ export function EmailForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="seu@email.com"
+          placeholder={t('Login.emailPlaceholder')}
           className="border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-primary/20 flex w-full rounded-lg border px-10 py-3 text-sm outline-none transition-colors focus:ring-2"
         />
       </div>
@@ -80,7 +80,7 @@ export function EmailForm() {
         ) : (
           <Mail className="h-4 w-4" />
         )}
-        {loading ? "Enviando..." : t('Login.email')}
+        {loading ? t('Login.sending') : t('Login.email')}
       </button>
     </form>
   )

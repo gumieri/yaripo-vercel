@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { use } from "react"
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import {
   useManageEvent,
   useUpdateEvent,

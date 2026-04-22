@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { useEvent, useEventSectors, useQueueStatus, useJoinQueue } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { use } from "react"

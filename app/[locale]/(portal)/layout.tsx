@@ -1,9 +1,11 @@
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { auth, signOut } from "@/lib/auth/server"
 import { Mountain } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
+  const t = await getTranslations('Portal')
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -28,7 +30,7 @@ export default async function PortalLayout({ children }: { children: React.React
                   type="submit"
                   className="border-border hover:bg-secondary text-muted-foreground rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
                 >
-                  Sair
+                  {t('signOut')}
                 </button>
               </form>
             </div>
@@ -37,7 +39,7 @@ export default async function PortalLayout({ children }: { children: React.React
               href="/login"
               className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-1.5 text-sm font-medium transition-colors"
             >
-              Entrar
+              {t('enter')}
             </Link>
           )}
         </nav>

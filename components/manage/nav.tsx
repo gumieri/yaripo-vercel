@@ -1,17 +1,19 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Link } from "@/i18n/routing"
+import { usePathname } from "@/i18n/routing"
 import { LayoutDashboard, Trophy, Users } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const navItems = [
-  { href: "/manage", label: "Visão Geral", icon: LayoutDashboard },
-  { href: "/manage/events", label: "Eventos", icon: Trophy },
-  { href: "/manage/invitations", label: "Convites", icon: Users },
+  { href: "/manage", label: "Manage", icon: LayoutDashboard },
+  { href: "/manage/events", label: "Events", icon: Trophy },
+  { href: "/manage/invitations", label: "Invitations", icon: Users },
 ]
 
 export function ManageNav() {
   const pathname = usePathname()
+  const t = useTranslations('Manage')
 
   return (
     <aside className="hidden w-48 shrink-0 sm:block">
@@ -33,7 +35,7 @@ export function ManageNav() {
               }`}
             >
               <Icon className="h-4 w-4" />
-              {item.label}
+              {t(item.label as keyof typeof t)}
             </Link>
           )
         })}

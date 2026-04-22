@@ -1,46 +1,48 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { useManageEvents, useDeleteEvent } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-
-const statusLabels: Record<string, string> = {
-  draft: "Rascunho",
-  published: "Publicado",
-  active: "Em andamento",
-  completed: "Finalizado",
-  archived: "Arquivado",
-}
-
-const statusColors: Record<string, string> = {
-  draft: "bg-secondary text-muted-foreground",
-  published: "bg-[oklch(0.72_0.15_240_/_0.15)] text-[oklch(0.72_0.15_240)]",
-  active: "bg-[oklch(0.72_0.19_150_/_0.15)] text-[oklch(0.72_0.19_150)]",
-  completed: "bg-secondary text-muted-foreground",
-  archived: "bg-secondary text-muted-foreground/60",
-}
+import { useTranslations } from "next-intl"
 
 export default function ManageEventsPage() {
   const { data: events, isLoading } = useManageEvents()
   const deleteEvent = useDeleteEvent()
+  const t = useTranslations('Manage')
+
+  const statusLabels: Record<string, string> = {
+    draft: t('statusDraft'),
+    published: t('statusPublished'),
+    active: t('statusActive'),
+    completed: t('statusCompleted'),
+    archived: t('statusArchived'),
+  }
+
+  const statusColors: Record<string, string> = {
+    draft: "bg-secondary text-muted-foreground",
+    published: "bg-[oklch(0.72_0.15_240_/_0.15)] text-[oklch(0.72_0.15_240)]",
+    active: "bg-[oklch(0.72_0.19_150_/_0.15)] text-[oklch(0.72_0.19_150)]",
+    completed: "bg-secondary text-muted-foreground",
+    archived: "bg-secondary text-muted-foreground/60",
+  }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Excluir evento "${name}"? Esta acao não pode ser desfeita.`)) return
+    if (!confirm(t('deleteConfirm', { name }))) return
     try {
       await deleteEvent.mutateAsync(id)
-      toast.success("Evento excluído")
+      toast.success(t('deleteSuccess'))
     } catch {
-      toast.error("Erro ao excluir evento")
+      toast.error(t('deleteError'))
     }
   }
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-foreground text-2xl font-bold">Eventos</h1>
+        <h1 className="text-foreground text-2xl font-bold">{t('events')}</h1>
         <Link href="/manage/events/new">
-          <Button>Novo Evento</Button>
+          <Button>{t('newEvent')}</Button>
         </Link>
       </div>
 
@@ -54,9 +56,9 @@ export default function ManageEventsPage() {
 
       {!isLoading && (!events || events.length === 0) && (
         <div className="border-border/50 rounded-lg border border-dashed p-8 text-center">
-          <p className="text-muted-foreground">Nenhum evento criado.</p>
+          <p className="text-muted-foreground">{t('noEvents')}</p>
           <Link href="/manage/events/new" className="text-primary mt-2 inline-block text-sm">
-            Criar primeiro evento
+            {t('createFirstEvent')}
           </Link>
         </div>
       )}
@@ -79,7 +81,7 @@ export default function ManageEventsPage() {
                   {event.slug}
                   {event.startsAt && (
                     <span className="ml-3">
-                      {new Date(event.startsAt).toLocaleDateString("pt-BR")}
+                      {new Date(event.startsAt).toLocaleDateString()}
                     </span>
                   )}
                 </p>
@@ -97,7 +99,7 @@ export default function ManageEventsPage() {
                   onClick={() => handleDelete(event.id, event.name)}
                   disabled={deleteEvent.isPending}
                 >
-                  Excluir
+                  {t('delete')}
                 </Button>
               </div>
             </div>

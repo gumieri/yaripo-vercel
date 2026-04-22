@@ -1,7 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useRouter, Link } from "@/i18n/routing"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -9,13 +8,14 @@ import { useCreateEvent, useManageGyms } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 const eventSchema = z.object({
-  name: z.string().min(1, "Nome obrigatório"),
+  name: z.string().min(1, "Name is required"),
   slug: z
     .string()
-    .min(1, "Slug obrigatório")
-    .regex(/^[a-z0-9-]+$/, "Apenas minúsculas, números e hífens"),
+    .min(1, "Slug is required")
+    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes only"),
   gymId: z.string().optional(),
   scoringType: z.enum(["simple", "ifsc", "redpoint"]),
   description: z.string().optional(),
@@ -33,6 +33,7 @@ export default function NewEventPage() {
   const createEvent = useCreateEvent()
   const { data: gyms } = useManageGyms()
   const [slugPreview, setSlugPreview] = useState("")
+  const t = useTranslations('Manage')
 
   const {
     register,
@@ -48,13 +49,13 @@ export default function NewEventPage() {
   async function onSubmit(data: EventForm) {
     try {
       const result = await createEvent.mutateAsync(data)
-      toast.success("Evento criado")
+      toast.success(t('createSuccess'))
       router.push(`/manage/events/${result.id}`)
     } catch (error: any) {
       if (error?.code === "CONFLICT") {
-        toast.error("Slug já existe")
+        toast.error(t('slugExists'))
       } else {
-        toast.error("Erro ao criar evento")
+        toast.error(t('createError'))
       }
     }
   }
@@ -66,83 +67,83 @@ export default function NewEventPage() {
           href="/manage/events"
           className="text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
-          &larr; Voltar para eventos
+          &larr; {t('backToEvents')}
         </Link>
-        <h1 className="text-foreground mt-2 text-2xl font-bold">Novo Evento</h1>
+        <h1 className="text-foreground mt-2 text-2xl font-bold">{t('newEvent')}</h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-4">
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Nome</label>
-           <input
-             {...register("name")}
-             className={inputCls}
-             placeholder="Boulder Open 2026"
-           />
-           {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>}
-         </div>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('name')}</label>
+            <input
+              {...register("name")}
+              className={inputCls}
+              placeholder={t('namePlaceholder')}
+            />
+            {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>}
+          </div>
 
-         <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Link Único do Evento</label>
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('slug')}</label>
             <input
               {...register("slug", {
                 onChange: (e) => setSlugPreview(e.target.value),
               })}
               className={inputCls}
-              placeholder="boulder-open-2026"
+              placeholder={t('slugPlaceholder')}
             />
             {slugPreview && (
               <p className="text-muted-foreground mt-1 text-sm">
-                yaripo.app/events/{slugPreview}
+                {t('slugPreview', { slug: slugPreview })}
               </p>
             )}
-           {errors.slug && <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>}
-         </div>
-
-         <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Ginásio (opcional)</label>
-           <select {...register("gymId")} className={inputCls}>
-             <option value="">Nenhuma</option>
-             {gyms?.map((gym: any) => (
-               <option key={gym.id} value={gym.id}>
-                 {gym.name}
-               </option>
-             ))}
-           </select>
-         </div>
+            {errors.slug && <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>}
+          </div>
 
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Formato</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('gym')}</label>
+            <select {...register("gymId")} className={inputCls}>
+              <option value="">{t('noGym')}</option>
+              {gyms?.map((gym: any) => (
+                <option key={gym.id} value={gym.id}>
+                  {gym.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('format')}</label>
           <select {...register("scoringType")} className={inputCls}>
-            <option value="simple">Simples (tops + tentativas)</option>
-            <option value="ifsc">IFSC (tops + zonas + tentativas)</option>
-            <option value="redpoint">Redpoint (pontos por rota)</option>
+            <option value="simple">{t('simpleFormat')}</option>
+            <option value="ifsc">{t('ifscFormat')}</option>
+            <option value="redpoint">{t('redpointFormat')}</option>
           </select>
         </div>
 
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Descrição</label>
-          <textarea {...register("description")} rows={3} className={inputCls} />
-        </div>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('description')}</label>
+            <textarea {...register("description")} rows={3} className={inputCls} />
+          </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Início</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t('start')}</label>
             <input {...register("startsAt")} type="datetime-local" className={inputCls} />
           </div>
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Fim</label>
+            <label className="textforeground mb-1 block text-sm font-medium">{t('end')}</label>
             <input {...register("endsAt")} type="datetime-local" className={inputCls} />
           </div>
         </div>
 
         <div className="flex gap-3 pt-2">
           <Button type="submit" disabled={createEvent.isPending}>
-            {createEvent.isPending ? "Criando..." : "Criar Evento"}
+            {createEvent.isPending ? t('creating') : t('create')}
           </Button>
           <Link href="/manage/events">
             <Button type="button" variant="outline">
-              Cancelar
+              {t('cancel')}
             </Button>
           </Link>
         </div>

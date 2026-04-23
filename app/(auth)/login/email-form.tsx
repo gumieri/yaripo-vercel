@@ -17,7 +17,7 @@ export function EmailForm() {
 
     setLoading(true)
     try {
-      const res = await fetch("/api/auth/signin/nodemailer", {
+      const res = await fetch("/api/auth/signin/email", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ email, callbackUrl: "/" }),

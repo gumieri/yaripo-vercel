@@ -1,6 +1,6 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
-import Nodemailer from "next-auth/providers/nodemailer"
+import Email from "next-auth/providers/email"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { db } from "@/lib/db"
 import * as schema from "@/lib/db/schema"
@@ -33,16 +33,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
-    Nodemailer({
+    Email({
+      from: process.env.EMAIL_FROM,
       server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: Number(process.env.EMAIL_SERVER_PORT),
+        host: "localhost",
+        port: 25,
         auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
+          user: "",
+          pass: "",
         },
       },
-      from: process.env.EMAIL_FROM,
+      sendVerificationRequest: async ({ identifier: email, url, provider }) => {
+        const { render } = await import("@react-email/render")
+        const MagicLinkEmail = (await import("@/lib/email/templates/magic-link")).default
+        const { sendEmail } = await import("@/lib/email/client")
+
+        const html = await render(MagicLinkEmail({ url, email }))
+
+        await sendEmail({
+          to: email,
+          subject: "Sign in to Yaripo",
+          html,
+        })
+      },
     }),
   ],
   callbacks: {

@@ -34,6 +34,7 @@ export default async function Home() {
             </Link>
             {session?.user ? (
               <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                 <Link
                   href="/manage"
                   className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
@@ -65,6 +66,7 @@ export default async function Home() {
                     {t('Common.signOut')}
                   </button>
                 </form>
+                </div>
               </div>
             ) : (
               <Link

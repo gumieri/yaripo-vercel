@@ -29,10 +29,10 @@ export default function JudgePage() {
                   <p className="text-foreground font-medium">{event.name}</p>
                   <p className="text-muted-foreground text-sm">
                     {event.scoringType === "ifsc"
-                      ? "IFSC"
+                      ? t('Common.scoringIFSC')
                       : event.scoringType === "redpoint"
-                        ? "Redpoint"
-                        : "Simples"}
+                        ? t('Common.scoringRedpoint')
+                        : t('Common.scoringSimple')}
                   </p>
                 </div>
               </Link>

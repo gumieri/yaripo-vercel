@@ -1,18 +1,11 @@
 "use client"
 
-import { useState } from "react"
 import { Link } from "@/i18n/routing"
-import {
-  useEvent,
-  useEventSectors,
-  usePopQueue,
-  useDropQueue,
-  useSubmitAttempt,
-  useQueueStatus,
-} from "@/lib/api/hooks"
+import { useEvent, useEventSectors, useQueueStatus, usePopQueue, useDropQueue } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { use } from "react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 export default function JudgeEventPage({
   params,
@@ -22,31 +15,15 @@ export default function JudgeEventPage({
   const { slug } = use(params)
   const { data: event, isLoading } = useEvent(slug)
   const { data: sectors } = useEventSectors(slug)
-  const [selectedSector, setSelectedSector] = useState<string | null>(null)
+  const t = useTranslations('JudgeEvent')
 
-  if (isLoading) return <p className="text-muted-foreground p-4">Carregando...</p>
+  if (isLoading) return <p className="text-muted-foreground p-4">{t('loading')}</p>
 
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">Evento não encontrado.</p>
+        <p className="text-muted-foreground">{t('notFound')}</p>
       </div>
-    )
-  }
-
-  if (selectedSector) {
-    return (
-      <JudgeSectorView
-        sectorId={selectedSector}
-        sectorName={sectors?.find((s: any) => s.id === selectedSector)?.name || ""}
-        scoringType={event.scoringType}
-        sectorConfig={
-          event.scoringType === "redpoint"
-            ? sectors?.find((s: any) => s.id === selectedSector)
-            : null
-        }
-        onBack={() => setSelectedSector(null)}
-      />
     )
   }
 
@@ -56,71 +33,45 @@ export default function JudgeEventPage({
         href="/judge"
         className="text-muted-foreground hover:text-foreground mb-6 inline-block text-sm"
       >
-        &larr; Voltar
+        &larr; {t('backToSectors')}
       </Link>
-      <h1 className="text-foreground mb-8 text-2xl font-bold">{event.name}</h1>
+      <h1 className="text-foreground mb-2 text-2xl font-bold">{event.name}</h1>
+      <p className="text-muted-foreground mb-8">
+        {event.scoringType === "ifsc"
+          ? t('formatIFSC')
+          : event.scoringType === "redpoint"
+            ? t('formatRedpoint')
+            : t('formatSimple')}
+      </p>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="space-y-3">
         {sectors?.map((sector: any) => (
-          <button
-            key={sector.id}
-            onClick={() => setSelectedSector(sector.id)}
-            className="rounded-xl border border-border/50 bg-card p-6 text-left transition-all hover:border-border hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
-          >
-            <p className="text-foreground text-lg font-semibold">{sector.name}</p>
-            <p className="text-muted-foreground text-sm">Setor {sector.orderIndex + 1}</p>
-          </button>
+          <SectorCard key={sector.id} sector={sector} isRedpoint={event.scoringType === "redpoint"} />
         ))}
       </div>
     </div>
   )
 }
 
-function JudgeSectorView({
-  sectorId,
-  sectorName,
-  scoringType,
-  sectorConfig,
-  onBack,
-}: {
-  sectorId: string
-  sectorName: string
-  scoringType: string
-  sectorConfig: any
-  onBack: () => void
-}) {
-  const { data: queueData } = useQueueStatus(sectorId)
+function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }) {
+  const { data: queueData, isLoading } = useQueueStatus(sector.id)
   const popQueue = usePopQueue()
   const dropQueue = useDropQueue()
-  const submitAttempt = useSubmitAttempt()
+  const t = useTranslations('JudgeEvent')
 
-  const [activeEntry, setActiveEntry] = useState<any>(null)
-  const [attemptCount, setAttemptCount] = useState(1)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const activeEntry = queueData?.find((q: any) => q.status === "active")
+  const waitingCount = queueData?.filter((q: any) => q.status === "waiting").length || 0
 
-  const maxAttempts = sectorConfig?.maxAttempts ?? null
-  const flashPoints = sectorConfig?.flashPoints ?? null
-  const pointsPerAttempt = sectorConfig?.pointsPerAttempt ?? null
-
-  const currentPoints =
-    scoringType === "redpoint" && flashPoints !== null && pointsPerAttempt !== null
-      ? Math.max(flashPoints - (attemptCount - 1) * pointsPerAttempt, 0)
-      : null
-
-  const waitingEntries = queueData?.filter((q: any) => q.status === "waiting") || []
-
-  async function handlePop() {
+  async function handleCallNext() {
     try {
-      const result = await popQueue.mutateAsync({ sectorId })
-      if (result) {
-        setActiveEntry(result)
-        setAttemptCount(1)
-        toast.success(`Atleta chamado: ${result.athlete?.name}`)
+      await popQueue.mutateAsync({ sectorId: sector.id })
+      toast.success(t('callNextSuccess'))
+    } catch (error: any) {
+      if (error?.code === "CONFLICT") {
+        toast.error(t('alreadyInQueue'))
       } else {
-        toast.info("Fila vazia")
+        toast.error(t('callNextError'))
       }
-    } catch {
-      toast.error("Erro ao chamar próximo atleta")
     }
   }
 
@@ -128,134 +79,58 @@ function JudgeSectorView({
     if (!activeEntry) return
     try {
       await dropQueue.mutateAsync({ queueId: activeEntry.id })
-      setActiveEntry(null)
-      toast.success("Atleta removido da fila")
-    } catch {
-      toast.error("Erro ao remover atleta")
-    }
-  }
-
-  async function handleSubmit(isTop: boolean) {
-    if (!activeEntry) return
-    setIsSubmitting(true)
-    try {
-      const idempotencyKey = crypto.randomUUID()
-      const payload: any = {
-        sectorId,
-        athleteId: activeEntry.athleteId,
-        isTop,
-        attemptCount,
-        idempotencyKey,
-      }
-      if (scoringType === "ifsc") {
-        payload.resultData = {
-          top: isTop,
-          zone: !isTop && attemptCount > 0,
-          attempts: attemptCount,
-          attempts_to_top: isTop ? attemptCount : null,
-        }
-      }
-      await submitAttempt.mutateAsync(payload)
-      toast.success(isTop ? "TOP registrado!" : "Tentativa registrada")
-      setActiveEntry(null)
-      setAttemptCount(1)
-    } catch {
-      toast.error("Erro ao registrar. Tentando novamente...")
-    } finally {
-      setIsSubmitting(false)
+      toast.success(t('dropSuccess'))
+    } catch (error: any) {
+      toast.error(t('dropError'))
     }
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-12">
-      <button onClick={onBack} className="text-muted-foreground hover:text-foreground mb-6 text-sm">
-        &larr; Voltar para setores
-      </button>
-
-      <h1 className="text-foreground mb-2 text-2xl font-bold">{sectorName}</h1>
-
+    <div className="rounded-lg border p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-foreground font-medium">{sector.name}</p>
+          <p className="text-muted-foreground text-sm">{t('sector')} {sector.orderIndex + 1}</p>
+          {isRedpoint && sector.flashPoints != null && (
+            <p className="text-muted-foreground text-xs">
+              {t('flashPoints')}: {sector.flashPoints} {t('points')}
+              {sector.pointsPerAttempt != null && sector.pointsPerAttempt > 0 && (
+                <> (-{sector.pointsPerAttempt}/{t('attempt')})</>
+              )}
+              {sector.maxAttempts != null && <> | {t('max')} {sector.maxAttempts} {t('attempts')}</>}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {activeEntry ? (
+            <>
+              <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                {activeEntry.athleteName}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDrop}
+                disabled={dropQueue.isPending}
+              >
+                {t('drop')}
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={handleCallNext}
+              disabled={popQueue.isPending || isLoading}
+            >
+              {t('callNext')}
+            </Button>
+          )}
+        </div>
+      </div>
       {activeEntry && (
-        <div className="mb-6 rounded-xl border-2 border-primary bg-primary/10 p-6 text-center">
-          <p className="text-sm font-medium text-primary">Atleta Ativo</p>
-          <p className="text-foreground mt-2 text-4xl font-extrabold">{activeEntry.athlete?.name}</p>
-          <div className="mt-3 flex items-center justify-center gap-2">
-            <button
-              onClick={() => setAttemptCount((c) => Math.max(1, c - 1))}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-xl font-bold text-foreground active:bg-secondary"
-            >
-              -
-            </button>
-            <span className="text-foreground min-w-[3rem] text-center text-2xl font-bold">
-              {attemptCount}
-            </span>
-            <button
-              onClick={() =>
-                setAttemptCount((c) => (maxAttempts !== null ? Math.min(c + 1, maxAttempts) : c + 1))
-              }
-              disabled={maxAttempts !== null && attemptCount >= maxAttempts}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-xl font-bold text-foreground active:bg-secondary disabled:opacity-40"
-            >
-              +
-            </button>
-          </div>
-          <p className="text-muted-foreground mt-1 text-xs">
-            Tentativas
-            {maxAttempts !== null && ` (max ${maxAttempts})`}
+        <div className="mt-4 border-t pt-4">
+          <p className="text-muted-foreground text-sm">
+            {t('activeAthlete')}: {activeEntry.athleteName}
           </p>
-          {currentPoints !== null && (
-            <p className="mt-2 text-lg font-bold text-primary">{currentPoints} pts</p>
-          )}
-        </div>
-      )}
-
-      {!activeEntry && (
-        <div className="mb-6 flex flex-col items-center gap-4">
-          <Button
-            size="xl"
-            onClick={handlePop}
-            disabled={popQueue.isPending}
-            className="w-full max-w-sm text-lg font-bold shadow-lg active:scale-[0.98]"
-          >
-            CHAMAR PRÓXIMO
-          </Button>
-          {waitingEntries.length > 0 && (
-            <p className="text-muted-foreground text-sm">{waitingEntries.length} na fila</p>
-          )}
-        </div>
-      )}
-
-      {activeEntry && (
-        <div className="flex flex-col gap-3">
-          <Button
-            size="xl"
-            onClick={() => handleSubmit(true)}
-            disabled={isSubmitting}
-            className="w-full text-lg font-bold shadow-lg active:scale-[0.98]"
-          >
-            {isSubmitting
-              ? "ENVIANDO..."
-              : currentPoints !== null
-                ? `TOP (${currentPoints} pts)`
-                : "TOP"}
-          </Button>
-          <Button
-            size="xl"
-            onClick={() => handleSubmit(false)}
-            disabled={isSubmitting}
-            variant="secondary"
-            className="w-full text-lg font-bold active:scale-[0.98]"
-          >
-            {isSubmitting ? "ENVIANDO..." : "TENTATIVA"}
-          </Button>
-          <Button
-            size="lg"
-            onClick={handleDrop}
-            disabled={isSubmitting}
-            variant="outline"
-            className="text-destructive w-full text-base font-medium active:scale-[0.98]"
-          >
-            NÃO COMPARECEU
-          </Button>
         </div>
       )}
     </div>

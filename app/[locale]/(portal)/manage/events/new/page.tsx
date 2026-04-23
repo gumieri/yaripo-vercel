@@ -132,7 +132,7 @@ export default function NewEventPage() {
             <input {...register("startsAt")} type="datetime-local" className={inputCls} />
           </div>
           <div>
-            <label className="textforeground mb-1 block text-sm font-medium">{t('end')}</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t('end')}</label>
             <input {...register("endsAt")} type="datetime-local" className={inputCls} />
           </div>
         </div>

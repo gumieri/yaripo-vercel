@@ -1,6 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
 import {NextRequest, NextResponse} from 'next/server';
-import {auth} from '@/lib/auth/edge';
+import {auth} from '@/lib/auth';
 import {routing} from './i18n/routing';
 
 const handleI18nRouting = createMiddleware(routing);

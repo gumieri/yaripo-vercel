@@ -17,22 +17,7 @@ import {
 } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-
-const statusLabels: Record<string, string> = {
-  draft: "Rascunho",
-  published: "Publicado",
-  active: "Em andamento",
-  completed: "Finalizado",
-  archived: "Arquivado",
-}
-
-const statusOptions = ["draft", "published", "active", "completed", "archived"] as const
-
-const genderLabels: Record<string, string> = {
-  male: "Masculino",
-  female: "Feminino",
-  open: "Aberto",
-}
+import { useTranslations } from "next-intl"
 
 type Tab = "settings" | "categories" | "sectors" | "athletes"
 
@@ -51,16 +36,17 @@ export default function AdminEventDetailPage({
   const { id } = use(params)
   const { data: event, isLoading } = useManageEvent(id)
   const [tab, setTab] = useState<Tab>("settings")
+  const t = useTranslations('ManageEvent')
 
   if (isLoading || !event) {
     return <p className="text-muted-foreground p-4"><div className="space-y-2"><div className="h-4 w-24 animate-pulse rounded bg-secondary" /><div className="h-8 w-64 animate-pulse rounded bg-secondary" /><div className="h-64 w-full animate-pulse rounded-lg bg-secondary" /></div></p>
   }
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "settings", label: "Configurações" },
-    { key: "categories", label: `Categorias (${event.categories?.length || 0})` },
-    { key: "sectors", label: `Setores (${event.sectors?.length || 0})` },
-    { key: "athletes", label: `Atletas (${event.athletes?.length || 0})` },
+    { key: "settings", label: t('settings') },
+    { key: "categories", label: `${t('categories')} (${event.categories?.length || 0})` },
+    { key: "sectors", label: `${t('sectors')} (${event.sectors?.length || 0})` },
+    { key: "athletes", label: `${t('athletes')} (${event.athletes?.length || 0})` },
   ]
 
   return (
@@ -70,10 +56,10 @@ export default function AdminEventDetailPage({
           href="/manage/events"
           className="text-muted-foreground hover:text-foreground text-sm"
         >
-          &larr; Voltar para eventos
+          &larr; {t('backToEvents')}
         </Link>
         <h1 className="text-foreground mt-2 text-2xl font-bold">{event.name}</h1>
-        <p className="text-muted-foreground mt-1 text-sm">yaripo.app/events/{event.slug}</p>
+        <p className="text-muted-foreground mt-1 text-sm">{t('urlPreview', { slug: event.slug })}</p>
       </div>
 
       <div className="mb-6 flex gap-1 border-b">
@@ -102,6 +88,7 @@ export default function AdminEventDetailPage({
 
 function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
   const updateEvent = useUpdateEvent()
+  const t = useTranslations('ManageEvent')
   const [form, setForm] = useState({
     name: event.name,
     slug: event.slug,
@@ -113,6 +100,16 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
     bestRoutesCount: event.bestRoutesCount ?? "",
   })
 
+  const statusOptions = ["draft", "published", "active", "completed", "archived"] as const
+
+  const statusLabels: Record<string, string> = {
+    draft: t('statusDraft'),
+    published: t('statusPublished'),
+    active: t('statusActive'),
+    completed: t('statusCompleted'),
+    archived: t('statusArchived'),
+  }
+
   async function handleSave() {
     try {
       await updateEvent.mutateAsync({
@@ -122,12 +119,12 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         endsAt: form.endsAt || null,
         bestRoutesCount: form.bestRoutesCount !== "" ? Number(form.bestRoutesCount) : null,
       })
-      toast.success("Evento atualizado")
+      toast.success(t('eventUpdated'))
     } catch (error: any) {
       if (error?.code === "CONFLICT") {
-        toast.error("Slug já existe")
+        toast.error(t('slugExists'))
       } else {
-        toast.error("Erro ao atualizar")
+        toast.error(t('updateError'))
       }
     }
   }
@@ -135,7 +132,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
   return (
     <div className="max-w-lg space-y-4">
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">Nome</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t('name')}</label>
         <input
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -144,7 +141,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
       </div>
 
        <div>
-         <label className="text-foreground mb-1 block text-sm font-medium">Link Único do Evento</label>
+         <label className="text-foreground mb-1 block text-sm font-medium">{t('slug')}</label>
          <input
            value={form.slug}
            onChange={(e) => setForm({ ...form, slug: e.target.value })}
@@ -152,13 +149,13 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
          />
          {form.slug && (
            <p className="text-muted-foreground mt-1 text-sm">
-             yaripo.app/events/{form.slug}
+             {t('urlPreview', { slug: form.slug })}
            </p>
          )}
        </div>
 
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">Status</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t('status')}</label>
         <select
           value={form.status}
           onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -173,22 +170,22 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
       </div>
 
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">Formato</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t('format')}</label>
         <select
           value={form.scoringType}
           onChange={(e) => setForm({ ...form, scoringType: e.target.value })}
           className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         >
-          <option value="simple">Simples</option>
-          <option value="ifsc">IFSC</option>
-          <option value="redpoint">Redpoint</option>
+          <option value="simple">{t('simple')}</option>
+          <option value="ifsc">{t('ifsc')}</option>
+          <option value="redpoint">{t('redpoint')}</option>
         </select>
       </div>
 
       {form.scoringType === "redpoint" && (
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">
-            Melhores Rotas (vazio = todas)
+            {t('bestRoutes')}
           </label>
           <input
             type="number"
@@ -196,16 +193,16 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
             value={form.bestRoutesCount}
             onChange={(e) => setForm({ ...form, bestRoutesCount: e.target.value })}
             className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="Ex: 5"
+            placeholder={t('bestRoutesPlaceholder')}
           />
           <p className="text-muted-foreground mt-1 text-xs">
-            Número de rotas que contam para a pontuação total. Deixe vazio para contar todas.
+            {t('bestRoutesDesc')}
           </p>
         </div>
       )}
 
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">Descrição</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t('description')}</label>
         <textarea
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -216,7 +213,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Início</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('start')}</label>
           <input
             type="datetime-local"
             value={form.startsAt}
@@ -225,7 +222,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
           />
         </div>
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Fim</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('end')}</label>
           <input
             type="datetime-local"
             value={form.endsAt}
@@ -240,7 +237,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         disabled={updateEvent.isPending}
         className="bg-primary hover:bg-primary/90"
       >
-        {updateEvent.isPending ? "Salvando..." : "Salvar"}
+        {updateEvent.isPending ? t('saving') : t('save')}
       </Button>
     </div>
   )
@@ -249,10 +246,17 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
 function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
   const createCategory = useCreateCategory()
   const deleteCategory = useDeleteCategory()
+  const t = useTranslations('ManageEvent')
   const [name, setName] = useState("")
   const [gender, setGender] = useState("open")
   const [minAge, setMinAge] = useState("")
   const [maxAge, setMaxAge] = useState("")
+
+  const genderLabels: Record<string, string> = {
+    male: t('genderMale'),
+    female: t('genderFemale'),
+    open: t('genderOpen'),
+  }
 
   async function handleCreate() {
     if (!name.trim()) return
@@ -265,19 +269,19 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
         maxAge: maxAge ? Number(maxAge) : null,
       })
       setName("")
-      toast.success("Categoria criada")
+      toast.success(t('categoryCreated'))
     } catch {
-      toast.error("Erro ao criar categoria")
+      toast.error(t('categoryCreateError'))
     }
   }
 
   async function handleDelete(catId: string, catName: string) {
-    if (!confirm(`Excluir categoria "${catName}"? Atletas vinculados serão removidos.`)) return
+    if (!confirm(t('deleteCategoryConfirm', { name: catName }))) return
     try {
       await deleteCategory.mutateAsync({ eventId, categoryId: catId })
-      toast.success("Categoria excluida")
+      toast.success(t('categoryDeleted'))
     } catch {
-      toast.error("Erro ao excluir")
+      toast.error(t('deleteCategoryError'))
     }
   }
 
@@ -285,29 +289,29 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
     <div>
       <div className="mb-4 flex items-end gap-3">
         <div className="flex-1">
-          <label className="text-foreground mb-1 block text-sm font-medium">Nome</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('name')}</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="Ex: Masculino 18-29"
+            placeholder={t('categoryPlaceholder')}
           />
         </div>
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">Gênero</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('gender')}</label>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="border-input bg-background rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option value="open">Aberto</option>
-            <option value="male">Masculino</option>
-            <option value="female">Feminino</option>
+            <option value="open">{t('genderOpen')}</option>
+            <option value="male">{t('genderMale')}</option>
+            <option value="female">{t('genderFemale')}</option>
           </select>
         </div>
         <div className="w-20">
-          <label className="text-foreground mb-1 block text-sm font-medium">Idade min</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('minAge')}</label>
           <input
             type="number"
             value={minAge}
@@ -316,7 +320,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
           />
         </div>
         <div className="w-20">
-          <label className="text-foreground mb-1 block text-sm font-medium">Idade max</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('maxAge')}</label>
           <input
             type="number"
             value={maxAge}
@@ -329,12 +333,12 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
           disabled={createCategory.isPending || !name.trim()}
           className="bg-primary hover:bg-primary/90"
         >
-          Adicionar
+          {t('add')}
         </Button>
       </div>
 
       {!event.categories?.length ? (
-        <p className="text-muted-foreground text-sm">Nenhuma categoria criada.</p>
+        <p className="text-muted-foreground text-sm">{t('noCategories')}</p>
       ) : (
         <div className="space-y-2">
           {event.categories.map((cat: any) => (
@@ -343,7 +347,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
                 <p className="text-foreground font-medium">{cat.name}</p>
                 <p className="text-muted-foreground text-xs">
                   {genderLabels[cat.gender] || cat.gender}
-                  {cat.minAge != null && cat.maxAge != null && ` | ${cat.minAge}-${cat.maxAge} anos`}
+                  {cat.minAge != null && cat.maxAge != null && ` | ${cat.minAge}-${cat.maxAge} ${t('years')}`}
                 </p>
               </div>
               <Button
@@ -353,7 +357,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
                 onClick={() => handleDelete(cat.id, cat.name)}
                 disabled={deleteCategory.isPending}
               >
-                Excluir
+                {t('delete')}
               </Button>
             </div>
           ))}
@@ -367,6 +371,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
   const createSector = useCreateSector()
   const deleteSector = useDeleteSector()
   const updateSector = useUpdateSector()
+  const t = useTranslations('ManageEvent')
   const [name, setName] = useState("")
   const isRedpoint = event.scoringType === "redpoint"
 
@@ -385,19 +390,19 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
       }
       await createSector.mutateAsync(payload)
       setName("")
-      toast.success("Setor criado")
+      toast.success(t('sectorCreated'))
     } catch {
-      toast.error("Erro ao criar setor")
+      toast.error(t('sectorCreateError'))
     }
   }
 
   async function handleDelete(sectorId: string, sectorName: string) {
-    if (!confirm(`Excluir setor "${sectorName}"? Filas e tentativas serão removidas.`)) return
+    if (!confirm(t('deleteSectorConfirm', { name: sectorName }))) return
     try {
       await deleteSector.mutateAsync({ eventId, sectorId })
-      toast.success("Setor excluído")
+      toast.success(t('sectorDeleted'))
     } catch {
-      toast.error("Erro ao excluir")
+      toast.error(t('deleteSectorError'))
     }
   }
 
@@ -405,7 +410,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
     try {
       await updateSector.mutateAsync({ eventId, sectorId, ...updates })
     } catch {
-      toast.error("Erro ao atualizar setor")
+      toast.error(t('sectorUpdateError'))
     }
   }
 
@@ -416,13 +421,13 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
     <div>
       <div className="mb-4 flex items-end gap-3">
         <div className="flex-1">
-          <label className="text-foreground mb-1 block text-sm font-medium">Nome do Setor</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t('sectorName')}</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             className={inputCls}
-            placeholder="Ex: Bloco A"
+            placeholder={t('sectorPlaceholder')}
           />
         </div>
         <Button
@@ -430,12 +435,12 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
           disabled={createSector.isPending || !name.trim()}
           className="bg-primary hover:bg-primary/90"
         >
-          Adicionar
+          {t('add')}
         </Button>
       </div>
 
       {!event.sectors?.length ? (
-        <p className="text-muted-foreground text-sm">Nenhum setor criado.</p>
+        <p className="text-muted-foreground text-sm">{t('noSectors')}</p>
       ) : (
         <div className="space-y-2">
           {event.sectors.map((sector: any, idx: number) => (
@@ -454,13 +459,13 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
                   onClick={() => handleDelete(sector.id, sector.name)}
                   disabled={deleteSector.isPending}
                 >
-                  Excluir
+                  {t('delete')}
                 </Button>
               </div>
               {isRedpoint && (
                 <div className="mt-3 grid grid-cols-3 gap-3 pl-11">
                   <div>
-                    <label className="text-muted-foreground mb-1 block text-xs">Flash (pts)</label>
+                    <label className="text-muted-foreground mb-1 block text-xs">{t('flashPoints')}</label>
                     <input
                       type="number"
                       min={0}
@@ -472,7 +477,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
                     />
                   </div>
                   <div>
-                    <label className="text-muted-foreground mb-1 block text-xs">Pts/tentativa</label>
+                    <label className="text-muted-foreground mb-1 block text-xs">{t('pointsPerAttempt')}</label>
                     <input
                       type="number"
                       min={0}
@@ -484,7 +489,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
                     />
                   </div>
                   <div>
-                    <label className="text-muted-foreground mb-1 block text-xs">Max tentativas</label>
+                    <label className="text-muted-foreground mb-1 block text-xs">{t('maxAttempts')}</label>
                     <input
                       type="number"
                       min={1}
@@ -509,6 +514,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
   const createAthlete = useCreateAthlete()
   const bulkCreateAthletes = useBulkCreateAthletes()
   const deleteAthlete = useDeleteAthlete()
+  const t = useTranslations('ManageEvent')
   const [name, setName] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [bulkNames, setBulkNames] = useState("")
@@ -526,15 +532,15 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
         categoryId: selectedCategory,
       })
       setName("")
-      toast.success("Atleta registrado")
+      toast.success(t('athleteRegistered'))
     } catch {
-      toast.error("Erro ao registrar atleta")
+      toast.error(t('athleteRegisterError'))
     }
   }
 
   async function handleBulkCreate() {
     if (!bulkCategory) {
-      toast.error("Selecione uma categoria")
+      toast.error(t('selectCategoryError'))
       return
     }
     const names = bulkNames
@@ -542,7 +548,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
       .map((n) => n.trim())
       .filter(Boolean)
     if (names.length === 0) {
-      toast.error("Insira ao menos um nome")
+      toast.error(t('enterAtLeastOneName'))
       return
     }
     try {
@@ -552,19 +558,19 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
         names,
       })
       setBulkNames("")
-      toast.success(`${result.count} atletas registrados`)
+      toast.success(`${result.count} ${t('athleteRegistered')}`)
     } catch {
-      toast.error("Erro ao registrar atletas")
+      toast.error(t('bulkRegisterError'))
     }
   }
 
   async function handleDelete(athleteId: string, athleteName: string) {
-    if (!confirm(`Excluir atleta "${athleteName}"?`)) return
+    if (!confirm(t('deleteAthleteConfirm', { name: athleteName }))) return
     try {
       await deleteAthlete.mutateAsync({ eventId, athleteId })
-      toast.success("Atleta removido")
+      toast.success(t('athleteDeleted'))
     } catch {
-      toast.error("Erro ao remover")
+      toast.error(t('deleteAthleteError'))
     }
   }
 
@@ -583,7 +589,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Individual
+          {t('individual')}
         </button>
         <button
           onClick={() => setShowBulk(true)}
@@ -593,30 +599,30 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Lote
+          {t('bulk')}
         </button>
       </div>
 
       {!showBulk ? (
         <div className="mb-4 flex items-end gap-3">
           <div className="flex-1">
-            <label className="text-foreground mb-1 block text-sm font-medium">Nome do Atleta</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t('athleteName')}</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreateSingle()}
               className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Ex: Joao Silva"
+              placeholder={t('athletePlaceholder')}
             />
           </div>
           <div className="w-48">
-            <label className="text-foreground mb-1 block text-sm font-medium">Categoria</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t('category')}</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="">Selecionar...</option>
+              <option value="">{t('selectCategory')}</option>
               {categories.map((cat: any) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -629,19 +635,19 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
             disabled={createAthlete.isPending || !name.trim() || !selectedCategory}
             className="bg-primary hover:bg-primary/90"
           >
-            Adicionar
+            {t('add')}
           </Button>
         </div>
       ) : (
         <div className="mb-4 space-y-3">
           <div className="w-48">
-            <label className="text-foreground mb-1 block text-sm font-medium">Categoria</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t('category')}</label>
             <select
               value={bulkCategory}
               onChange={(e) => setBulkCategory(e.target.value)}
               className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="">Selecionar...</option>
+              <option value="">{t('selectCategory')}</option>
               {categories.map((cat: any) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -651,14 +657,14 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
           </div>
           <div>
             <label className="text-foreground mb-1 block text-sm font-medium">
-              Nomes (um por linha)
+              {t('namesOnePerLine')}
             </label>
             <textarea
               value={bulkNames}
               onChange={(e) => setBulkNames(e.target.value)}
               rows={6}
               className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder={"Joao Silva\nMaria Santos\nPedro Lima"}
+              placeholder={t('namesPlaceholder')}
             />
           </div>
           <Button
@@ -668,13 +674,13 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
             }
             className="bg-primary hover:bg-primary/90"
           >
-            {bulkCreateAthletes.isPending ? "Registrando..." : "Registrar Lote"}
+            {bulkCreateAthletes.isPending ? t('registering') : t('registerBulk')}
           </Button>
         </div>
       )}
 
       {!event.athletes?.length ? (
-        <p className="text-muted-foreground text-sm">Nenhum atleta registrado.</p>
+        <p className="text-muted-foreground text-sm">{t('noAthletes')}</p>
       ) : (
         <div className="space-y-1">
           {event.athletes.map((athlete: any) => (
@@ -695,7 +701,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
                 onClick={() => handleDelete(athlete.id, athlete.name)}
                 disabled={deleteAthlete.isPending}
               >
-                Remover
+                {t('remove')}
               </Button>
             </div>
           ))}

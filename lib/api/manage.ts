@@ -1,7 +1,7 @@
 import { Hono } from "hono"
 import { desc, sql, and, eq, asc, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { auditLogs, events, categories, sectors, athletes, gyms, eventMembers, eventJudgeInvitations } from "@/lib/db/schema"
+import { auditLogs, events, categories, sectors, athletes, gyms, eventMembers, eventJudgeInvitations, users } from "@/lib/db/schema"
 import { authMiddleware, requireAuth, requirePlatformAdmin, requireEventOrganizer } from "@/lib/api/middleware/auth"
 import { logAudit } from "@/lib/db/audit"
 import {
@@ -668,6 +668,41 @@ manageRoutes.post("/events/:eventId/judges/invite", authMiddleware, requireEvent
       status: "pending",
     })
     .returning()
+
+  const [event] = await db.select({ name: events.name }).from(events).where(eq(events.id, eventId))
+  const [organizer] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId!))
+
+  const { render } = await import("@react-email/render")
+  const JudgeInviteEmail = (await import("@/lib/email/templates/judge-invite")).default
+  const { sendEmail } = await import("@/lib/email/client")
+
+  const supportedLocales = [
+    { code: "en", label: "EN" },
+    { code: "pt", label: "PT" },
+    { code: "es", label: "ES" },
+    { code: "fr", label: "FR" },
+    { code: "de", label: "DE" },
+    { code: "it", label: "IT" },
+    { code: "ja", label: "JA" },
+    { code: "ko", label: "KO" },
+    { code: "uk", label: "UK" },
+  ]
+
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/en/invitations/${created.id}`
+
+  sendEmail({
+    to: email,
+    subject: `You're invited to judge ${event.name}`,
+    html: await render(
+      JudgeInviteEmail({
+        eventName: event.name,
+        organizerName: organizer.name,
+        inviteUrl,
+        locale: "en",
+        supportedLocales,
+      })
+    ),
+  }).catch(console.error)
 
   return c.json({ success: true, data: created }, 201)
 })

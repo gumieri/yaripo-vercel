@@ -5,6 +5,7 @@ import { useEvent, useEventSectors, useQueueStatus, useJoinQueue } from "@/lib/a
 import { Button } from "@/components/ui/button"
 import { use } from "react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 export default function AthleteEventPage({
   params,
@@ -14,13 +15,14 @@ export default function AthleteEventPage({
   const { slug } = use(params)
   const { data: event, isLoading } = useEvent(slug)
   const { data: sectors } = useEventSectors(slug)
+  const t = useTranslations('AthleteEvent')
 
-  if (isLoading) return <p className="text-muted-foreground p-4">Carregando...</p>
+  if (isLoading) return <p className="text-muted-foreground p-4">{t('loading')}</p>
 
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">Evento não encontrado.</p>
+        <p className="text-muted-foreground">{t('notFound')}</p>
       </div>
     )
   }
@@ -31,15 +33,15 @@ export default function AthleteEventPage({
         href="/athlete"
         className="text-muted-foreground hover:text-foreground mb-6 inline-block text-sm"
       >
-        &larr; Voltar
+        &larr; {t('backToEvents')}
       </Link>
       <h1 className="text-foreground mb-2 text-2xl font-bold">{event.name}</h1>
       <p className="text-muted-foreground mb-8">
         {event.scoringType === "ifsc"
-          ? "Formato IFSC"
+          ? t('formatIFSC')
           : event.scoringType === "redpoint"
-            ? "Formato Redpoint"
-            : "Formato Simples"}
+            ? t('formatRedpoint')
+            : t('formatSimple')}
       </p>
 
       <div className="space-y-3">
@@ -53,7 +55,7 @@ export default function AthleteEventPage({
           href={`/events/${slug}`}
           className="text-sm font-medium text-primary hover:text-primary/80"
         >
-          Ver ranking &rarr;
+          {t('viewRanking')} &rarr;
         </Link>
       </div>
     </div>
@@ -63,6 +65,7 @@ export default function AthleteEventPage({
 function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }) {
   const { data: queueData, isLoading } = useQueueStatus(sector.id)
   const joinQueue = useJoinQueue()
+  const t = useTranslations('AthleteEvent')
 
   const myQueueEntry = queueData?.find(
     (q: any) => q.status === "waiting" || q.status === "active",
@@ -77,12 +80,12 @@ function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }
   async function handleJoin() {
     try {
       await joinQueue.mutateAsync({ sectorId: sector.id })
-      toast.success("Você entrou na fila!")
+      toast.success(t('enterQueue'))
     } catch (error: any) {
       if (error?.code === "CONFLICT") {
-        toast.error("Você já está em uma fila")
+        toast.error(t('alreadyInQueue'))
       } else {
-        toast.error("Erro ao entrar na fila")
+        toast.error(t('error'))
       }
     }
   }
@@ -92,24 +95,24 @@ function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }
       <div className="flex items-center justify-between">
         <div>
           <p className="text-foreground font-medium">{sector.name}</p>
-          <p className="text-muted-foreground text-sm">Setor {sector.orderIndex + 1}</p>
+          <p className="text-muted-foreground text-sm">{t('sector')} {sector.orderIndex + 1}</p>
           {isRedpoint && sector.flashPoints != null && (
             <p className="text-muted-foreground text-xs">
-              Flash: {sector.flashPoints} pts
+              {t('flash')}: {sector.flashPoints} {t('points')}
               {sector.pointsPerAttempt != null && sector.pointsPerAttempt > 0 && (
-                <> (-{sector.pointsPerAttempt}/tentativa)</>
+                <> (-{sector.pointsPerAttempt}/{t('attempt')})</>
               )}
-              {sector.maxAttempts != null && <> | Max {sector.maxAttempts} tentativas</>}
+              {sector.maxAttempts != null && <> | {t('max')} {sector.maxAttempts} {t('attempts')}</>}
             </p>
           )}
         </div>
         {isActive ? (
           <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-            SUA VEZ!
+            {t('yourTurn')}
           </span>
         ) : isWaiting ? (
           <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
-            #{position} na fila
+            #{position} {t('inQueue')}
           </span>
         ) : (
           <Button
@@ -117,7 +120,7 @@ function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }
             disabled={joinQueue.isPending || isLoading}
             className="bg-primary hover:bg-primary/90"
           >
-            ENTRAR NA FILA
+            {t('enterQueueButton')}
           </Button>
         )}
       </div>

@@ -6,23 +6,21 @@ import { LayoutDashboard, Trophy, Users } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 const navItems = [
-  { href: "/manage", label: "Manage", icon: LayoutDashboard },
-  { href: "/manage/events", label: "Events", icon: Trophy },
-  { href: "/manage/invitations", label: "Invitations", icon: Users },
+  { href: "/manage", label: "title", icon: LayoutDashboard },
+  { href: "/manage/events", label: "events", icon: Trophy },
+  { href: "/manage/invitations", label: "invitations", icon: Users },
 ]
 
 export function ManageNav() {
   const pathname = usePathname()
-  const t = useTranslations('Manage')
+  const t = useTranslations("Manage")
 
   return (
     <aside className="hidden w-48 shrink-0 sm:block">
       <nav className="space-y-1">
         {navItems.map((item) => {
           const isActive =
-            item.href === "/manage"
-              ? pathname === "/manage"
-              : pathname.startsWith(item.href)
+            item.href === "/manage" ? pathname === "/manage" : pathname.startsWith(item.href)
           const Icon = item.icon
           return (
             <Link
@@ -35,7 +33,7 @@ export function ManageNav() {
               }`}
             >
               <Icon className="h-4 w-4" />
-              {t(item.label as "Manage" | "Events" | "Invitations")}
+              {t(item.label)}
             </Link>
           )
         })}

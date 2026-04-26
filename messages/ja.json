@@ -136,7 +136,10 @@
     "backToEvents": "大会一覧に戻る",
     "createSuccess": "大会を作成しました",
     "slugExists": "スラグは既に存在します",
-    "createError": "大会の作成エラー"
+    "createError": "大会の作成エラー",
+    "activeEvents": "アクティブなイベント",
+    "configuredSectors": "設定されたセクター",
+    "registeredAthletes": "登録されたアスリート"
   },
   "ManageEvent": {
     "backToEvents": "大会一覧に戻る",
@@ -295,7 +298,7 @@
     "accepted": "招待を承諾しました！",
     "declined": "招待を辞退しました",
     "signInToAccept": "ログインして応答",
-    "viewIn": "表示言語",
+    "viewIn": "アプリで表示",
     "alreadyResponded": "この招待はすでに{status}されています",
     "notFound": "招待が見つかりません"
   }

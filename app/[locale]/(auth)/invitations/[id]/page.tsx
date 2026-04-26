@@ -42,7 +42,7 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
           <Mountain className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
           <h1 className="text-foreground mb-2 text-2xl font-bold">{t("notFound")}</h1>
           <p className="text-muted-foreground">
-            This invitation doesn't exist or has been deleted.
+            This invitation doesn&apos;t exist or has been deleted.
           </p>
         </Card>
       </div>

@@ -51,3 +51,35 @@ export async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
     .set({ status: "expired", updatedAt: new Date() })
     .where(eq(eventPayments.stripeCheckoutSessionId, session.id))
 }
+
+export async function handlePaymentFailed(session: Stripe.Checkout.Session) {
+  const { eventId } = session.metadata || {}
+
+  if (!eventId) {
+    console.error("[stripe webhook] Missing eventId in failed payment", session.id)
+    return
+  }
+
+  await db
+    .update(eventPayments)
+    .set({ status: "failed", updatedAt: new Date() })
+    .where(eq(eventPayments.stripeCheckoutSessionId, session.id))
+}
+
+export async function handleAsyncPaymentFailed(session: Stripe.Checkout.Session) {
+  const { eventId } = session.metadata || {}
+
+  if (!eventId) {
+    console.error("[stripe webhook] Missing eventId in async failed payment", session.id)
+    return
+  }
+
+  await db
+    .update(eventPayments)
+    .set({ status: "failed", updatedAt: new Date() })
+    .where(eq(eventPayments.stripeCheckoutSessionId, session.id))
+}
+
+export async function handleAsyncPaymentSucceeded(session: Stripe.Checkout.Session) {
+  await handleCheckoutCompleted(session)
+}

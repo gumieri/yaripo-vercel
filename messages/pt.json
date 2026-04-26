@@ -16,7 +16,7 @@
     "noResults": "Nenhum resultado encontrado.",
     "comingSoon": "Em breve",
     "formats": "Formatos",
-    "liveRankings": "Rankings ao vivo",
+    "liveRankings": "Classificações ao vivo",
     "zeroSetup": "Zero instalação",
     "scoringIFSC": "IFSC",
     "scoringRedpoint": "Redpoint",
@@ -33,7 +33,7 @@
     "liveBadge": "Competições ao vivo",
     "title": "Competições de escalada,",
     "titleHighlight": "simplificadas.",
-    "description": "Gerencie competições de escalada com simplicidade e precisão. Rankings em tempo real, gerenciamento de filas e acompanhamento de desempenho.",
+    "description": "Gerencie competições de escalada com simplicidade e precisão. Classificações em tempo real, gerenciamento de filas e acompanhamento de desempenho.",
     "viewEvents": "Ver Eventos",
     "viewGyms": "Ver Ginásios",
     "footer": "Yaripo — Plataforma de Competições de Escalada"
@@ -48,7 +48,7 @@
   "EventDetail": {
     "backToEvents": "Voltar para eventos",
     "start": "Início",
-    "ranking": "Ranking",
+    "ranking": "Classificação",
     "noResults": "Nenhum resultado ainda.",
     "athlete": "Atleta",
     "category": "Categoria",
@@ -62,7 +62,7 @@
     "title": "Ginásios"
   },
   "Leaderboard": {
-    "title": "Ranking",
+    "title": "Classificação",
     "noResults": "Nenhum resultado ainda."
   },
   "Login": {

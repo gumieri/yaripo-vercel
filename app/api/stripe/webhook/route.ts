@@ -1,7 +1,7 @@
 import type Stripe from "stripe"
 import { headers } from "next/headers"
 import { stripe } from "@/lib/stripe/client"
-import { handleCheckoutCompleted, handleCheckoutExpired } from "@/lib/stripe/webhooks"
+import { handleCheckoutCompleted, handleCheckoutExpired, handlePaymentFailed, handleAsyncPaymentFailed, handleAsyncPaymentSucceeded } from "@/lib/stripe/webhooks"
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -41,6 +41,22 @@ export async function POST(req: Request) {
       case "checkout.session.expired": {
         const session = event.data.object as Stripe.Checkout.Session
         await handleCheckoutExpired(session)
+        break
+      }
+      case "payment_intent.payment_failed": {
+        const intent = event.data.object as unknown as Stripe.PaymentIntent
+        const session = { id: intent.id, metadata: intent.metadata } as unknown as Stripe.Checkout.Session
+        await handlePaymentFailed(session)
+        break
+      }
+      case "checkout.session.async_payment_failed": {
+        const session = event.data.object as Stripe.Checkout.Session
+        await handleAsyncPaymentFailed(session)
+        break
+      }
+      case "checkout.session.async_payment_succeeded": {
+        const session = event.data.object as Stripe.Checkout.Session
+        await handleAsyncPaymentSucceeded(session)
         break
       }
       default:

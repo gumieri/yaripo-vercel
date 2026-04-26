@@ -64,3 +64,31 @@ export function safeParseFloat(value: unknown, defaultValue: number = 0): number
   }
   return defaultValue
 }
+
+export function paymentRequiredResponse(c: Context, message: string = "Payment required"): Response {
+  return errorResponse(c, "PAYMENT_REQUIRED", message, 402)
+}
+
+export function methodNotAllowedResponse(c: Context): Response {
+  return errorResponse(c, "METHOD_NOT_ALLOWED", "Method not allowed", 405)
+}
+
+export function cacheHeaders(sMaxAge: number, staleWhileRevalidate: number): Record<string, string> {
+  return {
+    "Cache-Control": `public, s-maxage=${sMaxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+  }
+}
+
+export function internalServerErrorResponse(c: Context, message: string = "Internal server error"): Response {
+  return errorResponse(c, "INTERNAL_SERVER_ERROR", message, 500)
+}
+
+export function isPgUniqueConstraintError(error: unknown): boolean {
+  if (error instanceof Error) {
+    const cause = (error as Error & { cause?: { code?: string } }).cause
+    if (cause && typeof cause === "object" && "code" in cause && cause.code === "23505") {
+      return true
+    }
+  }
+  return false
+}

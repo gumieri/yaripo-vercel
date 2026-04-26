@@ -88,9 +88,9 @@ export const updateCategorySchema = z.object({
 export const createSectorSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
   orderIndex: nonNegativeIntSchema.default(0),
-  flashPoints: positiveIntSchema.default(1000),
-  pointsPerAttempt: nonNegativeIntSchema.default(100),
-  maxAttempts: positiveIntSchema.default(5),
+  flashPoints: z.number().int().min(0, "Flash points must be non-negative").default(1000),
+  pointsPerAttempt: z.number().int().min(0, "Points per attempt must be non-negative").default(100),
+  maxAttempts: z.number().int().min(1, "Max attempts must be at least 1").default(5),
 })
 
 export const updateSectorSchema = z.object({

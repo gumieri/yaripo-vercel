@@ -1,11 +1,11 @@
 import { Hono } from "hono"
 import { eq, and, count as countFn } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { events, categories, athletes, eventPayments, gyms, users } from "@/lib/db/schema"
+import { events, categories, athletes, eventPayments, users } from "@/lib/db/schema"
 import { authMiddleware, requireGymMember } from "@/lib/api/middleware/auth"
 import { createStripeCustomer, createEventCheckoutSession } from "@/lib/stripe/client"
 import { logAudit } from "@/lib/db/audit"
-import { notFoundResponse, validationErrorResponse, forbiddenResponse } from "@/lib/api/helpers"
+import { notFoundResponse, validationErrorResponse, forbiddenResponse, paymentRequiredResponse } from "@/lib/api/helpers"
 
 const gymRoutes = new Hono()
 
@@ -145,10 +145,7 @@ gymRoutes.post(
 
     const [user] = await db.select().from(users).where(eq(users.id, userId))
     if (!user || !user.stripeCustomerId) {
-      return c.json(
-        { success: false, error: { code: "PAYMENT_REQUIRED", message: "User has no payment method" } },
-        402,
-      )
+      return paymentRequiredResponse(c, "User has no payment method")
     }
 
     const session = await createEventCheckoutSession({

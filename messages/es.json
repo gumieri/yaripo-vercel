@@ -254,7 +254,7 @@
     "years": "años",
     "sectorCreated": "Sector creado",
     "sectorCreateError": "Error al crear sector",
-    "deleteSectorConfirm": "¿Eliminar sector \"{name}\"? Las colas y intentos serán eliminados.",
+    "deleteSectorConfirm": "¿Eliminar sector \"{name}\"? Las colas e intentos serán eliminados.",
     "sectorDeleted": "Sector eliminado",
     "deleteSectorError": "Error al eliminar",
     "sectorUpdateError": "Error al actualizar sector",
@@ -289,5 +289,18 @@
     "statusActive": "En curso",
     "statusCompleted": "Finalizado",
     "statusArchived": "Archivado"
+  },
+  "Invitations": {
+    "title": "Invitación de juez",
+    "invitedBy": "{organizer} te invitó a juzgar",
+    "eventName": "Evento",
+    "accept": "Aceptar",
+    "decline": "Declinar",
+    "accepted": "¡Invitación aceptada!",
+    "declined": "Invitación rechazada",
+    "signInToAccept": "Inicia sesión para responder",
+    "viewIn": "Ver en",
+    "alreadyResponded": "Esta invitación ya ha sido {status}",
+    "notFound": "Invitación no encontrada"
   }
 }

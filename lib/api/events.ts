@@ -2,9 +2,12 @@ import { Hono } from "hono"
 import { eq, sql, inArray, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { events, sectors, categories, athletes, attempts } from "@/lib/db/schema"
-import { notFoundResponse } from "@/lib/api/helpers"
+import { notFoundResponse, cacheHeaders } from "@/lib/api/helpers"
+import { rateLimitMiddleware } from "@/lib/api/middleware/rate-limit"
 
 const eventRoutes = new Hono()
+
+eventRoutes.use("/*", rateLimitMiddleware(100, 60_000))
 
 eventRoutes.get("/", async (c) => {
   const eventList = await db
@@ -22,9 +25,7 @@ eventRoutes.get("/", async (c) => {
     .where(inArray(events.status, ["published", "active", "completed"]))
     .orderBy(events.startsAt)
 
-  return c.json({ success: true, data: eventList }, 200, {
-    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-  })
+  return c.json({ success: true, data: eventList }, 200, cacheHeaders(60, 120))
 })
 
 eventRoutes.get("/:slug", async (c) => {
@@ -39,9 +40,7 @@ eventRoutes.get("/:slug", async (c) => {
     return notFoundResponse(c, "Event")
   }
 
-  return c.json({ success: true, data: event }, 200, {
-    "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
-  })
+  return c.json({ success: true, data: event }, 200, cacheHeaders(30, 60))
 })
 
 eventRoutes.get("/:slug/leaderboard", async (c) => {
@@ -157,7 +156,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
       rn: number
     }>(rawSql)
 
-    const rankings = result.rows.map((row: any) => ({
+    const rankings = result.rows.map((row) => ({
       rank: Number(row.rn),
       athlete: { id: row.athlete_id, name: row.athlete_name },
       category: row.category_name,
@@ -166,9 +165,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
       totalAttempts: Number(row.total_attempts),
     }))
 
-    return c.json({ success: true, data: { rankings, scoringType: "redpoint" } }, 200, {
-      "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
-    })
+    return c.json({ success: true, data: { rankings, scoringType: "redpoint" } }, 200, cacheHeaders(15, 30))
   }
 
   if (event.scoringType === "ifsc") {
@@ -210,9 +207,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
       totalAttempts: Number(row.totalAttempts),
     }))
 
-    return c.json({ success: true, data: { rankings: ranked, scoringType: "ifsc" } }, 200, {
-      "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
-    })
+    return c.json({ success: true, data: { rankings: ranked, scoringType: "ifsc" } }, 200, cacheHeaders(15, 30))
   }
 
   const rankings = await db
@@ -242,9 +237,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
     totalAttempts: Number(row.totalAttempts),
   }))
 
-  return c.json({ success: true, data: { rankings: ranked, scoringType: "simple" } }, 200, {
-    "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
-  })
+  return c.json({ success: true, data: { rankings: ranked, scoringType: "simple" } }, 200, cacheHeaders(15, 30))
 })
 
 eventRoutes.get("/:slug/sectors", async (c) => {
@@ -265,9 +258,7 @@ eventRoutes.get("/:slug/sectors", async (c) => {
     .where(eq(sectors.eventId, event.id))
     .orderBy(sectors.orderIndex)
 
-  return c.json({ success: true, data: sectorList }, 200, {
-    "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
-  })
+  return c.json({ success: true, data: sectorList }, 200, cacheHeaders(30, 60))
 })
 
 export { eventRoutes }

@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
+import type { EventDetail, Category, Sector, Athlete } from "@/lib/api/hooks"
+
 type Tab = "settings" | "categories" | "sectors" | "athletes"
 
 function formatLocalDatetime(dateStr: string): string {
@@ -63,17 +65,17 @@ export default function AdminEventDetailPage({
       </div>
 
       <div className="mb-6 flex gap-1 border-b">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+        {tabs.map((tabItem) => (
+<button
+            key={tabItem.key}
+            onClick={() => setTab(tabItem.key)}
             className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.key
+              tab === tabItem.key
                 ? "border-violet-600 text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            {t.label}
+            {tabItem.label}
           </button>
         ))}
       </div>
@@ -86,7 +88,7 @@ export default function AdminEventDetailPage({
   )
 }
 
-function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
+function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }) {
   const updateEvent = useUpdateEvent()
   const t = useTranslations('ManageEvent')
   const [form, setForm] = useState({
@@ -120,8 +122,8 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
         bestRoutesCount: form.bestRoutesCount !== "" ? Number(form.bestRoutesCount) : null,
       })
       toast.success(t('eventUpdated'))
-    } catch (error: any) {
-      if (error?.code === "CONFLICT") {
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && (error as { code: string }).code === "CONFLICT") {
         toast.error(t('slugExists'))
       } else {
         toast.error(t('updateError'))
@@ -243,7 +245,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: any }) {
   )
 }
 
-function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
+function CategoriesTab({ eventId, event }: { eventId: string; event: EventDetail }) {
   const createCategory = useCreateCategory()
   const deleteCategory = useDeleteCategory()
   const t = useTranslations('ManageEvent')
@@ -341,7 +343,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
         <p className="text-muted-foreground text-sm">{t('noCategories')}</p>
       ) : (
         <div className="space-y-2">
-          {event.categories.map((cat: any) => (
+          {event.categories.map((cat: Category) => (
             <div key={cat.id} className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <p className="text-foreground font-medium">{cat.name}</p>
@@ -367,7 +369,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: any }) {
   )
 }
 
-function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
+function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail }) {
   const createSector = useCreateSector()
   const deleteSector = useDeleteSector()
   const updateSector = useUpdateSector()
@@ -378,7 +380,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
   async function handleCreate() {
     if (!name.trim()) return
     try {
-      const payload: { eventId: string; [key: string]: any } = {
+      const payload: { eventId: string; [key: string]: unknown } = {
         eventId,
         name: name.trim(),
         orderIndex: (event.sectors?.length || 0),
@@ -406,7 +408,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
     }
   }
 
-  async function handleUpdateSector(sectorId: string, updates: Record<string, any>) {
+  async function handleUpdateSector(sectorId: string, updates: Record<string, unknown>) {
     try {
       await updateSector.mutateAsync({ eventId, sectorId, ...updates })
     } catch {
@@ -443,7 +445,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
         <p className="text-muted-foreground text-sm">{t('noSectors')}</p>
       ) : (
         <div className="space-y-2">
-          {event.sectors.map((sector: any, idx: number) => (
+          {event.sectors.map((sector: Sector, idx: number) => (
             <div key={sector.id} className="rounded-lg border p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -510,7 +512,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: any }) {
   )
 }
 
-function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
+function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }) {
   const createAthlete = useCreateAthlete()
   const bulkCreateAthletes = useBulkCreateAthletes()
   const deleteAthlete = useDeleteAthlete()
@@ -575,7 +577,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
   }
 
   function getCategoryName(catId: string) {
-    return categories.find((c: any) => c.id === catId)?.name || catId
+    return categories.find((c: Category) => c.id === catId)?.name || catId
   }
 
   return (
@@ -623,7 +625,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
               className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">{t('selectCategory')}</option>
-              {categories.map((cat: any) => (
+              {categories.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -648,7 +650,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
               className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">{t('selectCategory')}</option>
-              {categories.map((cat: any) => (
+              {categories.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -683,7 +685,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: any }) {
         <p className="text-muted-foreground text-sm">{t('noAthletes')}</p>
       ) : (
         <div className="space-y-1">
-          {event.athletes.map((athlete: any) => (
+          {event.athletes.map((athlete: Athlete) => (
             <div
               key={athlete.id}
               className="flex items-center justify-between rounded-lg border p-3"

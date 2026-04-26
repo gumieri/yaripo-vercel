@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing"
 import { useManageEvents, useDeleteEvent } from "@/lib/api/hooks"
+import type { EventSummary } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
@@ -65,7 +66,7 @@ export default function ManageEventsPage() {
 
       {events && events.length > 0 && (
         <div className="space-y-2">
-          {events.map((event: any) => (
+          {events.map((event: EventSummary) => (
             <div
               key={event.id}
               className="border-border/50 bg-card hover:border-border flex items-center justify-between rounded-lg border p-4 transition-colors"

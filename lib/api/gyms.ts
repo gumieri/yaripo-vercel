@@ -2,8 +2,12 @@ import { Hono } from "hono"
 import { eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { gyms } from "@/lib/db/schema"
+import { notFoundResponse, cacheHeaders } from "@/lib/api/helpers"
+import { rateLimitMiddleware } from "@/lib/api/middleware/rate-limit"
 
 const gymRoutes = new Hono()
+
+gymRoutes.use("/*", rateLimitMiddleware(100, 60_000))
 
 gymRoutes.get("/", async (c) => {
   const gymList = await db
@@ -16,9 +20,7 @@ gymRoutes.get("/", async (c) => {
     })
     .from(gyms)
 
-  return c.json({ success: true, data: gymList }, 200, {
-    "Cache-Control": "public, s-maxage=120, stale-while-revalidate=240",
-  })
+  return c.json({ success: true, data: gymList }, 200, cacheHeaders(120, 240))
 })
 
 gymRoutes.get("/:slug", async (c) => {
@@ -27,18 +29,10 @@ gymRoutes.get("/:slug", async (c) => {
   const [gym] = await db.select().from(gyms).where(eq(gyms.slug, slug))
 
   if (!gym) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "NOT_FOUND", message: "Gym not found" },
-      },
-      404,
-    )
+    return notFoundResponse(c, "Gym")
   }
 
-  return c.json({ success: true, data: gym }, 200, {
-    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-  })
+  return c.json({ success: true, data: gym }, 200, cacheHeaders(60, 120))
 })
 
 export { gymRoutes }

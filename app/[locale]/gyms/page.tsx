@@ -1,6 +1,7 @@
 "use client"
 
 import { useGyms } from "@/lib/api/hooks"
+import type { GymSummary } from "@/lib/api/hooks"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
 
@@ -28,7 +29,7 @@ export default function GymsPage() {
 
       {gyms && gyms.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {gyms.map((gym: any) => (
+          {gyms.map((gym: GymSummary) => (
             <div
               key={gym.id}
               className="bg-card rounded-lg border p-6 transition-shadow hover:shadow-md"

@@ -1,6 +1,7 @@
 export const authMiddleware = async (c: any, next: any) => {
   const email = c.req.header("x-test-user-email") || null
   c.set("userId", c.req.header("x-test-user-id") || null)
+  c.set("userEmail", c.req.header("x-test-user-email") || null)
   c.set("gymId", c.req.header("x-test-gym-id") || null)
   c.set("gymRole", c.req.header("x-test-gym-role") || null)
   c.set("eventId", c.req.header("x-test-event-id") || null)
@@ -10,36 +11,32 @@ export const authMiddleware = async (c: any, next: any) => {
   await next()
 }
 
-export function requireAuth() {
-  return async (c: any, next: any) => {
-    if (!c.req.header("x-test-user-id")) {
-      return c.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
-        401,
-      )
-    }
-    await next()
+export const requireAuth = async (c: any, next: any) => {
+  if (!c.req.header("x-test-user-id")) {
+    return c.json(
+      { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
+      401,
+    )
   }
+  await next()
 }
 
-export function requirePlatformAdmin() {
-  return async (c: any, next: any) => {
-    const userId = c.req.header("x-test-user-id")
-    const email = c.req.header("x-test-user-email")
-    if (!userId) {
-      return c.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
-        401,
-      )
-    }
-    if (email !== "admin@yaripo.app") {
-      return c.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Platform admin access required" } },
-        403,
-      )
-    }
-    await next()
+export const requirePlatformAdmin = async (c: any, next: any) => {
+  const userId = c.req.header("x-test-user-id")
+  const email = c.req.header("x-test-user-email")
+  if (!userId) {
+    return c.json(
+      { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
+      401,
+    )
   }
+  if (email !== "admin@yaripo.app") {
+    return c.json(
+      { success: false, error: { code: "FORBIDDEN", message: "Platform admin access required" } },
+      403,
+    )
+  }
+  await next()
 }
 
 export function requireEventMember(eventIdParam: string, roles: string[]) {

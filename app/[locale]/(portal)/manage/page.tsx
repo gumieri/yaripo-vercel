@@ -1,9 +1,7 @@
 import { Trophy, Users, Target } from "lucide-react"
-import { auth } from "@/lib/auth/server"
 import { getTranslations } from "next-intl/server"
 
 export default async function ManagePage() {
-  const session = await auth()
   const t = await getTranslations('Manage')
 
   return (

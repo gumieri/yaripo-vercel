@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing"
 import { useEvent, useEventSectors, useQueueStatus, useJoinQueue } from "@/lib/api/hooks"
+import type { Sector, QueueEntry } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { use } from "react"
 import { toast } from "sonner"
@@ -45,7 +46,7 @@ export default function AthleteEventPage({
       </p>
 
       <div className="space-y-3">
-        {sectors?.map((sector: any) => (
+        {sectors?.map((sector: Sector) => (
           <SectorCard key={sector.id} sector={sector} isRedpoint={event.scoringType === "redpoint"} />
         ))}
       </div>
@@ -62,27 +63,27 @@ export default function AthleteEventPage({
   )
 }
 
-function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }) {
+function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolean }) {
   const { data: queueData, isLoading } = useQueueStatus(sector.id)
   const joinQueue = useJoinQueue()
   const t = useTranslations('AthleteEvent')
 
   const myQueueEntry = queueData?.find(
-    (q: any) => q.status === "waiting" || q.status === "active",
+    (q: QueueEntry) => q.status === "waiting" || q.status === "active",
   )
   const isWaiting = myQueueEntry?.status === "waiting"
   const isActive = myQueueEntry?.status === "active"
   const position =
     (queueData
-      ?.filter((q: any) => q.status === "waiting")
-      .findIndex((q: any) => q.id === myQueueEntry?.id) ?? -1) + 1 || 0
+      ?.filter((q: QueueEntry) => q.status === "waiting")
+      .findIndex((q: QueueEntry) => q.id === myQueueEntry?.id) ?? -1) + 1 || 0
 
   async function handleJoin() {
     try {
       await joinQueue.mutateAsync({ sectorId: sector.id })
       toast.success(t('enterQueue'))
-    } catch (error: any) {
-      if (error?.code === "CONFLICT") {
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && (error as { code: string }).code === "CONFLICT") {
         toast.error(t('alreadyInQueue'))
       } else {
         toast.error(t('error'))

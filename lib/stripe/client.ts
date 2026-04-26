@@ -46,7 +46,7 @@ export async function createEventCheckoutSession(params: {
   athleteCount: number
   type: "publish" | "delta"
 }): Promise<Stripe.Checkout.Session> {
-  const lineItems: any[] = [
+  const lineItems: Array<{ price: string; quantity: number }> = [
     {
       price: getEventBasePriceId(),
       quantity: 1,

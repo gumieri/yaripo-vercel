@@ -1,6 +1,7 @@
 "use client"
 
 import { useEvent, useLeaderboard } from "@/lib/api/hooks"
+import type { LeaderboardEntry } from "@/lib/api/hooks"
 import { use } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Link } from "@/i18n/routing"
@@ -101,7 +102,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </tr>
             </thead>
             <tbody>
-              {leaderboard.rankings.map((row: any) => (
+              {leaderboard.rankings.map((row: LeaderboardEntry) => (
                 <tr key={row.athlete.id} className="border-b last:border-0">
                   <td className="px-4 py-3 font-medium">
                     {row.rank <= 3 && (

@@ -1,8 +1,9 @@
 import { createMiddleware } from "hono/factory"
 import { eq, and } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { gymMembers, gyms, eventMembers, events } from "@/lib/db/schema"
+import { gymMembers, gyms, eventMembers } from "@/lib/db/schema"
 import { auth } from "@/lib/auth/server"
+import { unauthorizedResponse, forbiddenResponse, validationErrorResponse, notFoundResponse } from "@/lib/api/helpers"
 import type { Session } from "next-auth"
 
 type AuthEnv = {
@@ -29,75 +30,41 @@ export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
   await next()
 })
 
-export function requireAuth() {
-  return createMiddleware<AuthEnv>(async (c, next) => {
-    const userId = c.get("userId")
-    if (!userId) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required" },
-        },
-        401,
-      )
-    }
-    await next()
-  })
-}
+export const requireAuth = createMiddleware<AuthEnv>(async (c, next) => {
+  const userId = c.get("userId")
+  if (!userId) {
+    return unauthorizedResponse(c)
+  }
+  await next()
+})
 
-export function requirePlatformAdmin() {
-  return createMiddleware<AuthEnv>(async (c, next) => {
-    const userId = c.get("userId")
-    const isPlatformAdmin = c.get("isPlatformAdmin")
+export const requirePlatformAdmin = createMiddleware<AuthEnv>(async (c, next) => {
+  const userId = c.get("userId")
+  const isPlatformAdmin = c.get("isPlatformAdmin")
 
-    if (!userId) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required" },
-        },
-        401,
-      )
-    }
+  if (!userId) {
+    return unauthorizedResponse(c)
+  }
 
-    if (!isPlatformAdmin) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Platform admin access required" },
-        },
-        403,
-      )
-    }
+  if (!isPlatformAdmin) {
+    return forbiddenResponse(c, "Platform admin access required")
+  }
 
-    await next()
-  })
-}
+  await next()
+})
 
 export function requireEventMember(eventIdParam: string, roles: string[]) {
   return createMiddleware<AuthEnv>(async (c, next) => {
     const userId = c.get("userId")
 
     if (!userId) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required" },
-        },
-        401,
-      )
+      return unauthorizedResponse(c)
     }
 
     const eventId = c.req.param(eventIdParam)
 
     if (!eventId) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "BAD_REQUEST", message: "Event ID is required" },
-        },
-        400,
-      )
+      return validationErrorResponse(c, "Event ID is required")
     }
 
     const [membership] = await db
@@ -106,23 +73,11 @@ export function requireEventMember(eventIdParam: string, roles: string[]) {
       .where(and(eq(eventMembers.eventId, eventId), eq(eventMembers.userId, userId)))
 
     if (!membership) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Not a member of this event" },
-        },
-        403,
-      )
+      return forbiddenResponse(c, "Not a member of this event")
     }
 
     if (!roles.includes(membership.role)) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Insufficient event permissions" },
-        },
-        403,
-      )
+      return forbiddenResponse(c, "Insufficient event permissions")
     }
 
     c.set("eventId", eventId)
@@ -145,25 +100,13 @@ export function requireGymMember(slugParam: string, roles: string[]) {
     const userId = c.get("userId")
 
     if (!userId) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required" },
-        },
-        401,
-      )
+      return unauthorizedResponse(c)
     }
 
     const gymSlug = c.req.param(slugParam)
 
     if (!gymSlug) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "BAD_REQUEST", message: "Gym slug is required" },
-        },
-        400,
-      )
+      return validationErrorResponse(c, "Gym slug is required")
     }
 
     const [gym] = await db
@@ -172,13 +115,7 @@ export function requireGymMember(slugParam: string, roles: string[]) {
       .where(eq(gyms.slug, gymSlug))
 
     if (!gym) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Gym not found" },
-        },
-        404,
-      )
+      return notFoundResponse(c, "Gym")
     }
 
     const [membership] = await db
@@ -187,23 +124,11 @@ export function requireGymMember(slugParam: string, roles: string[]) {
       .where(and(eq(gymMembers.gymId, gym.id), eq(gymMembers.userId, userId)))
 
     if (!membership) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Not a member of this gym" },
-        },
-        403,
-      )
+      return forbiddenResponse(c, "Not a member of this gym")
     }
 
     if (!roles.includes(membership.role)) {
-      return c.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Insufficient gym permissions" },
-        },
-        403,
-      )
+      return forbiddenResponse(c, "Insufficient gym permissions")
     }
 
     c.set("gymId", gym.id)

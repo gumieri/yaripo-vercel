@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, uniqueIndex } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core"
 
 export const gyms = pgTable("gyms", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -56,7 +56,10 @@ export const verificationTokens = pgTable("verification_tokens", {
   identifier: text("identifier").notNull(),
   token: text("token").primaryKey(),
   expires: timestamp("expires", { withTimezone: true }).notNull(),
-})
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  identifierIdx: index("verification_tokens_identifier_idx").on(table.identifier),
+}))
 
 export const gymMembers = pgTable("gym_members", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -70,6 +73,7 @@ export const gymMembers = pgTable("gym_members", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   uniqueGymUser: uniqueIndex("gym_members_gym_id_user_id_idx").on(table.gymId, table.userId),
+  gymRoleIdx: index("gym_members_gym_id_role_idx").on(table.gymId, table.role),
 }))
 
 export const events = pgTable("events", {
@@ -109,6 +113,7 @@ export const eventMembers = pgTable("event_members", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   uniqueEventUser: uniqueIndex("event_members_event_id_user_id_idx").on(table.eventId, table.userId),
+  eventRoleIdx: index("event_members_event_id_role_idx").on(table.eventId, table.role),
 }))
 
 export const eventJudgeInvitations = pgTable("event_judge_invitations", {
@@ -134,6 +139,8 @@ export const categories = pgTable("categories", {
   gender: text("gender", { enum: ["male", "female", "open"] }).notNull(),
   minAge: integer("min_age"),
   maxAge: integer("max_age"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
 
 export const sectors = pgTable("sectors", {
@@ -147,6 +154,7 @@ export const sectors = pgTable("sectors", {
   pointsPerAttempt: integer("points_per_attempt").default(100),
   maxAttempts: integer("max_attempts").default(5),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
 
 export const athletes = pgTable("athletes", {
@@ -158,6 +166,7 @@ export const athletes = pgTable("athletes", {
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
   externalId: text("external_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
 
 export const sectorQueues = pgTable("sector_queues", {
@@ -174,7 +183,10 @@ export const sectorQueues = pgTable("sector_queues", {
     .default("waiting")
     .notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => ({
+  sectorStatusIdx: index("sector_queues_sector_id_status_idx").on(table.sectorId, table.status),
+  athleteStatusIdx: index("sector_queues_athlete_id_status_idx").on(table.athleteId, table.status),
+}))
 
 export const attempts = pgTable("attempts", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -192,7 +204,10 @@ export const attempts = pgTable("attempts", {
   resultData: jsonb("result_data"),
   idempotencyKey: text("idempotency_key").notNull().unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => ({
+  sectorAthleteTopIdx: index("attempts_sector_id_athlete_id_top_idx").on(table.sectorId, table.athleteId, table.isTop),
+  sectorAthleteIdx: index("attempts_sector_id_athlete_id_idx").on(table.sectorId, table.athleteId),
+}))
 
 export const auditLogs = pgTable("audit_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -203,7 +218,10 @@ export const auditLogs = pgTable("audit_logs", {
   oldValues: jsonb("old_values"),
   newValues: jsonb("new_values"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => ({
+  resourceTypeResourceIdIdx: index("audit_logs_resource_type_resource_id_idx").on(table.resourceType, table.resourceId),
+  userIdCreatedAtIdx: index("audit_logs_user_id_created_at_idx").on(table.userId, table.createdAt),
+}))
 
 export const eventPayments = pgTable("event_payments", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -223,4 +241,7 @@ export const eventPayments = pgTable("event_payments", {
   stripeCustomerId: text("stripe_customer_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => ({
+  eventIdTypeIdx: index("event_payments_event_id_type_idx").on(table.eventId, table.type),
+  eventTypeStatusIdx: index("event_payments_event_id_type_status_idx").on(table.eventId, table.type, table.status),
+}))

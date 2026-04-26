@@ -62,6 +62,20 @@ manageRoutes.get("/audit-logs", authMiddleware, requirePlatformAdmin, async (c) 
   })
 })
 
+const eventSelectFields = {
+  id: events.id,
+  name: events.name,
+  slug: events.slug,
+  description: events.description,
+  scoringType: events.scoringType,
+  startsAt: events.startsAt,
+  endsAt: events.endsAt,
+  status: events.status,
+  gymId: events.gymId,
+  createdBy: events.createdBy,
+  createdAt: events.createdAt,
+}
+
 manageRoutes.get("/events", authMiddleware, requireAuth, async (c) => {
   const userId = c.get("userId")
   const isPlatformAdmin = c.get("isPlatformAdmin")
@@ -70,36 +84,12 @@ manageRoutes.get("/events", authMiddleware, requireAuth, async (c) => {
 
   if (isPlatformAdmin) {
     eventList = await db
-      .select({
-        id: events.id,
-        name: events.name,
-        slug: events.slug,
-        description: events.description,
-        scoringType: events.scoringType,
-        startsAt: events.startsAt,
-        endsAt: events.endsAt,
-        status: events.status,
-        gymId: events.gymId,
-        createdBy: events.createdBy,
-        createdAt: events.createdAt,
-      })
+      .select(eventSelectFields)
       .from(events)
       .orderBy(desc(events.createdAt))
   } else {
     eventList = await db
-      .select({
-        id: events.id,
-        name: events.name,
-        slug: events.slug,
-        description: events.description,
-        scoringType: events.scoringType,
-        startsAt: events.startsAt,
-        endsAt: events.endsAt,
-        status: events.status,
-        gymId: events.gymId,
-        createdBy: events.createdBy,
-        createdAt: events.createdAt,
-      })
+      .select(eventSelectFields)
       .from(events)
       .innerJoin(eventMembers, eq(events.id, eventMembers.eventId))
       .where(and(eq(eventMembers.userId, userId!), eq(eventMembers.role, "organizer")))

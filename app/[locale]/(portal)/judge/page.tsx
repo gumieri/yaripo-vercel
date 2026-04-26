@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing"
 import { useEvents } from "@/lib/api/hooks"
+import type { EventSummary } from "@/lib/api/hooks"
 import { useTranslations } from "next-intl"
 
 export default function JudgePage() {
@@ -21,9 +22,9 @@ export default function JudgePage() {
 
       {events && (
         <div className="space-y-2">
-          {events
-            .filter((e: any) => e.status === "active" || e.status === "published")
-            .map((event: any) => (
+        {events
+          .filter((e: EventSummary) => e.status === "active" || e.status === "published")
+          .map((event: EventSummary) => (
               <Link key={event.id} href={`/judge/${event.slug}`}>
                 <div className="hover:bg-muted rounded-lg border p-4 transition-colors">
                   <p className="text-foreground font-medium">{event.name}</p>

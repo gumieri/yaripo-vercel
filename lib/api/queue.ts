@@ -1,14 +1,14 @@
 import { Hono } from "hono"
-import { eq, and, asc, inArray } from "drizzle-orm"
+import { eq, and, asc, inArray, sql } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { sectorQueues, athletes, sectors, categories, eventMembers } from "@/lib/db/schema"
-import { authMiddleware, requireAuth, requireEventJudge } from "@/lib/api/middleware/auth"
+import { authMiddleware, requireAuth } from "@/lib/api/middleware/auth"
 import { joinQueueSchema, popQueueSchema, dropQueueSchema } from "@/lib/api/validations"
-import { validationErrorResponse, notFoundResponse, conflictResponse } from "@/lib/api/helpers"
+import { validationErrorResponse, notFoundResponse, conflictResponse, forbiddenResponse, cacheHeaders } from "@/lib/api/helpers"
 
 const queueRoutes = new Hono()
 
-queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
+queueRoutes.post("/join", authMiddleware, requireAuth, async (c) => {
   const userId = c.get("userId")!
   const body = await c.req.json()
 
@@ -66,16 +66,16 @@ queueRoutes.post("/join", authMiddleware, requireAuth(), async (c) => {
   return c.json({ success: true, data: queue }, 201)
 })
 
-queueRoutes.post("/pop", authMiddleware, requireAuth(), async (c) => {
+queueRoutes.post("/pop", authMiddleware, requireAuth, async (c) => {
   const userId = c.get("userId")!
   const body = await c.req.json()
 
-  const result = popQueueSchema.safeParse(body)
-  if (!result.success) {
-    return validationErrorResponse(c, result.error.issues[0].message)
+  const parseResult = popQueueSchema.safeParse(body)
+  if (!parseResult.success) {
+    return validationErrorResponse(c, parseResult.error.issues[0].message)
   }
 
-  const { sectorId } = result.data
+  const { sectorId } = parseResult.data
 
   const [sector] = await db
     .select({ eventId: sectors.eventId })
@@ -92,51 +92,53 @@ queueRoutes.post("/pop", authMiddleware, requireAuth(), async (c) => {
     .where(and(eq(eventMembers.eventId, sector.eventId), eq(eventMembers.userId, userId)))
 
   if (!membership || (membership.role !== "organizer" && membership.role !== "judge")) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "FORBIDDEN", message: "Judge access required" },
-      },
-      403,
-    )
+    return forbiddenResponse(c, "Judge access required")
   }
 
-  const [queueEntry] = await db
-    .select()
-    .from(sectorQueues)
-    .where(and(eq(sectorQueues.sectorId, sectorId), eq(sectorQueues.status, "waiting")))
-    .orderBy(asc(sectorQueues.createdAt))
-    .limit(1)
+  const result = await db.transaction(async (tx) => {
+    const queueResult = await tx.execute<{
+      id: string
+      athlete_id: string
+      status: string
+    }>(sql`
+      UPDATE sector_queues
+      SET status = 'active'
+      WHERE id = (
+        SELECT id FROM sector_queues
+        WHERE sector_id = ${sectorId} AND status = 'waiting'
+        ORDER BY created_at ASC
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED
+      )
+      RETURNING id, athlete_id, status
+    `)
 
-  if (!queueEntry) {
+    const row = queueResult.rows[0]
+
+    if (!row) {
+      return null
+    }
+
+    const [athlete] = await tx.select().from(athletes).where(eq(athletes.id, row.athlete_id))
+
+    return { row, athlete }
+  })
+
+  if (!result) {
     return c.json({ success: true, data: null })
   }
-
-  const [updated] = await db
-    .update(sectorQueues)
-    .set({ status: "active" })
-    .where(
-      and(eq(sectorQueues.id, queueEntry.id), eq(sectorQueues.status, "waiting")),
-    )
-    .returning()
-
-  if (!updated) {
-    return c.json({ success: true, data: null })
-  }
-
-  const [athlete] = await db.select().from(athletes).where(eq(athletes.id, updated.athleteId))
 
   return c.json({
     success: true,
     data: {
-      id: updated.id,
-      athlete: athlete ? { id: athlete.id, name: athlete.name } : null,
-      status: updated.status,
+      id: result.row.id,
+      athlete: result.athlete ? { id: result.athlete.id, name: result.athlete.name } : null,
+      status: result.row.status,
     },
   })
 })
 
-queueRoutes.post("/drop", authMiddleware, requireAuth(), async (c) => {
+queueRoutes.post("/drop", authMiddleware, requireAuth, async (c) => {
   const userId = c.get("userId")!
   const body = await c.req.json()
 
@@ -171,13 +173,7 @@ queueRoutes.post("/drop", authMiddleware, requireAuth(), async (c) => {
     .where(and(eq(eventMembers.eventId, sector.eventId), eq(eventMembers.userId, userId)))
 
   if (!membership || (membership.role !== "organizer" && membership.role !== "judge")) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "FORBIDDEN", message: "Judge access required" },
-      },
-      403,
-    )
+    return forbiddenResponse(c, "Judge access required")
   }
 
   const [updated] = await db
@@ -193,7 +189,7 @@ queueRoutes.post("/drop", authMiddleware, requireAuth(), async (c) => {
   return c.json({ success: true, data: updated })
 })
 
-queueRoutes.get("/status", authMiddleware, requireAuth(), async (c) => {
+queueRoutes.get("/status", authMiddleware, requireAuth, async (c) => {
   const sectorId = c.req.query("sector_id")
 
   if (!sectorId) {
@@ -218,9 +214,7 @@ queueRoutes.get("/status", authMiddleware, requireAuth(), async (c) => {
     )
     .orderBy(asc(sectorQueues.createdAt))
 
-  return c.json({ success: true, data: queue }, 200, {
-    "Cache-Control": "public, s-maxage=5, stale-while-revalidate=10",
-  })
+  return c.json({ success: true, data: queue }, 200, cacheHeaders(5, 10))
 })
 
 export { queueRoutes }

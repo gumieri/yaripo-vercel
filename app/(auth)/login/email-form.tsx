@@ -60,8 +60,12 @@ export function EmailForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="relative">
+        <label htmlFor="email" className="sr-only">
+          {t('Login.emailPlaceholder')}
+        </label>
         <Mail className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
         <input
+          id="email"
           type="email"
           required
           value={email}

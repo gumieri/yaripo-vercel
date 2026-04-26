@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCreateEvent, useManageGyms } from "@/lib/api/hooks"
+import type { GymSummary } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -51,8 +52,8 @@ export default function NewEventPage() {
       const result = await createEvent.mutateAsync(data)
       toast.success(t('createSuccess'))
       router.push(`/manage/events/${result.id}`)
-    } catch (error: any) {
-      if (error?.code === "CONFLICT") {
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && (error as { code: string }).code === "CONFLICT") {
         toast.error(t('slugExists'))
       } else {
         toast.error(t('createError'))
@@ -104,7 +105,7 @@ export default function NewEventPage() {
           <label className="text-foreground mb-1 block text-sm font-medium">{t('gym')}</label>
             <select {...register("gymId")} className={inputCls}>
               <option value="">{t('noGym')}</option>
-              {gyms?.map((gym: any) => (
+                {gyms?.map((gym: GymSummary) => (
                 <option key={gym.id} value={gym.id}>
                   {gym.name}
                 </option>

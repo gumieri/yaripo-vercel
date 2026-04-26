@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing"
 import { useEvent, useEventSectors, useQueueStatus, usePopQueue, useDropQueue } from "@/lib/api/hooks"
+import type { Sector, QueueEntry } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { use } from "react"
 import { toast } from "sonner"
@@ -45,7 +46,7 @@ export default function JudgeEventPage({
       </p>
 
       <div className="space-y-3">
-        {sectors?.map((sector: any) => (
+        {sectors?.map((sector: Sector) => (
           <SectorCard key={sector.id} sector={sector} isRedpoint={event.scoringType === "redpoint"} />
         ))}
       </div>
@@ -53,25 +54,22 @@ export default function JudgeEventPage({
   )
 }
 
-function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }) {
+function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolean }) {
   const { data: queueData, isLoading } = useQueueStatus(sector.id)
   const popQueue = usePopQueue()
   const dropQueue = useDropQueue()
   const t = useTranslations('JudgeEvent')
 
-  const activeEntry = queueData?.find((q: any) => q.status === "active")
-  const waitingCount = queueData?.filter((q: any) => q.status === "waiting").length || 0
+  const activeEntry = queueData?.find((q: QueueEntry) => q.status === "active")
+  const waitingCount = queueData?.filter((q: QueueEntry) => q.status === "waiting").length || 0
+  void waitingCount
 
   async function handleCallNext() {
     try {
       await popQueue.mutateAsync({ sectorId: sector.id })
       toast.success(t('callNextSuccess'))
-    } catch (error: any) {
-      if (error?.code === "CONFLICT") {
-        toast.error(t('alreadyInQueue'))
-      } else {
-        toast.error(t('callNextError'))
-      }
+    } catch {
+      toast.error(t('callNextError'))
     }
   }
 
@@ -80,7 +78,7 @@ function SectorCard({ sector, isRedpoint }: { sector: any; isRedpoint: boolean }
     try {
       await dropQueue.mutateAsync({ queueId: activeEntry.id })
       toast.success(t('dropSuccess'))
-    } catch (error: any) {
+    } catch {
       toast.error(t('dropError'))
     }
   }

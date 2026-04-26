@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing"
 import { useEvents } from "@/lib/api/hooks"
+import type { EventSummary } from "@/lib/api/hooks"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations, useLocale } from "next-intl"
@@ -31,7 +32,7 @@ export default function EventsPage() {
 
       {events && events.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {events.map((event: any) => (
+          {events.map((event: EventSummary) => (
             <Link key={event.id} href={`/events/${event.slug}`}>
               <Card className="transition-shadow hover:shadow-md">
                 <CardContent className="p-6">

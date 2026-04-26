@@ -35,7 +35,7 @@ export function ManageNav() {
               }`}
             >
               <Icon className="h-4 w-4" />
-              {t(item.label as keyof typeof t)}
+              {t(item.label as "Manage" | "Events" | "Invitations")}
             </Link>
           )
         })}

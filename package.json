@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "format-check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "prepare": "husky",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
@@ -17,6 +18,15 @@
     "db:seed": "tsx lib/db/seed/run.ts",
     "test": "vitest run",
     "test:watch": "vitest"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
@@ -58,6 +68,8 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.2",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",

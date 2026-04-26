@@ -3,9 +3,14 @@ import { eq, and, count as countFn } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { events, categories, athletes, eventPayments, users } from "@/lib/db/schema"
 import { authMiddleware, requireGymMember } from "@/lib/api/middleware/auth"
-import { createStripeCustomer, createEventCheckoutSession } from "@/lib/stripe/client"
+import { createStripeCustomer, createStripeCheckoutSession } from "@/lib/stripe/client"
 import { logAudit } from "@/lib/db/audit"
-import { notFoundResponse, validationErrorResponse, forbiddenResponse, paymentRequiredResponse } from "@/lib/api/helpers"
+import {
+  notFoundResponse,
+  validationErrorResponse,
+  forbiddenResponse,
+  paymentRequiredResponse,
+} from "@/lib/api/helpers"
 
 const gymRoutes = new Hono()
 
@@ -59,7 +64,7 @@ gymRoutes.post(
       await db.update(users).set({ stripeCustomerId: customerId }).where(eq(users.id, userId))
     }
 
-    const session = await createEventCheckoutSession({
+    const session = await createStripeCheckoutSession({
       customerId,
       gymId,
       eventId,
@@ -148,7 +153,7 @@ gymRoutes.post(
       return paymentRequiredResponse(c, "User has no payment method")
     }
 
-    const session = await createEventCheckoutSession({
+    const session = await createStripeCheckoutSession({
       customerId: user.stripeCustomerId,
       gymId,
       eventId,

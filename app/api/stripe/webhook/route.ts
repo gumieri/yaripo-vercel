@@ -1,7 +1,12 @@
 import type Stripe from "stripe"
 import { headers } from "next/headers"
-import { stripe } from "@/lib/stripe/client"
-import { handleCheckoutCompleted, handleCheckoutExpired, handlePaymentFailed, handleAsyncPaymentFailed, handleAsyncPaymentSucceeded } from "@/lib/stripe/webhooks"
+import {
+  handleCheckoutCompleted,
+  handleCheckoutExpired,
+  handlePaymentFailed,
+  handleAsyncPaymentFailed,
+  handleAsyncPaymentSucceeded,
+} from "@/lib/stripe/webhooks"
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -14,7 +19,10 @@ export async function POST(req: Request) {
     })
   }
 
+  // Dynamic import to avoid Edge Runtime issues
+  const { getStripeInstance } = await import("@/lib/stripe/client")
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
   if (!webhookSecret) {
     console.error("[stripe webhook] STRIPE_WEBHOOK_SECRET is not set")
     return new Response(JSON.stringify({ error: "Webhook secret not configured" }), {
@@ -25,7 +33,8 @@ export async function POST(req: Request) {
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    const stripeLib = await getStripeInstance()
+    event = stripeLib.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err) {
     console.error("[stripe webhook] Signature verification failed", err)
     return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 })
@@ -45,7 +54,10 @@ export async function POST(req: Request) {
       }
       case "payment_intent.payment_failed": {
         const intent = event.data.object as unknown as Stripe.PaymentIntent
-        const session = { id: intent.id, metadata: intent.metadata } as unknown as Stripe.Checkout.Session
+        const session = {
+          id: intent.id,
+          metadata: intent.metadata,
+        } as unknown as Stripe.Checkout.Session
         await handlePaymentFailed(session)
         break
       }

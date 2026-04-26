@@ -1,14 +1,20 @@
-import Stripe from "stripe"
+// Use dynamic import to avoid Edge Runtime issues
+import type Stripe from "stripe"
 
-const secretKey = process.env.STRIPE_SECRET_KEY
-
-if (!secretKey && process.env.NODE_ENV !== "test") {
-  throw new Error("STRIPE_SECRET_KEY is not set")
+const getStripe = async () => {
+  const stripe = await import("stripe")
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey && process.env.NODE_ENV !== "test") {
+    throw new Error("STRIPE_SECRET_KEY is not set")
+  }
+  return new stripe.default(secretKey || "sk_test_mock", {
+    typescript: true,
+  })
 }
 
-export const stripe = new Stripe(secretKey || "sk_test_mock", {
-  typescript: true,
-})
+export async function getStripeInstance() {
+  return getStripe()
+}
 
 export function getEventBasePriceId(): string {
   const id = process.env.STRIPE_EVENT_BASE_PRICE_ID
@@ -31,6 +37,14 @@ export async function createStripeCustomer(params: {
   name: string
   metadata?: Record<string, string>
 }): Promise<Stripe.Customer> {
+  const { default: Stripe } = await import("stripe")
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey && process.env.NODE_ENV !== "test") {
+    throw new Error("STRIPE_SECRET_KEY is not set")
+  }
+  const stripe = new Stripe(secretKey || "sk_test_mock", {
+    typescript: true,
+  })
   return stripe.customers.create({
     email: params.email,
     name: params.name,
@@ -38,7 +52,7 @@ export async function createStripeCustomer(params: {
   })
 }
 
-export async function createEventCheckoutSession(params: {
+export async function createStripeCheckoutSession(params: {
   customerId: string
   gymId: string
   eventId: string
@@ -46,6 +60,7 @@ export async function createEventCheckoutSession(params: {
   athleteCount: number
   type: "publish" | "delta"
 }): Promise<Stripe.Checkout.Session> {
+  const stripe = await getStripeInstance()
   const lineItems: Array<{ price: string; quantity: number }> = [
     {
       price: getEventBasePriceId(),

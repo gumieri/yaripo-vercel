@@ -101,6 +101,12 @@ export interface BulkCreateResult {
   count: number
 }
 
+export interface EventPhaseData {
+  currentPhase: string
+  metadata: Record<string, unknown>
+  durationMs: number | null
+}
+
 export function useEvents() {
   return useQuery({
     queryKey: ["events"],
@@ -240,11 +246,28 @@ export function useCreateEvent() {
   })
 }
 
+export function useCreateBoulderFestival() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) =>
+      apiFetch<EventDetail>("/manage/events/boulder-festival", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["manage", "events"] })
+    },
+  })
+}
+
 export function useUpdateEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
-      apiFetch<EventDetail>(`/manage/events/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+      apiFetch<EventDetail>(`/manage/events/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["manage", "events"] })
       qc.invalidateQueries({ queryKey: ["manage", "events", variables.id] })
@@ -390,6 +413,51 @@ export function useDeleteAthlete() {
       }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId] })
+    },
+  })
+}
+
+export function useEventPhase(eventId: string) {
+  return useQuery({
+    queryKey: ["manage", "events", eventId, "phase"],
+    queryFn: () => apiFetch<EventPhaseData>(`/manage/events/${eventId}/phase`),
+    enabled: !!eventId,
+    refetchInterval: 10_000,
+  })
+}
+
+export function useTransitionPhase() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      toPhase,
+      metadata,
+    }: {
+      eventId: string
+      toPhase: string
+      metadata?: Record<string, unknown>
+    }) =>
+      apiFetch<{ currentPhase: string }>(`/manage/events/${eventId}/phase/transition`, {
+        method: "POST",
+        body: JSON.stringify({ toPhase, metadata }),
+      }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId, "phase"] })
+    },
+  })
+}
+
+export function useUpdatePhaseMetadata() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ eventId, metadata }: { eventId: string; metadata: Record<string, unknown> }) =>
+      apiFetch<{ message: string }>(`/manage/events/${eventId}/phase/metadata`, {
+        method: "PATCH",
+        body: JSON.stringify({ metadata }),
+      }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId, "phase"] })
     },
   })
 }

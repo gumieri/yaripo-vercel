@@ -2,6 +2,7 @@ import { z } from "zod"
 
 export const eventScoringTypeEnum = z.enum(["simple", "ifsc", "redpoint"])
 export const eventStatusEnum = z.enum(["draft", "published", "active", "completed", "archived"])
+export const eventPhaseEnum = z.enum(["prep", "onboard", "engage", "live", "wrapup"])
 export const gymMemberRoleEnum = z.enum(["owner", "admin", "judge"])
 export const categoryGenderEnum = z.enum(["male", "female", "open"])
 export const queueStatusEnum = z.enum(["waiting", "active", "completed", "dropped"])
@@ -43,6 +44,8 @@ export const createEventSchema = z.object({
   description: z.string().trim().max(2000, "Description too long").nullish().default(null),
   startsAt: z.string().datetime("Invalid start date").nullish().default(null),
   endsAt: z.string().datetime("Invalid end date").nullish().default(null),
+  eventFormat: z.enum(["redpoint", "onsight", "flash"]).nullish().default("redpoint"),
+  eventConfig: z.record(z.string(), z.unknown()).nullish().default(null),
 })
 
 export const updateEventSchema = z.object({
@@ -54,21 +57,13 @@ export const updateEventSchema = z.object({
     .max(100, "Slug too long")
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes only")
     .optional(),
-  description: z
-    .string()
-    .trim()
-    .max(2000, "Description too long")
-    .nullish()
-    .optional(),
+  description: z.string().trim().max(2000, "Description too long").nullish().optional(),
   scoringType: eventScoringTypeEnum.optional(),
-  startsAt: z
-    .union([z.string().datetime("Invalid start date"), z.literal(null)])
-    .optional(),
-  endsAt: z
-    .union([z.string().datetime("Invalid end date"), z.literal(null)])
-    .optional(),
+  startsAt: z.union([z.string().datetime("Invalid start date"), z.literal(null)]).optional(),
+  endsAt: z.union([z.string().datetime("Invalid end date"), z.literal(null)]).optional(),
   status: eventStatusEnum.optional(),
   bestRoutesCount: optionalPositiveIntSchema,
+  eventConfig: z.record(z.string(), z.unknown()).nullish().optional(),
 })
 
 export const createCategorySchema = z.object({

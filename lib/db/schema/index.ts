@@ -1,4 +1,14 @@
-import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core"
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  uuid,
+  jsonb,
+  uniqueIndex,
+  index,
+} from "drizzle-orm/pg-core"
 
 export const gyms = pgTable("gyms", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -52,29 +62,37 @@ export const sessions = pgTable("sessions", {
   expires: timestamp("expires", { withTimezone: true }).notNull(),
 })
 
-export const verificationTokens = pgTable("verification_tokens", {
-  identifier: text("identifier").notNull(),
-  token: text("token").primaryKey(),
-  expires: timestamp("expires", { withTimezone: true }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  identifierIdx: index("verification_tokens_identifier_idx").on(table.identifier),
-}))
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").primaryKey(),
+    expires: timestamp("expires", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    identifierIdx: index("verification_tokens_identifier_idx").on(table.identifier),
+  }),
+)
 
-export const gymMembers = pgTable("gym_members", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  gymId: uuid("gym_id")
-    .notNull()
-    .references(() => gyms.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  role: text("role", { enum: ["owner", "admin", "judge"] }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  uniqueGymUser: uniqueIndex("gym_members_gym_id_user_id_idx").on(table.gymId, table.userId),
-  gymRoleIdx: index("gym_members_gym_id_role_idx").on(table.gymId, table.role),
-}))
+export const gymMembers = pgTable(
+  "gym_members",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    gymId: uuid("gym_id")
+      .notNull()
+      .references(() => gyms.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["owner", "admin", "judge"] }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueGymUser: uniqueIndex("gym_members_gym_id_user_id_idx").on(table.gymId, table.userId),
+    gymRoleIdx: index("gym_members_gym_id_role_idx").on(table.gymId, table.role),
+  }),
+)
 
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -97,24 +115,39 @@ export const events = pgTable("events", {
   })
     .default("draft")
     .notNull(),
+  phase: text("phase", {
+    enum: ["prep", "onboard", "engage", "live", "wrapup"],
+  })
+    .default("prep")
+    .notNull(),
+  phaseStartedAt: timestamp("phase_started_at", { withTimezone: true }),
+  phaseMetadata: jsonb("phase_metadata").$type<Record<string, unknown>>(),
+  eventConfig: jsonb("event_config").$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
 
-export const eventMembers = pgTable("event_members", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  eventId: uuid("event_id")
-    .notNull()
-    .references(() => events.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  role: text("role", { enum: ["organizer", "judge"] }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  uniqueEventUser: uniqueIndex("event_members_event_id_user_id_idx").on(table.eventId, table.userId),
-  eventRoleIdx: index("event_members_event_id_role_idx").on(table.eventId, table.role),
-}))
+export const eventMembers = pgTable(
+  "event_members",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["organizer", "judge"] }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueEventUser: uniqueIndex("event_members_event_id_user_id_idx").on(
+      table.eventId,
+      table.userId,
+    ),
+    eventRoleIdx: index("event_members_event_id_role_idx").on(table.eventId, table.role),
+  }),
+)
 
 export const eventJudgeInvitations = pgTable("event_judge_invitations", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -169,79 +202,117 @@ export const athletes = pgTable("athletes", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
 
-export const sectorQueues = pgTable("sector_queues", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  sectorId: uuid("sector_id")
-    .notNull()
-    .references(() => sectors.id, { onDelete: "cascade" }),
-  athleteId: uuid("athlete_id")
-    .notNull()
-    .references(() => athletes.id, { onDelete: "cascade" }),
-  status: text("status", {
-    enum: ["waiting", "active", "completed", "dropped"],
-  })
-    .default("waiting")
-    .notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  sectorStatusIdx: index("sector_queues_sector_id_status_idx").on(table.sectorId, table.status),
-  athleteStatusIdx: index("sector_queues_athlete_id_status_idx").on(table.athleteId, table.status),
-}))
+export const sectorQueues = pgTable(
+  "sector_queues",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sectorId: uuid("sector_id")
+      .notNull()
+      .references(() => sectors.id, { onDelete: "cascade" }),
+    athleteId: uuid("athlete_id")
+      .notNull()
+      .references(() => athletes.id, { onDelete: "cascade" }),
+    status: text("status", {
+      enum: ["waiting", "active", "completed", "dropped"],
+    })
+      .default("waiting")
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    sectorStatusIdx: index("sector_queues_sector_id_status_idx").on(table.sectorId, table.status),
+    athleteStatusIdx: index("sector_queues_athlete_id_status_idx").on(
+      table.athleteId,
+      table.status,
+    ),
+  }),
+)
 
-export const attempts = pgTable("attempts", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  sectorId: uuid("sector_id")
-    .notNull()
-    .references(() => sectors.id, { onDelete: "cascade" }),
-  athleteId: uuid("athlete_id")
-    .notNull()
-    .references(() => athletes.id, { onDelete: "cascade" }),
-  judgeId: text("judge_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  isTop: boolean("is_top").notNull().default(false),
-  attemptCount: integer("attempt_count").notNull().default(1),
-  resultData: jsonb("result_data"),
-  idempotencyKey: text("idempotency_key").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  sectorAthleteTopIdx: index("attempts_sector_id_athlete_id_top_idx").on(table.sectorId, table.athleteId, table.isTop),
-  sectorAthleteIdx: index("attempts_sector_id_athlete_id_idx").on(table.sectorId, table.athleteId),
-}))
+export const attempts = pgTable(
+  "attempts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sectorId: uuid("sector_id")
+      .notNull()
+      .references(() => sectors.id, { onDelete: "cascade" }),
+    athleteId: uuid("athlete_id")
+      .notNull()
+      .references(() => athletes.id, { onDelete: "cascade" }),
+    judgeId: text("judge_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    isTop: boolean("is_top").notNull().default(false),
+    attemptCount: integer("attempt_count").notNull().default(1),
+    resultData: jsonb("result_data"),
+    idempotencyKey: text("idempotency_key").notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    sectorAthleteTopIdx: index("attempts_sector_id_athlete_id_top_idx").on(
+      table.sectorId,
+      table.athleteId,
+      table.isTop,
+    ),
+    sectorAthleteIdx: index("attempts_sector_id_athlete_id_idx").on(
+      table.sectorId,
+      table.athleteId,
+    ),
+  }),
+)
 
-export const auditLogs = pgTable("audit_logs", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
-  action: text("action").notNull(),
-  resourceType: text("resource_type").notNull(),
-  resourceId: text("resource_id").notNull(),
-  oldValues: jsonb("old_values"),
-  newValues: jsonb("new_values"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  resourceTypeResourceIdIdx: index("audit_logs_resource_type_resource_id_idx").on(table.resourceType, table.resourceId),
-  userIdCreatedAtIdx: index("audit_logs_user_id_created_at_idx").on(table.userId, table.createdAt),
-}))
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    action: text("action").notNull(),
+    resourceType: text("resource_type").notNull(),
+    resourceId: text("resource_id").notNull(),
+    oldValues: jsonb("old_values"),
+    newValues: jsonb("new_values"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    resourceTypeResourceIdIdx: index("audit_logs_resource_type_resource_id_idx").on(
+      table.resourceType,
+      table.resourceId,
+    ),
+    userIdCreatedAtIdx: index("audit_logs_user_id_created_at_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
+  }),
+)
 
-export const eventPayments = pgTable("event_payments", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  eventId: uuid("event_id")
-    .notNull()
-    .references(() => events.id, { onDelete: "cascade" }),
-  gymId: uuid("gym_id")
-    .notNull()
-    .references(() => gyms.id, { onDelete: "cascade" }),
-  stripeCheckoutSessionId: text("stripe_checkout_session_id"),
-  stripePaymentIntentId: text("stripe_payment_intent_id"),
-  athleteCount: integer("athlete_count").notNull(),
-  type: text("type", { enum: ["publish", "delta"] }).default("publish").notNull(),
-  status: text("status", { enum: ["pending", "paid", "failed", "expired"] })
-    .default("pending")
-    .notNull(),
-  stripeCustomerId: text("stripe_customer_id"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  eventIdTypeIdx: index("event_payments_event_id_type_idx").on(table.eventId, table.type),
-  eventTypeStatusIdx: index("event_payments_event_id_type_status_idx").on(table.eventId, table.type, table.status),
-}))
+export const eventPayments = pgTable(
+  "event_payments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    gymId: uuid("gym_id")
+      .notNull()
+      .references(() => gyms.id, { onDelete: "cascade" }),
+    stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    athleteCount: integer("athlete_count").notNull(),
+    type: text("type", { enum: ["publish", "delta"] })
+      .default("publish")
+      .notNull(),
+    status: text("status", { enum: ["pending", "paid", "failed", "expired"] })
+      .default("pending")
+      .notNull(),
+    stripeCustomerId: text("stripe_customer_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    eventIdTypeIdx: index("event_payments_event_id_type_idx").on(table.eventId, table.type),
+    eventTypeStatusIdx: index("event_payments_event_id_type_status_idx").on(
+      table.eventId,
+      table.type,
+      table.status,
+    ),
+  }),
+)

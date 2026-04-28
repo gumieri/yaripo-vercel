@@ -1,8 +1,8 @@
 import { Hono } from "hono"
 import { eq, and, count as countFn } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { events, categories, athletes, eventPayments, users } from "@/lib/db/schema"
-import { authMiddleware, requireGymMember } from "@/lib/api/middleware/auth"
+import { events, categories, athletes, eventPayments, users, venues } from "@/lib/db/schema"
+import { authMiddleware, requireVenueMember } from "@/lib/api/middleware/auth"
 import { createStripeCustomer, createStripeCheckoutSession } from "@/lib/stripe/client"
 import { logAudit } from "@/lib/db/audit"
 import {
@@ -12,15 +12,15 @@ import {
   paymentRequiredResponse,
 } from "@/lib/api/helpers"
 
-const gymRoutes = new Hono()
+const venueRoutes = new Hono()
 
-gymRoutes.use("*", authMiddleware)
+venueRoutes.use("*", authMiddleware)
 
-gymRoutes.post(
-  "/:gymSlug/events/:eventId/publish",
-  requireGymMember("gymSlug", ["owner", "admin"]),
+venueRoutes.post(
+  "/:venueSlug/events/:eventId/publish",
+  requireVenueMember("venueSlug", ["owner", "admin"]),
   async (c) => {
-    const gymId = c.get("gymId")!
+    const venueId = c.get("venueId")!
     const userId = c.get("userId")!
     const eventId = c.req.param("eventId")
 
@@ -29,8 +29,8 @@ gymRoutes.post(
       return notFoundResponse(c, "Event")
     }
 
-    if (event.gymId !== gymId) {
-      return forbiddenResponse(c, "Event does not belong to this gym")
+    if (event.venueId !== venueId) {
+      return forbiddenResponse(c, "Event does not belong to this venue")
     }
 
     if (event.status !== "draft") {
@@ -66,7 +66,7 @@ gymRoutes.post(
 
     const session = await createStripeCheckoutSession({
       customerId,
-      gymId,
+      userId,
       eventId,
       eventName: event.name,
       athleteCount,
@@ -75,7 +75,7 @@ gymRoutes.post(
 
     await db.insert(eventPayments).values({
       eventId,
-      gymId,
+      userId,
       stripeCheckoutSessionId: session.id,
       athleteCount,
       type: "publish",
@@ -95,11 +95,11 @@ gymRoutes.post(
   },
 )
 
-gymRoutes.post(
-  "/:gymSlug/events/:eventId/activate",
-  requireGymMember("gymSlug", ["owner", "admin"]),
+venueRoutes.post(
+  "/:venueSlug/events/:eventId/activate",
+  requireVenueMember("venueSlug", ["owner", "admin"]),
   async (c) => {
-    const gymId = c.get("gymId")!
+    const venueId = c.get("venueId")!
     const userId = c.get("userId")!
     const eventId = c.req.param("eventId")
 
@@ -108,8 +108,8 @@ gymRoutes.post(
       return notFoundResponse(c, "Event")
     }
 
-    if (event.gymId !== gymId) {
-      return forbiddenResponse(c, "Event does not belong to this gym")
+    if (event.venueId !== venueId) {
+      return forbiddenResponse(c, "Event does not belong to this venue")
     }
 
     if (event.status !== "published") {
@@ -155,7 +155,7 @@ gymRoutes.post(
 
     const session = await createStripeCheckoutSession({
       customerId: user.stripeCustomerId,
-      gymId,
+      userId,
       eventId,
       eventName: event.name,
       athleteCount: delta,
@@ -164,7 +164,7 @@ gymRoutes.post(
 
     await db.insert(eventPayments).values({
       eventId,
-      gymId,
+      userId,
       stripeCheckoutSessionId: session.id,
       athleteCount: delta,
       type: "delta",
@@ -184,4 +184,4 @@ gymRoutes.post(
   },
 )
 
-export { gymRoutes as gymManagementRoutes }
+export { venueRoutes as venueManagementRoutes }

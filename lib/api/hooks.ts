@@ -13,7 +13,7 @@ export interface EventSummary {
 }
 
 export interface EventDetail extends EventSummary {
-  gymId: string
+  venueId: string
   createdAt: string
   updatedAt: string
   rules: string | null

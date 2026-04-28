@@ -8,7 +8,51 @@ import {
   jsonb,
   uniqueIndex,
   index,
+  doublePrecision,
 } from "drizzle-orm/pg-core"
+
+export const venues = pgTable("venues", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  country: text("country"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  photoUrl: text("photo_url"),
+  socialLinks: jsonb("social_links").$type<Record<string, unknown>>(),
+  type: text("type", { enum: ["gym", "outdoor", "public", "other"] })
+    .default("gym")
+    .notNull(),
+  createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const venueMembers = pgTable(
+  "venue_members",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    venueId: uuid("venue_id")
+      .notNull()
+      .references(() => venues.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["owner", "admin", "judge"] }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueVenueUser: uniqueIndex("venue_members_venue_id_user_id_idx").on(
+      table.venueId,
+      table.userId,
+    ),
+    venueRoleIdx: index("venue_members_venue_id_role_idx").on(table.venueId, table.role),
+  }),
+)
 
 export const gyms = pgTable("gyms", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -96,7 +140,7 @@ export const gymMembers = pgTable(
 
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
-  gymId: uuid("gym_id").references(() => gyms.id, { onDelete: "cascade" }),
+  venueId: uuid("venue_id").references(() => venues.id, { onDelete: "set null" }),
   createdBy: text("created_by")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -291,9 +335,9 @@ export const eventPayments = pgTable(
     eventId: uuid("event_id")
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
-    gymId: uuid("gym_id")
+    userId: text("user_id")
       .notNull()
-      .references(() => gyms.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     stripeCheckoutSessionId: text("stripe_checkout_session_id"),
     stripePaymentIntentId: text("stripe_payment_intent_id"),
     athleteCount: integer("athlete_count").notNull(),

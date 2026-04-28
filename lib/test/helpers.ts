@@ -7,8 +7,8 @@ export async function truncateTables() {
     TRUNCATE TABLE 
       event_judge_invitations, event_members,
       event_payments, audit_logs, attempts, sector_queues, athletes, sectors, 
-      categories, events, gym_members, sessions, accounts, 
-      verification_tokens, users, gyms
+      categories, events, venue_members, sessions, accounts, 
+      verification_tokens, users, venues
     RESTART IDENTITY CASCADE
   `)
 }
@@ -27,17 +27,19 @@ export function authHeaders(
 }
 
 export const F = {
-  gym: {
+  venue: {
     id: "a0000000-0000-0000-0000-000000000001",
-    name: "Test Gym",
-    slug: "test-gym",
+    name: "Test Venue",
+    slug: "test-venue",
     city: "Sao Paulo",
     state: "SP",
+    type: "gym" as const,
   },
   admin: {
     id: "a0000000-0000-0000-0000-000000000010",
     name: "Admin",
     email: "admin@yaripo.app",
+    stripeCustomerId: "cus_test_admin",
   },
   judge: {
     id: "a0000000-0000-0000-0000-000000000020",
@@ -49,19 +51,19 @@ export const F = {
     name: "Regular User",
     email: "user@test.com",
   },
-  gymOwner: {
+  venueOwner: {
     id: "a0000000-0000-0000-0000-000000000030",
-    name: "Gym Owner",
+    name: "Venue Owner",
     email: "owner@test.com",
   },
-  gymAdminMember: {
+  venueAdminMember: {
     id: "a0000000-0000-0000-0000-000000000040",
-    name: "Gym Admin",
-    email: "gymadmin@test.com",
+    name: "Venue Admin",
+    email: "venueadmin@test.com",
   },
   simpleEvent: {
     id: "b0000000-0000-0000-0000-000000000001",
-    gymId: "a0000000-0000-0000-0000-000000000001",
+    venueId: "a0000000-0000-0000-0000-000000000001",
     createdBy: "a0000000-0000-0000-0000-000000000010",
     name: "Simple Event",
     slug: "simple-event",
@@ -72,7 +74,7 @@ export const F = {
   },
   ifscEvent: {
     id: "b0000000-0000-0000-0000-000000000002",
-    gymId: "a0000000-0000-0000-0000-000000000001",
+    venueId: "a0000000-0000-0000-0000-000000000001",
     createdBy: "a0000000-0000-0000-0000-000000000010",
     name: "IFSC Event",
     slug: "ifsc-event",
@@ -81,7 +83,7 @@ export const F = {
   },
   redpointEvent: {
     id: "b0000000-0000-0000-0000-000000000003",
-    gymId: "a0000000-0000-0000-0000-000000000001",
+    venueId: "a0000000-0000-0000-0000-000000000001",
     createdBy: "a0000000-0000-0000-0000-000000000010",
     name: "Redpoint Event",
     slug: "redpoint-event",
@@ -240,11 +242,11 @@ export const F = {
 }
 
 export async function seedFixtures() {
-  await db.insert(schema.gyms).values(F.gym)
-  await db.insert(schema.users).values([F.admin, F.judge, F.user, F.gymOwner, F.gymAdminMember])
-  await db.insert(schema.gymMembers).values([
-    { gymId: F.gym.id, userId: F.gymOwner.id, role: "owner" },
-    { gymId: F.gym.id, userId: F.gymAdminMember.id, role: "admin" },
+  await db.insert(schema.venues).values(F.venue)
+  await db.insert(schema.users).values([F.admin, F.judge, F.user, F.venueOwner, F.venueAdminMember])
+  await db.insert(schema.venueMembers).values([
+    { venueId: F.venue.id, userId: F.venueOwner.id, role: "owner" },
+    { venueId: F.venue.id, userId: F.venueAdminMember.id, role: "admin" },
   ])
   await db.insert(schema.events).values([F.simpleEvent, F.ifscEvent, F.redpointEvent])
   await db.insert(schema.eventMembers).values([

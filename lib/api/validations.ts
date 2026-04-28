@@ -46,6 +46,7 @@ export const createEventSchema = z.object({
   endsAt: z.string().datetime("Invalid end date").nullish().default(null),
   eventFormat: z.enum(["redpoint", "onsight", "flash"]).nullish().default("redpoint"),
   eventConfig: z.record(z.string(), z.unknown()).nullish().default(null),
+  venueId: z.string().uuid("Invalid venue ID").nullish(),
 })
 
 export const updateEventSchema = z.object({

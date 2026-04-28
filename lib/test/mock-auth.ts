@@ -3,8 +3,8 @@ export const authMiddleware = async (c: any, next: any) => {
   const email = c.req.header("x-test-user-email") || null
   c.set("userId", c.req.header("x-test-user-id") || null)
   c.set("userEmail", c.req.header("x-test-user-email") || null)
-  c.set("gymId", c.req.header("x-test-gym-id") || null)
-  c.set("gymRole", c.req.header("x-test-gym-role") || null)
+  c.set("venueId", c.req.header("x-test-venue-id") || null)
+  c.set("venueRole", c.req.header("x-test-venue-role") || null)
   c.set("eventId", c.req.header("x-test-event-id") || null)
   c.set("eventRole", c.req.header("x-test-event-role") || null)
   c.set("isPlatformAdmin", email === "admin@yaripo.app")
@@ -70,7 +70,7 @@ export function requireEventJudge(eventIdParam: string) {
   return requireEventMember(eventIdParam, ["organizer", "judge"])
 }
 
-export function requireGymMember(_slugParam: string, roles: string[]) {
+export function requireVenueMember(slugParam: string, roles: string[]) {
   return async (c: any, next: any) => {
     const userId = c.req.header("x-test-user-id")
     if (!userId) {
@@ -79,16 +79,17 @@ export function requireGymMember(_slugParam: string, roles: string[]) {
         401,
       )
     }
-    const gymRole = c.req.header("x-test-gym-role")
-    if (!gymRole || !roles.includes(gymRole)) {
+    const venueRole = c.req.header("x-test-venue-role")
+    if (!venueRole || !roles.includes(venueRole)) {
       return c.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Insufficient gym permissions" } },
+        { success: false, error: { code: "FORBIDDEN", message: "Insufficient venue permissions" } },
         403,
       )
     }
-    c.set("userId", userId)
-    c.set("gymId", c.req.header("x-test-gym-id"))
-    c.set("gymRole", gymRole)
+    c.set("venueId", c.req.header("x-test-venue-id"))
+    c.set("venueRole", venueRole)
     await next()
   }
 }
+
+export const requireGymMember = requireVenueMember

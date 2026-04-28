@@ -7,7 +7,7 @@ import {
   categories,
   sectors,
   athletes,
-  gyms,
+  venues,
   eventMembers,
   eventJudgeInvitations,
   users,
@@ -84,7 +84,7 @@ const eventSelectFields = {
   startsAt: events.startsAt,
   endsAt: events.endsAt,
   status: events.status,
-  gymId: events.gymId,
+  venueId: events.venueId,
   createdBy: events.createdBy,
   createdAt: events.createdAt,
 }
@@ -118,7 +118,8 @@ manageRoutes.post("/events", authMiddleware, requireAuth, async (c) => {
     return validationErrorResponse(c, result.error.issues[0].message)
   }
 
-  const { name, slug, gymId, scoringType, description, startsAt, endsAt, eventConfig } = result.data
+  const { name, slug, venueId, scoringType, description, startsAt, endsAt, eventConfig } =
+    result.data
 
   const [existing] = await db.select({ id: events.id }).from(events).where(eq(events.slug, slug))
   if (existing) {
@@ -130,7 +131,7 @@ manageRoutes.post("/events", authMiddleware, requireAuth, async (c) => {
     .values({
       name,
       slug,
-      gymId: gymId ?? null,
+      venueId: venueId ?? null,
       createdBy: userId!,
       scoringType,
       description,
@@ -288,10 +289,13 @@ manageRoutes.post("/events/boulder-festival", authMiddleware, requireAuth, async
     return conflictResponse(c, "Event slug already exists")
   }
 
-  if (body.gymId) {
-    const [gym] = await db.select({ id: gyms.id }).from(gyms).where(eq(gyms.id, body.gymId))
-    if (!gym) {
-      return notFoundResponse(c, "Gym")
+  if (body.venueId) {
+    const [venue] = await db
+      .select({ id: venues.id })
+      .from(venues)
+      .where(eq(venues.id, body.venueId))
+    if (!venue) {
+      return notFoundResponse(c, "Venue")
     }
   }
 
@@ -302,7 +306,7 @@ manageRoutes.post("/events/boulder-festival", authMiddleware, requireAuth, async
     .values({
       name: eventName,
       slug: eventSlug,
-      gymId: body.gymId ?? null,
+      venueId: body.venueId ?? null,
       createdBy: userId!,
       scoringType: "redpoint",
       description: body.description || null,
@@ -335,19 +339,20 @@ manageRoutes.post("/events/boulder-festival", authMiddleware, requireAuth, async
   return c.json({ success: true, data: created }, 201)
 })
 
-manageRoutes.get("/gyms", authMiddleware, requirePlatformAdmin, async (c) => {
-  const gymList = await db
+manageRoutes.get("/venues", authMiddleware, requirePlatformAdmin, async (c) => {
+  const venueList = await db
     .select({
-      id: gyms.id,
-      name: gyms.name,
-      slug: gyms.slug,
-      city: gyms.city,
-      state: gyms.state,
+      id: venues.id,
+      name: venues.name,
+      slug: venues.slug,
+      city: venues.city,
+      state: venues.state,
+      type: venues.type,
     })
-    .from(gyms)
-    .orderBy(asc(gyms.name))
+    .from(venues)
+    .orderBy(asc(venues.name))
 
-  return c.json({ success: true, data: gymList })
+  return c.json({ success: true, data: venueList })
 })
 
 manageRoutes.get(

@@ -5,9 +5,9 @@ import { handle } from "hono/vercel"
 import { queueRoutes } from "@/lib/api/queue"
 import { attemptRoutes } from "@/lib/api/attempts"
 import { eventRoutes } from "@/lib/api/events"
-import { gymRoutes } from "@/lib/api/gyms"
+import { venueRoutes } from "@/lib/api/venues"
 import { manageRoutes } from "@/lib/api/manage"
-import { gymManagementRoutes } from "@/lib/api/gym-management"
+import { venueManagementRoutes } from "@/lib/api/venue-management"
 
 const app = new Hono().basePath("/api")
 
@@ -19,8 +19,8 @@ app.get("/health", (c) => c.json({ success: true, data: { status: "ok" } }))
 app.route("/queue", queueRoutes)
 app.route("/attempts", attemptRoutes)
 app.route("/events", eventRoutes)
-app.route("/gyms", gymRoutes)
-app.route("/gym", gymManagementRoutes)
+app.route("/venues", venueRoutes)
+app.route("/venue", venueManagementRoutes)
 app.route("/manage", manageRoutes)
 
 app.notFound((c) =>

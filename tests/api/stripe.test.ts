@@ -36,11 +36,11 @@ describe("Stripe Webhook Handlers", () => {
 
   describe("handleCheckoutCompleted", () => {
     it("marks publish payment as paid and publishes event", async () => {
-      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.gym.slug))
+      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.venue.slug))
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: gym.id,
+        userId: gym.id,
         stripeCheckoutSessionId: "cs_publish_done",
         athleteCount: 5,
         type: "publish",
@@ -52,7 +52,7 @@ describe("Stripe Webhook Handlers", () => {
         id: "cs_publish_done",
         metadata: {
           eventId: F.simpleEvent.id,
-          gymId: gym.id,
+          userId: gym.id,
           type: "publish",
           athleteCount: "5",
         },
@@ -71,11 +71,11 @@ describe("Stripe Webhook Handlers", () => {
     })
 
     it("marks delta payment as paid and activates published event", async () => {
-      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.gym.slug))
+      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.venue.slug))
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: gym.id,
+        userId: gym.id,
         stripeCheckoutSessionId: "cs_publish_done",
         athleteCount: 3,
         type: "publish",
@@ -88,7 +88,7 @@ describe("Stripe Webhook Handlers", () => {
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: gym.id,
+        userId: gym.id,
         stripeCheckoutSessionId: "cs_delta_done",
         athleteCount: 2,
         type: "delta",
@@ -100,7 +100,7 @@ describe("Stripe Webhook Handlers", () => {
         id: "cs_delta_done",
         metadata: {
           eventId: F.simpleEvent.id,
-          gymId: gym.id,
+          userId: gym.id,
           type: "delta",
           athleteCount: "2",
         },
@@ -118,11 +118,11 @@ describe("Stripe Webhook Handlers", () => {
     })
 
     it("does not activate event if not yet published", async () => {
-      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.gym.slug))
+      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.venue.slug))
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: gym.id,
+        userId: gym.id,
         stripeCheckoutSessionId: "cs_delta_draft",
         athleteCount: 1,
         type: "delta",
@@ -134,7 +134,7 @@ describe("Stripe Webhook Handlers", () => {
         id: "cs_delta_draft",
         metadata: {
           eventId: F.simpleEvent.id,
-          gymId: gym.id,
+          userId: gym.id,
           type: "delta",
           athleteCount: "1",
         },
@@ -162,11 +162,11 @@ describe("Stripe Webhook Handlers", () => {
 
   describe("handleCheckoutExpired", () => {
     it("marks payment as expired", async () => {
-      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.gym.slug))
+      const [gym] = await db.select().from(gyms).where(eq(gyms.slug, F.venue.slug))
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: gym.id,
+        userId: gym.id,
         stripeCheckoutSessionId: "cs_expired_test",
         athleteCount: 4,
         type: "publish",
@@ -178,7 +178,7 @@ describe("Stripe Webhook Handlers", () => {
         id: "cs_expired_test",
         metadata: {
           eventId: F.simpleEvent.id,
-          gymId: gym.id,
+          userId: gym.id,
           type: "publish",
         },
       } as any)

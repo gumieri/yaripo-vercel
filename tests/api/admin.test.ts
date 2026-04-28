@@ -56,7 +56,7 @@ describe("Admin API", () => {
       const event = json.data.find((e: any) => e.id === F.simpleEvent.id)
       expect(event.scoringType).toBe("simple")
       expect(event.status).toBe("active")
-      expect(event.gymId).toBe(F.gym.id)
+      expect(event.venueId).toBe(F.venue.id)
     })
   })
 
@@ -68,7 +68,7 @@ describe("Admin API", () => {
         body: JSON.stringify({
           name: "New Event",
           slug: "new-event",
-          gymId: F.gym.id,
+          venueId: F.venue.id,
           scoringType: "simple",
         }),
       })
@@ -84,7 +84,7 @@ describe("Admin API", () => {
       const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
-        body: JSON.stringify({ slug: "x", gymId: F.gym.id }),
+        body: JSON.stringify({ slug: "x", venueId: F.venue.id }),
       })
       expect(res.status).toBe(400)
     })
@@ -93,7 +93,7 @@ describe("Admin API", () => {
       const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
-        body: JSON.stringify({ name: "Test", gymId: F.gym.id }),
+        body: JSON.stringify({ name: "Test", venueId: F.venue.id }),
       })
       expect(res.status).toBe(400)
     })
@@ -102,7 +102,7 @@ describe("Admin API", () => {
       const res = await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
-        body: JSON.stringify({ name: "Test", slug: "Invalid Slug!", gymId: F.gym.id }),
+        body: JSON.stringify({ name: "Test", slug: "Invalid Slug!", venueId: F.venue.id }),
       })
       expect(res.status).toBe(400)
     })
@@ -114,7 +114,7 @@ describe("Admin API", () => {
         body: JSON.stringify({
           name: "Duplicate",
           slug: "simple-event",
-          gymId: F.gym.id,
+          venueId: F.venue.id,
         }),
       })
       expect(res.status).toBe(409)
@@ -127,7 +127,7 @@ describe("Admin API", () => {
         body: JSON.stringify({
           name: "Audited Event",
           slug: "audited-event",
-          gymId: F.gym.id,
+          venueId: F.venue.id,
         }),
       })
       const { db } = await import("@/lib/db")
@@ -410,7 +410,7 @@ describe("Admin API", () => {
       await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
-        body: JSON.stringify({ name: "X", slug: "x", gymId: F.gym.id }),
+        body: JSON.stringify({ name: "X", slug: "x", venueId: F.venue.id }),
       })
 
       const res = await app.request("/api/manage/audit-logs", { headers: adminHeaders })
@@ -426,7 +426,7 @@ describe("Admin API", () => {
       await app.request("/api/manage/events", {
         method: "POST",
         headers: adminHeaders,
-        body: JSON.stringify({ name: "X", slug: "x", gymId: F.gym.id }),
+        body: JSON.stringify({ name: "X", slug: "x", venueId: F.venue.id }),
       })
 
       const res = await app.request("/api/manage/audit-logs?resource_type=event", {

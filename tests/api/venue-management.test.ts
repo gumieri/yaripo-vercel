@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest"
 import { createTestApp } from "@/lib/test/app"
 import { truncateTables, seedFixtures, authHeaders, F } from "@/lib/test/helpers"
 import { db } from "@/lib/db"
-import { eventPayments, events, gyms, athletes } from "@/lib/db/schema"
+import { eventPayments, events, venues, users, athletes } from "@/lib/db/schema"
 import { eq, sql } from "drizzle-orm"
 
 vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
@@ -47,22 +47,22 @@ vi.mock("@/lib/stripe/client", () => {
   return mockModule
 })
 
-describe("Gym Management API", () => {
+describe("Venue Management API", () => {
   let app: ReturnType<typeof createTestApp>
 
-  const ownerHeaders = authHeaders(F.gymOwner.id, F.gymOwner.email, {
-    "x-test-gym-id": F.gym.id,
-    "x-test-gym-role": "owner",
+  const ownerHeaders = authHeaders(F.venueOwner.id, F.venueOwner.email, {
+    "x-test-venue-id": F.venue.id,
+    "x-test-venue-role": "owner",
   })
 
-  const adminMemberHeaders = authHeaders(F.gymAdminMember.id, F.gymAdminMember.email, {
-    "x-test-gym-id": F.gym.id,
-    "x-test-gym-role": "admin",
+  const adminMemberHeaders = authHeaders(F.venueAdminMember.id, F.venueAdminMember.email, {
+    "x-test-venue-id": F.venue.id,
+    "x-test-venue-role": "admin",
   })
 
   const judgeHeaders = authHeaders(F.judge.id, F.judge.email, {
-    "x-test-gym-id": F.gym.id,
-    "x-test-gym-role": "judge",
+    "x-test-venue-id": F.venue.id,
+    "x-test-venue-role": "judge",
   })
 
   const noAuthHeaders = { "Content-Type": "application/json" }
@@ -82,27 +82,36 @@ describe("Gym Management API", () => {
 
   describe("Auth guards", () => {
     it("returns 401 if not authenticated", async () => {
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: noAuthHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: noAuthHeaders,
+        },
+      )
       expect(res.status).toBe(401)
     })
 
-    it("returns 403 if not a gym member", async () => {
+    it("returns 403 if not a venue member", async () => {
       const headers = authHeaders(F.judge.id, F.judge.email)
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers,
+        },
+      )
       expect(res.status).toBe(403)
     })
 
     it("returns 403 if judge role tries to publish", async () => {
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: judgeHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: judgeHeaders,
+        },
+      )
       expect(res.status).toBe(403)
     })
 
@@ -113,10 +122,13 @@ describe("Gym Management API", () => {
           Promise.resolve({ id: "cs_test", url: "https://checkout.stripe.com/test" }),
       })
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       expect(res.status).toBe(200)
     })
 
@@ -127,15 +139,18 @@ describe("Gym Management API", () => {
           Promise.resolve({ id: "cs_test", url: "https://checkout.stripe.com/test" }),
       })
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: adminMemberHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: adminMemberHeaders,
+        },
+      )
       expect(res.status).toBe(200)
     })
   })
 
-  describe("POST /api/gym/:gymSlug/events/:eventId/publish", () => {
+  describe("POST /api/venue/:venueSlug/events/:eventId/publish", () => {
     it("creates checkout session and event payment record", async () => {
       const stripeModule: any = await import("@/lib/stripe/client")
       stripeModule.__setFns({
@@ -143,10 +158,13 @@ describe("Gym Management API", () => {
           Promise.resolve({ id: "cs_publish_1", url: "https://checkout.stripe.com/pay" }),
       })
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       const json = await res.json()
 
       expect(res.status).toBe(200)
@@ -163,27 +181,33 @@ describe("Gym Management API", () => {
       expect(payment?.status).toBe("pending")
     })
 
-    it("creates Stripe customer if gym has none", async () => {
+    it("creates Stripe customer if venue has none", async () => {
       const stripeModule: any = await import("@/lib/stripe/client")
       stripeModule.__setFns({
         createCustomer: () =>
-          Promise.resolve({ id: "cus_new_123", email: "test@test.com", name: "Test Gym" }),
+          Promise.resolve({ id: "cus_new_123", email: "test@test.com", name: "Test Venue" }),
         createCheckoutSession: () =>
           Promise.resolve({ id: "cs_new_cust", url: "https://checkout.stripe.com/new" }),
       })
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       expect(res.status).toBe(200)
 
-      const [gym] = await db.select().from(gyms).where(eq(gyms.id, F.gym.id))
-      expect(gym?.stripeCustomerId).toBe("cus_new_123")
+      const [user] = await db.select().from(users).where(eq(users.id, F.venueOwner.id))
+      expect(user?.stripeCustomerId).toBe("cus_new_123")
     })
 
     it("reuses existing Stripe customer", async () => {
-      await db.update(gyms).set({ stripeCustomerId: "cus_existing" }).where(eq(gyms.id, F.gym.id))
+      await db
+        .update(users)
+        .set({ stripeCustomerId: "cus_existing" })
+        .where(eq(users.id, F.venueOwner.id))
 
       let customerCreated = false
       const stripeModule: any = await import("@/lib/stripe/client")
@@ -196,7 +220,7 @@ describe("Gym Management API", () => {
           Promise.resolve({ id: "cs_reuse", url: "https://checkout.stripe.com/reuse" }),
       })
 
-      await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
+      await app.request(`/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`, {
         method: "POST",
         headers: ownerHeaders,
       })
@@ -212,20 +236,20 @@ describe("Gym Management API", () => {
 
     it("returns 404 for non-existent event", async () => {
       const res = await app.request(
-        `/api/gym/${F.gym.slug}/events/00000000-0000-0000-0000-000000000000/publish`,
+        `/api/venue/${F.venue.slug}/events/00000000-0000-0000-0000-000000000000/publish`,
         { method: "POST", headers: ownerHeaders },
       )
       expect(res.status).toBe(404)
     })
 
-    it("returns 403 if event belongs to different gym", async () => {
+    it("returns 403 if event belongs to different venue", async () => {
       const stripeModule: any = await import("@/lib/stripe/client")
       stripeModule.__setFns({
         createCheckoutSession: () =>
           Promise.resolve({ id: "cs_test", url: "https://checkout.stripe.com/test" }),
       })
 
-      const res = await app.request(`/api/gym/nonexistent/events/${F.simpleEvent.id}/publish`, {
+      const res = await app.request(`/api/venue/nonexistent/events/${F.simpleEvent.id}/publish`, {
         method: "POST",
         headers: ownerHeaders,
       })
@@ -235,10 +259,13 @@ describe("Gym Management API", () => {
     it("returns 400 if event is not draft", async () => {
       await db.update(events).set({ status: "published" }).where(eq(events.id, F.simpleEvent.id))
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       expect(res.status).toBe(400)
       const json = await res.json()
       expect(json.error.code).toBe("VALIDATION_ERROR")
@@ -247,10 +274,13 @@ describe("Gym Management API", () => {
     it("returns 400 if event has no athletes", async () => {
       await db.execute(sql`DELETE FROM athletes`)
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       expect(res.status).toBe(400)
       const json = await res.json()
       expect(json.error.code).toBe("VALIDATION_ERROR")
@@ -267,7 +297,7 @@ describe("Gym Management API", () => {
         },
       })
 
-      await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
+      await app.request(`/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`, {
         method: "POST",
         headers: ownerHeaders,
       })
@@ -289,7 +319,7 @@ describe("Gym Management API", () => {
         },
       })
 
-      await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
+      await app.request(`/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`, {
         method: "POST",
         headers: ownerHeaders,
       })
@@ -312,7 +342,7 @@ describe("Gym Management API", () => {
         .set({ name: "This is a very long event name that should be truncated" })
         .where(eq(events.id, F.simpleEvent.id))
 
-      await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
+      await app.request(`/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`, {
         method: "POST",
         headers: ownerHeaders,
       })
@@ -330,13 +360,13 @@ describe("Gym Management API", () => {
         },
       })
 
-      await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
+      await app.request(`/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`, {
         method: "POST",
         headers: ownerHeaders,
       })
 
       expect(capturedMetadata?.eventId).toBe(F.simpleEvent.id)
-      expect(capturedMetadata?.gymId).toBe(F.gym.id)
+      expect(capturedMetadata?.userId).toBe(F.venue.id)
       expect(capturedMetadata?.type).toBe("publish")
       expect(capturedMetadata?.athleteCount).toBe("5")
     })
@@ -348,7 +378,7 @@ describe("Gym Management API", () => {
           Promise.resolve({ id: "cs_audit", url: "https://checkout.stripe.com/audit" }),
       })
 
-      await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
+      await app.request(`/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/publish`, {
         method: "POST",
         headers: ownerHeaders,
       })
@@ -357,14 +387,17 @@ describe("Gym Management API", () => {
       const logs = await db.select().from(auditLogs)
       const log = logs.find((l: any) => l.action === "event.publish_initiated")
       expect(log).toBeDefined()
-      expect(log?.userId).toBe(F.gymOwner.id)
+      expect(log?.userId).toBe(F.venueOwner.id)
       expect(log?.resourceId).toBe(F.simpleEvent.id)
     })
   })
 
-  describe("POST /api/gym/:gymSlug/events/:eventId/activate", () => {
+  describe("POST /api/venue/:venueSlug/events/:eventId/activate", () => {
     beforeEach(async () => {
-      await db.update(gyms).set({ stripeCustomerId: "cus_activate" }).where(eq(gyms.id, F.gym.id))
+      await db
+        .update(users)
+        .set({ stripeCustomerId: "cus_activate" })
+        .where(eq(users.id, F.venueOwner.id))
     })
 
     it("activates event without charge if no new athletes", async () => {
@@ -372,7 +405,7 @@ describe("Gym Management API", () => {
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_orig_publish",
         athleteCount: 5,
         type: "publish",
@@ -381,10 +414,13 @@ describe("Gym Management API", () => {
         stripeCustomerId: "cus_activate",
       })
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/activate`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       const json = await res.json()
 
       expect(res.status).toBe(200)
@@ -400,7 +436,7 @@ describe("Gym Management API", () => {
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_orig_publish",
         athleteCount: 3,
         type: "publish",
@@ -423,10 +459,13 @@ describe("Gym Management API", () => {
         },
       })
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/activate`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       const json = await res.json()
 
       expect(res.status).toBe(200)
@@ -439,10 +478,13 @@ describe("Gym Management API", () => {
     })
 
     it("returns 400 if event is not published", async () => {
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/activate`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       expect(res.status).toBe(400)
       const json = await res.json()
       expect(json.error.code).toBe("VALIDATION_ERROR")
@@ -450,20 +492,20 @@ describe("Gym Management API", () => {
 
     it("returns 404 for non-existent event", async () => {
       const res = await app.request(
-        `/api/gym/${F.gym.slug}/events/00000000-0000-0000-0000-000000000000/activate`,
+        `/api/venue/${F.venue.slug}/events/00000000-0000-0000-0000-000000000000/activate`,
         { method: "POST", headers: ownerHeaders },
       )
       expect(res.status).toBe(404)
     })
 
-    it("returns 402 if gym has no Stripe customer", async () => {
-      await db.update(gyms).set({ stripeCustomerId: null }).where(eq(gyms.id, F.gym.id))
+    it("returns 402 if venue has no Stripe customer", async () => {
+      await db.update(users).set({ stripeCustomerId: null }).where(eq(users.id, F.venueOwner.id))
 
       await db.update(events).set({ status: "published" }).where(eq(events.id, F.simpleEvent.id))
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_orig",
         athleteCount: 1,
         type: "publish",
@@ -472,10 +514,13 @@ describe("Gym Management API", () => {
         stripeCustomerId: "cus_old",
       })
 
-      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`, {
-        method: "POST",
-        headers: ownerHeaders,
-      })
+      const res = await app.request(
+        `/api/venue/${F.venue.slug}/events/${F.simpleEvent.id}/activate`,
+        {
+          method: "POST",
+          headers: ownerHeaders,
+        },
+      )
       expect(res.status).toBe(402)
     })
   })

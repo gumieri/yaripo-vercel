@@ -1,8 +1,8 @@
 import { db } from "@/lib/db"
 import {
-  gyms,
+  venues,
+  venueMembers,
   users,
-  gymMembers,
   events,
   eventMembers,
   categories,
@@ -12,7 +12,7 @@ import {
 } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 
-const GYM_ID = "00000000-0000-4000-8000-000000000001"
+const VENUE_ID = "00000000-0000-4000-8000-000000000001"
 const ADMIN_ID = "00000000-0000-4000-8000-000000000008"
 const JUDGE_ID = "00000000-0000-4000-8000-000000000999"
 const EVENT_ID = "00000000-0000-4000-8000-000000000010"
@@ -54,20 +54,21 @@ const SAMPLE_ATTEMPTS = [
 async function seed() {
   console.log("Seeding database...")
 
-  const existingGym = await db.select().from(gyms).where(eq(gyms.id, GYM_ID)).limit(1)
+  const existingVenue = await db.select().from(venues).where(eq(venues.id, VENUE_ID)).limit(1)
 
-  if (existingGym.length > 0) {
+  if (existingVenue.length > 0) {
     console.log("Seed data already exists. Skipping.")
     return
   }
 
-  await db.insert(gyms).values({
-    id: GYM_ID,
+  await db.insert(venues).values({
+    id: VENUE_ID,
     name: "Gym Example",
     slug: "gym-example",
     city: "Sao Paulo",
     state: "SP",
     description: "Ginásio de escalada indoor em Sao Paulo.",
+    type: "gym",
   })
 
   await db.insert(users).values([
@@ -83,15 +84,15 @@ async function seed() {
     },
   ])
 
-  await db.insert(gymMembers).values({
-    gymId: GYM_ID,
+  await db.insert(venueMembers).values({
+    venueId: VENUE_ID,
     userId: ADMIN_ID,
     role: "owner",
   })
 
   await db.insert(events).values({
     id: EVENT_ID,
-    gymId: GYM_ID,
+    venueId: VENUE_ID,
     createdBy: ADMIN_ID,
     name: "Boulder Open 2026",
     slug: "boulder-open-2026",

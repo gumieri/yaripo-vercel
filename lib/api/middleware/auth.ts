@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory"
 import { eq, and } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { gymMembers, gyms, eventMembers } from "@/lib/db/schema"
+import { venueMembers, venues, eventMembers } from "@/lib/db/schema"
 import { auth } from "@/lib/auth/server"
 import {
   unauthorizedResponse,
@@ -16,8 +16,8 @@ type AuthEnv = {
     session: Session | null
     userId: string | null
     userEmail: string | null
-    gymId: string | null
-    gymRole: string | null
+    venueId: string | null
+    venueRole: string | null
     eventId: string | null
     eventRole: string | null
     isPlatformAdmin: boolean
@@ -100,7 +100,7 @@ export function requireEventJudge(eventIdParam: string) {
   return requireEventMember(eventIdParam, ["organizer", "judge"])
 }
 
-export function requireGymMember(slugParam: string, roles: string[]) {
+export function requireVenueMember(slugParam: string, roles: string[]) {
   return createMiddleware<AuthEnv>(async (c, next) => {
     const userId = c.get("userId")
 
@@ -108,33 +108,36 @@ export function requireGymMember(slugParam: string, roles: string[]) {
       return unauthorizedResponse(c)
     }
 
-    const gymSlug = c.req.param(slugParam)
+    const venueSlug = c.req.param(slugParam)
 
-    if (!gymSlug) {
-      return validationErrorResponse(c, "Gym slug is required")
+    if (!venueSlug) {
+      return validationErrorResponse(c, "Venue slug is required")
     }
 
-    const [gym] = await db.select({ id: gyms.id }).from(gyms).where(eq(gyms.slug, gymSlug))
+    const [venue] = await db
+      .select({ id: venues.id })
+      .from(venues)
+      .where(eq(venues.slug, venueSlug))
 
-    if (!gym) {
-      return notFoundResponse(c, "Gym")
+    if (!venue) {
+      return notFoundResponse(c, "Venue")
     }
 
     const [membership] = await db
-      .select({ role: gymMembers.role })
-      .from(gymMembers)
-      .where(and(eq(gymMembers.gymId, gym.id), eq(gymMembers.userId, userId)))
+      .select({ role: venueMembers.role })
+      .from(venueMembers)
+      .where(and(eq(venueMembers.venueId, venue.id), eq(venueMembers.userId, userId)))
 
     if (!membership) {
-      return forbiddenResponse(c, "Not a member of this gym")
+      return forbiddenResponse(c, "Not a member of this venue")
     }
 
     if (!roles.includes(membership.role)) {
-      return forbiddenResponse(c, "Insufficient gym permissions")
+      return forbiddenResponse(c, "Insufficient venue permissions")
     }
 
-    c.set("gymId", gym.id)
-    c.set("gymRole", membership.role)
+    c.set("venueId", venue.id)
+    c.set("venueRole", membership.role)
 
     await next()
   })

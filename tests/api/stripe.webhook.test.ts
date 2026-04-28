@@ -57,7 +57,7 @@ describe("Stripe Webhook Route", () => {
               id: "cs_test_completed",
               metadata: {
                 eventId: F.simpleEvent.id,
-                gymId: F.gym.id,
+                userId: F.venue.id,
                 type: "publish",
                 athleteCount: "5",
               },
@@ -70,7 +70,7 @@ describe("Stripe Webhook Route", () => {
       await db.insert(eventPayments).values({
         id: "payment-id-1",
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_test_completed",
         athleteCount: 5,
         type: "publish",
@@ -118,7 +118,7 @@ describe("Stripe Webhook Route", () => {
       await db.insert(eventPayments).values({
         id: "payment-id-2",
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_test_expired",
         athleteCount: 5,
         type: "publish",
@@ -208,7 +208,7 @@ describe("Stripe Webhook Route", () => {
               id: "cs_test_publish",
               metadata: {
                 eventId: F.simpleEvent.id,
-                gymId: F.gym.id,
+                userId: F.venue.id,
                 type: "publish",
                 athleteCount: "5",
               },
@@ -221,7 +221,7 @@ describe("Stripe Webhook Route", () => {
       await db.insert(eventPayments).values({
         id: "payment-id-3",
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_test_publish",
         athleteCount: 5,
         type: "publish",
@@ -254,7 +254,7 @@ describe("Stripe Webhook Route", () => {
               id: "cs_test_delta",
               metadata: {
                 eventId: F.simpleEvent.id,
-                gymId: F.gym.id,
+                userId: F.venue.id,
                 type: "delta",
                 athleteCount: "2",
               },
@@ -269,7 +269,7 @@ describe("Stripe Webhook Route", () => {
       await db.insert(eventPayments).values({
         id: "payment-id-4",
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_test_delta",
         athleteCount: 5,
         type: "publish",
@@ -280,7 +280,7 @@ describe("Stripe Webhook Route", () => {
       await db.insert(eventPayments).values({
         id: "payment-id-5",
         eventId: F.simpleEvent.id,
-        gymId: F.gym.id,
+        userId: F.venue.id,
         stripeCheckoutSessionId: "cs_test_delta",
         athleteCount: 2,
         type: "delta",

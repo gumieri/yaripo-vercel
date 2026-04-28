@@ -225,7 +225,7 @@ describe("Events API", () => {
         id: "f0000000-0000-0000-0000-000000000001",
         name: "Empty Event",
         slug: "empty-event",
-        gymId: F.gym.id,
+        venueId: F.venue.id,
         createdBy: F.admin.id,
         scoringType: "simple",
         status: "active",

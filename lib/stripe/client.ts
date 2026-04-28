@@ -54,7 +54,7 @@ export async function createStripeCustomer(params: {
 
 export async function createStripeCheckoutSession(params: {
   customerId: string
-  gymId: string
+  userId: string
   eventId: string
   eventName: string
   athleteCount: number
@@ -81,11 +81,11 @@ export async function createStripeCheckoutSession(params: {
     mode: "payment",
     customer: params.customerId,
     line_items: lineItems,
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://yaripo.app"}/gym/${params.gymId}/events/${params.eventId}?payment=success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://yaripo.app"}/gym/${params.gymId}/events/${params.eventId}?payment=cancelled`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://yaripo.app"}/manage/events/${params.eventId}?payment=success`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://yaripo.app"}/manage/events/${params.eventId}?payment=cancelled`,
     metadata: {
       eventId: params.eventId,
-      gymId: params.gymId,
+      userId: params.userId,
       type: params.type,
       athleteCount: String(params.athleteCount),
     },

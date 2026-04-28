@@ -4,9 +4,9 @@ import { eventPayments, events } from "@/lib/db/schema"
 import type Stripe from "stripe"
 
 export async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const { eventId, gymId, type } = session.metadata || {}
+  const { eventId, userId, type } = session.metadata || {}
 
-  if (!eventId || !gymId || !type) {
+  if (!eventId || !userId || !type) {
     console.error("[stripe webhook] Missing metadata in checkout session", session.id)
     return
   }

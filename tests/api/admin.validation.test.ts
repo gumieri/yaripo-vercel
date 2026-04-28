@@ -40,7 +40,7 @@ describe("Admin API Validation", () => {
         body: JSON.stringify({
           name: "Test Event",
           slug: "Invalid Slug!",
-          gymId: F.gym.id,
+          venueId: F.venue.id,
         }),
       })
       const json = await res.json()
@@ -54,7 +54,7 @@ describe("Admin API Validation", () => {
         id: "test-event-id",
         name: "Existing Event",
         slug: "existing-event",
-        gymId: F.gym.id,
+        venueId: F.venue.id,
         createdBy: F.admin.id,
         status: "draft",
       })
@@ -65,7 +65,7 @@ describe("Admin API Validation", () => {
         body: JSON.stringify({
           name: "New Event",
           slug: "existing-event",
-          gymId: F.gym.id,
+          venueId: F.venue.id,
         }),
       })
       const json = await res.json()
@@ -80,7 +80,7 @@ describe("Admin API Validation", () => {
         body: JSON.stringify({
           name: "Test Event",
           slug: "test-event",
-          gymId: F.gym.id,
+          venueId: F.venue.id,
           startsAt: "not-a-date",
         }),
       })

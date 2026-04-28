@@ -4,7 +4,7 @@ import { truncateTables, seedFixtures, authHeaders, F } from "@/lib/test/helpers
 
 vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
 
-describe("Gyms API", () => {
+describe("Venues API", () => {
   let app: ReturnType<typeof createTestApp>
 
   beforeAll(() => {
@@ -15,39 +15,39 @@ describe("Gyms API", () => {
     await truncateTables()
   })
 
-  describe("GET /gyms", () => {
-    it("returns empty list when no gyms", async () => {
-      const res = await app.request("/api/gyms")
+  describe("GET /venues", () => {
+    it("returns empty list when no venues", async () => {
+      const res = await app.request("/api/venues")
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.success).toBe(true)
       expect(json.data).toEqual([])
     })
 
-    it("returns gym list", async () => {
+    it("returns venue list", async () => {
       await seedFixtures()
-      const res = await app.request("/api/gyms")
+      const res = await app.request("/api/venues")
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.data.length).toBe(1)
-      expect(json.data[0].name).toBe("Test Gym")
-      expect(json.data[0].slug).toBe("test-gym")
+      expect(json.data[0].name).toBe("Test Venue")
+      expect(json.data[0].slug).toBe("test-venue")
       expect(json.data[0].city).toBe("Sao Paulo")
     })
   })
 
-  describe("GET /gyms/:slug", () => {
-    it("returns gym by slug", async () => {
+  describe("GET /venues/:slug", () => {
+    it("returns venue by slug", async () => {
       await seedFixtures()
-      const res = await app.request("/api/gyms/test-gym")
+      const res = await app.request("/api/venues/test-venue")
       const json = await res.json()
       expect(res.status).toBe(200)
-      expect(json.data.name).toBe("Test Gym")
-      expect(json.data.slug).toBe("test-gym")
+      expect(json.data.name).toBe("Test Venue")
+      expect(json.data.slug).toBe("test-venue")
     })
 
     it("returns 404 for non-existent slug", async () => {
-      const res = await app.request("/api/gyms/nonexistent")
+      const res = await app.request("/api/venues/nonexistent")
       expect(res.status).toBe(404)
     })
   })

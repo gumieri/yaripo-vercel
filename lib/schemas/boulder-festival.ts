@@ -21,15 +21,6 @@ export const boulderFestivalConfigSchema = z.object({
   enableJudgeView: z.boolean().default(true),
   enableOrganizerView: z.boolean().default(true),
   customRules: z.string().nullish(),
-  venueInfo: z
-    .object({
-      name: z.string().min(1),
-      address: z.string().nullish(),
-      capacity: z.number().int().min(1).nullish(),
-      wallCount: z.number().int().min(1).default(1),
-      sectorCount: z.number().int().min(1).default(1),
-    })
-    .optional(),
   schedule: z
     .object({
       checkInStart: z.string().datetime().nullish(),
@@ -91,13 +82,6 @@ export const defaultBoulderFestivalConfig: BoulderFestivalConfig = {
   enableJudgeView: true,
   enableOrganizerView: true,
   customRules: null,
-  venueInfo: {
-    name: "Boulder Festival Venue",
-    address: null,
-    capacity: null,
-    wallCount: 1,
-    sectorCount: 1,
-  },
   schedule: {
     checkInStart: null,
     checkInEnd: null,
@@ -119,14 +103,6 @@ export function createBoulderFestivalConfig(
   return {
     ...defaultBoulderFestivalConfig,
     ...overrides,
-    venueInfo: {
-      name: "Boulder Festival Venue",
-      address: null,
-      capacity: null,
-      wallCount: 1,
-      sectorCount: 1,
-      ...overrides.venueInfo,
-    },
     schedule: {
       checkInStart: null,
       checkInEnd: null,

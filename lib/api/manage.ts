@@ -274,7 +274,7 @@ manageRoutes.post("/events/boulder-festival", authMiddleware, requireAuth, async
 
   const festivalConfig = validateBoulderFestivalConfig(body.config)
 
-  const rawSlug = body.slug || festivalConfig.venueInfo?.name || `boulder-festival-${Date.now()}`
+  const rawSlug = body.slug || `boulder-festival-${Date.now()}`
   const eventSlug = rawSlug
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, "-")
@@ -291,7 +291,7 @@ manageRoutes.post("/events/boulder-festival", authMiddleware, requireAuth, async
 
   if (body.venueId) {
     const [venue] = await db
-      .select({ id: venues.id })
+      .select({ id: venues.id, name: venues.name })
       .from(venues)
       .where(eq(venues.id, body.venueId))
     if (!venue) {
@@ -299,7 +299,7 @@ manageRoutes.post("/events/boulder-festival", authMiddleware, requireAuth, async
     }
   }
 
-  const eventName = body.name || `${festivalConfig.venueInfo?.name || "Boulder Festival"}`
+  const eventName = body.name || `Boulder Festival`
 
   const [created] = await db
     .insert(events)

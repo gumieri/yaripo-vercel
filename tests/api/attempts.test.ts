@@ -125,9 +125,7 @@ describe("Attempts API", () => {
     const [queue] = await db
       .select()
       .from(sectorQueues)
-      .where(
-        and(eq(sectorQueues.sectorId, sectorId), eq(sectorQueues.athleteId, athleteId)),
-      )
+      .where(and(eq(sectorQueues.sectorId, sectorId), eq(sectorQueues.athleteId, athleteId)))
     expect(queue.status).toBe("completed")
   })
 

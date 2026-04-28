@@ -32,7 +32,9 @@ export const JudgeInvitationAcceptedEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logo}>Yari<span style={logoHighlight}>po</span></Text>
+            <Text style={logo}>
+              Yari<span style={logoHighlight}>po</span>
+            </Text>
           </Section>
 
           <Heading style={heading}>Convite Aceito!</Heading>
@@ -52,9 +54,7 @@ export const JudgeInvitationAcceptedEmail = ({
             </a>
           </Section>
 
-          <Text style={footer}>
-            Yaripo — Plataforma de Competições de Escalada
-          </Text>
+          <Text style={footer}>Yaripo — Plataforma de Competições de Escalada</Text>
         </Container>
       </Body>
     </Html>

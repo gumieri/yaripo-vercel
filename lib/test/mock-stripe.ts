@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi } from "vitest"
 
 type MockFn = (...args: any[]) => any
@@ -24,7 +25,8 @@ export function __resetMockStripe() {
 
 export const mockStripe = {
   customers: {
-    create: (...args: any[]) => mockCreateCustomer?.(...args) ?? Promise.resolve({ id: "cus_mock" }),
+    create: (...args: any[]) =>
+      mockCreateCustomer?.(...args) ?? Promise.resolve({ id: "cus_mock" }),
   },
   checkout: {
     sessions: {
@@ -35,7 +37,7 @@ export const mockStripe = {
   },
   webhooks: {
     constructEvent: (...args: any[]) =>
-      mockConstructEvent?.(...args) ?? ({ type: "checkout.session.completed", data: { object: {} } }),
+      mockConstructEvent?.(...args) ?? { type: "checkout.session.completed", data: { object: {} } },
   },
 }
 

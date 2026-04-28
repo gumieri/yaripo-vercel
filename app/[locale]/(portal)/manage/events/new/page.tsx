@@ -34,7 +34,7 @@ export default function NewEventPage() {
   const createEvent = useCreateEvent()
   const { data: gyms } = useManageGyms()
   const [slugPreview, setSlugPreview] = useState("")
-  const t = useTranslations('Manage')
+  const t = useTranslations("Manage")
 
   const {
     register,
@@ -50,13 +50,17 @@ export default function NewEventPage() {
   async function onSubmit(data: EventForm) {
     try {
       const result = await createEvent.mutateAsync(data)
-      toast.success(t('createSuccess'))
+      toast.success(t("createSuccess"))
       router.push(`/manage/events/${result.id}`)
     } catch (error: unknown) {
-      if (error instanceof Error && 'code' in error && (error as { code: string }).code === "CONFLICT") {
-        toast.error(t('slugExists'))
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        (error as { code: string }).code === "CONFLICT"
+      ) {
+        toast.error(t("slugExists"))
       } else {
-        toast.error(t('createError'))
+        toast.error(t("createError"))
       }
     }
   }
@@ -68,83 +72,81 @@ export default function NewEventPage() {
           href="/manage/events"
           className="text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
-          &larr; {t('backToEvents')}
+          &larr; {t("backToEvents")}
         </Link>
-        <h1 className="text-foreground mt-2 text-2xl font-bold">{t('newEvent')}</h1>
+        <h1 className="text-foreground mt-2 text-2xl font-bold">{t("newEvent")}</h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-4">
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('name')}</label>
-            <input
-              {...register("name")}
-              className={inputCls}
-              placeholder={t('namePlaceholder')}
-            />
-            {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>}
-          </div>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("name")}</label>
+          <input {...register("name")} className={inputCls} placeholder={t("namePlaceholder")} />
+          {errors.name && <p className="text-destructive mt-1 text-sm">{errors.name.message}</p>}
+        </div>
 
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('slug')}</label>
-            <input
-              {...register("slug", {
-                onChange: (e) => setSlugPreview(e.target.value),
-              })}
-              className={inputCls}
-              placeholder={t('slugPlaceholder')}
-            />
-            {slugPreview && (
-              <p className="text-muted-foreground mt-1 text-sm">
-                {t('slugPreview', { slug: slugPreview })}
-              </p>
-            )}
-            {errors.slug && <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>}
-          </div>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("slug")}</label>
+          <input
+            {...register("slug", {
+              onChange: (e) => setSlugPreview(e.target.value),
+            })}
+            className={inputCls}
+            placeholder={t("slugPlaceholder")}
+          />
+          {slugPreview && (
+            <p className="text-muted-foreground mt-1 text-sm">
+              {t("slugPreview", { slug: slugPreview })}
+            </p>
+          )}
+          {errors.slug && <p className="text-destructive mt-1 text-sm">{errors.slug.message}</p>}
+        </div>
 
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('gym')}</label>
-            <select {...register("gymId")} className={inputCls}>
-              <option value="">{t('noGym')}</option>
-                {gyms?.map((gym: GymSummary) => (
-                <option key={gym.id} value={gym.id}>
-                  {gym.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-        <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('format')}</label>
-          <select {...register("scoringType")} className={inputCls}>
-            <option value="simple">{t('simpleFormat')}</option>
-            <option value="ifsc">{t('ifscFormat')}</option>
-            <option value="redpoint">{t('redpointFormat')}</option>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("gym")}</label>
+          <select {...register("gymId")} className={inputCls}>
+            <option value="">{t("noGym")}</option>
+            {gyms?.map((gym: GymSummary) => (
+              <option key={gym.id} value={gym.id}>
+                {gym.name}
+              </option>
+            ))}
           </select>
         </div>
 
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('description')}</label>
-            <textarea {...register("description")} rows={3} className={inputCls} />
-          </div>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("format")}</label>
+          <select {...register("scoringType")} className={inputCls}>
+            <option value="simple">{t("simpleFormat")}</option>
+            <option value="ifsc">{t("ifscFormat")}</option>
+            <option value="redpoint">{t("redpointFormat")}</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-foreground mb-1 block text-sm font-medium">
+            {t("description")}
+          </label>
+          <textarea {...register("description")} rows={3} className={inputCls} />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">{t('start')}</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t("start")}</label>
             <input {...register("startsAt")} type="datetime-local" className={inputCls} />
           </div>
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">{t('end')}</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t("end")}</label>
             <input {...register("endsAt")} type="datetime-local" className={inputCls} />
           </div>
         </div>
 
         <div className="flex gap-3 pt-2">
           <Button type="submit" disabled={createEvent.isPending}>
-            {createEvent.isPending ? t('creating') : t('create')}
+            {createEvent.isPending ? t("creating") : t("create")}
           </Button>
           <Link href="/manage/events">
             <Button type="button" variant="outline">
-              {t('cancel')}
+              {t("cancel")}
             </Button>
           </Link>
         </div>

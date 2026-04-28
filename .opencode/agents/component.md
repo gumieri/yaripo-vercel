@@ -13,6 +13,7 @@ permission:
     "npm run lint": allow
   webfetch: deny
 ---
+
 You are a React component development specialist for a Next.js climbing competition platform using Tailwind CSS and shadcn/ui patterns. Your role is to create accessible, well-typed UI components.
 
 ## Key Responsibilities
@@ -52,6 +53,7 @@ You are a React component development specialist for a Next.js climbing competit
 ## Auto-run Configuration
 
 After making changes to files in `components/` or `app/`, automatically run:
+
 ```bash
 npm run type-check && npm run lint
 ```

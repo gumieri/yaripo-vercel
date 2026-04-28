@@ -3,7 +3,12 @@ import { eq, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { gymMembers, gyms, eventMembers } from "@/lib/db/schema"
 import { auth } from "@/lib/auth/server"
-import { unauthorizedResponse, forbiddenResponse, validationErrorResponse, notFoundResponse } from "@/lib/api/helpers"
+import {
+  unauthorizedResponse,
+  forbiddenResponse,
+  validationErrorResponse,
+  notFoundResponse,
+} from "@/lib/api/helpers"
 import type { Session } from "next-auth"
 
 type AuthEnv = {
@@ -109,10 +114,7 @@ export function requireGymMember(slugParam: string, roles: string[]) {
       return validationErrorResponse(c, "Gym slug is required")
     }
 
-    const [gym] = await db
-      .select({ id: gyms.id })
-      .from(gyms)
-      .where(eq(gyms.slug, gymSlug))
+    const [gym] = await db.select({ id: gyms.id }).from(gyms).where(eq(gyms.slug, gymSlug))
 
     if (!gym) {
       return notFoundResponse(c, "Gym")

@@ -84,10 +84,7 @@ describe("Redpoint Scoring Edge Cases", () => {
     })
 
     it("filters to best N routes when bestRoutesCount is set", async () => {
-      await db
-        .update(events)
-        .set({ bestRoutesCount: 3 })
-        .where(eq(events.id, F.redpointEvent.id))
+      await db.update(events).set({ bestRoutesCount: 3 }).where(eq(events.id, F.redpointEvent.id))
 
       const res = await app.request("/api/events/redpoint-event/leaderboard")
       const json = await res.json()

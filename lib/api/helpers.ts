@@ -27,19 +27,31 @@ export function notFoundResponse(c: Context, resource: string = "Resource"): Res
   return errorResponse(c, "NOT_FOUND", `${resource} not found`, 404)
 }
 
-export function unauthorizedResponse(c: Context, message: string = "Authentication required"): Response {
+export function unauthorizedResponse(
+  c: Context,
+  message: string = "Authentication required",
+): Response {
   return errorResponse(c, "UNAUTHORIZED", message, 401)
 }
 
-export function forbiddenResponse(c: Context, message: string = "Insufficient permissions"): Response {
+export function forbiddenResponse(
+  c: Context,
+  message: string = "Insufficient permissions",
+): Response {
   return errorResponse(c, "FORBIDDEN", message, 403)
 }
 
-export function validationErrorResponse(c: Context, message: string = "Validation failed"): Response {
+export function validationErrorResponse(
+  c: Context,
+  message: string = "Validation failed",
+): Response {
   return errorResponse(c, "VALIDATION_ERROR", message, 400)
 }
 
-export function conflictResponse(c: Context, message: string = "Resource already exists"): Response {
+export function conflictResponse(
+  c: Context,
+  message: string = "Resource already exists",
+): Response {
   return errorResponse(c, "CONFLICT", message, 409)
 }
 
@@ -65,7 +77,10 @@ export function safeParseFloat(value: unknown, defaultValue: number = 0): number
   return defaultValue
 }
 
-export function paymentRequiredResponse(c: Context, message: string = "Payment required"): Response {
+export function paymentRequiredResponse(
+  c: Context,
+  message: string = "Payment required",
+): Response {
   return errorResponse(c, "PAYMENT_REQUIRED", message, 402)
 }
 
@@ -73,13 +88,19 @@ export function methodNotAllowedResponse(c: Context): Response {
   return errorResponse(c, "METHOD_NOT_ALLOWED", "Method not allowed", 405)
 }
 
-export function cacheHeaders(sMaxAge: number, staleWhileRevalidate: number): Record<string, string> {
+export function cacheHeaders(
+  sMaxAge: number,
+  staleWhileRevalidate: number,
+): Record<string, string> {
   return {
     "Cache-Control": `public, s-maxage=${sMaxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
   }
 }
 
-export function internalServerErrorResponse(c: Context, message: string = "Internal server error"): Response {
+export function internalServerErrorResponse(
+  c: Context,
+  message: string = "Internal server error",
+): Response {
   return errorResponse(c, "INTERNAL_SERVER_ERROR", message, 500)
 }
 

@@ -7,16 +7,8 @@ import JudgeInvitationDeclinedEmail from "./templates/judge-invitation-declined"
 import JudgeThankYouEmail from "./templates/judge-thank-you"
 import PaymentReceiptEmail from "./templates/payment-receipt"
 
-export async function sendMagicLink({
-  to,
-  url,
-}: {
-  to: string
-  url: string
-}) {
-  const html = await render(
-    MagicLinkEmail({ email: to, url })
-  )
+export async function sendMagicLink({ to, url }: { to: string; url: string }) {
+  const html = await render(MagicLinkEmail({ email: to, url }))
   return sendEmail({
     to,
     subject: "Acesse sua conta — Yaripo",
@@ -46,7 +38,7 @@ export async function sendJudgeInvite({
       inviteUrl,
       locale,
       supportedLocales,
-    })
+    }),
   )
   return sendEmail({
     to,
@@ -74,7 +66,7 @@ export async function sendJudgeInvitationAccepted({
       eventName,
       organizerName,
       eventUrl,
-    })
+    }),
   )
   return sendEmail({
     to,
@@ -99,7 +91,7 @@ export async function sendJudgeInvitationDeclined({
       judgeName,
       eventName,
       organizerName,
-    })
+    }),
   )
   return sendEmail({
     to,
@@ -127,7 +119,7 @@ export async function sendJudgeThankYou({
       eventName,
       organizerName,
       eventUrl,
-    })
+    }),
   )
   return sendEmail({
     to,
@@ -161,7 +153,7 @@ export async function sendPaymentReceipt({
       amount,
       paymentDate,
       receiptUrl,
-    })
+    }),
   )
   return sendEmail({
     to,

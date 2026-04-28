@@ -56,14 +56,14 @@ export function LanguageSwitcher() {
         <div
           role="menu"
           aria-label="Language selection"
-          className="bg-popover text-popover-foreground border-border absolute right-0 top-full z-50 mt-1 min-w-[160px] overflow-hidden rounded-lg border shadow-md"
+          className="bg-popover text-popover-foreground border-border absolute top-full right-0 z-50 mt-1 min-w-[160px] overflow-hidden rounded-lg border shadow-md"
         >
           {locales.map((l) => (
             <button
               key={l.code}
               onClick={() => switchLocale(l.code)}
               role="menuitem"
-              className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent ${
+              className={`hover:bg-accent flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors ${
                 l.code === locale ? "bg-accent" : ""
               }`}
             >

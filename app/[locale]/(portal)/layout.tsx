@@ -5,14 +5,14 @@ import { getTranslations } from "next-intl/server"
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
-  const t = await getTranslations('Portal')
+  const t = await getTranslations("Portal")
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-border/50 bg-background/80 backdrop-blur-lg sticky top-0 z-50 border-b">
+    <div className="bg-background flex min-h-screen flex-col">
+      <header className="border-border/50 bg-background/80 sticky top-0 z-50 border-b backdrop-blur-lg">
         <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-foreground">
-            <Mountain className="h-6 w-6 text-primary" />
+          <Link href="/" className="text-foreground flex items-center gap-2 text-xl font-bold">
+            <Mountain className="text-primary h-6 w-6" />
             <span>
               Yari<span className="text-primary">po</span>
             </span>
@@ -30,7 +30,7 @@ export default async function PortalLayout({ children }: { children: React.React
                   type="submit"
                   className="border-border hover:bg-secondary text-muted-foreground rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
                 >
-                  {t('signOut')}
+                  {t("signOut")}
                 </button>
               </form>
             </div>
@@ -39,7 +39,7 @@ export default async function PortalLayout({ children }: { children: React.React
               href="/login"
               className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-1.5 text-sm font-medium transition-colors"
             >
-              {t('enter')}
+              {t("enter")}
             </Link>
           )}
         </nav>

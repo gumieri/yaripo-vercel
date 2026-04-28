@@ -30,7 +30,9 @@ export const JudgeInvitationDeclinedEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logo}>Yari<span style={logoHighlight}>po</span></Text>
+            <Text style={logo}>
+              Yari<span style={logoHighlight}>po</span>
+            </Text>
           </Section>
 
           <Heading style={heading}>Convite Recusado</Heading>
@@ -44,9 +46,7 @@ export const JudgeInvitationDeclinedEmail = ({
             Você pode enviar um novo convite a outro juiz pelo painel de gerenciamento do evento.
           </Text>
 
-          <Text style={footer}>
-            Yaripo — Plataforma de Competições de Escalada
-          </Text>
+          <Text style={footer}>Yaripo — Plataforma de Competições de Escalada</Text>
         </Container>
       </Body>
     </Html>

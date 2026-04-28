@@ -21,7 +21,7 @@ describe("Attempts API Idempotency Edge Cases", () => {
 
   it("duplicate idempotencyKey returns existing attempt with different data", async () => {
     const idempotencyKey = "test-duplicate-key-001"
-    
+
     const firstAttempt = {
       sectorId,
       athleteId,
@@ -43,7 +43,7 @@ describe("Attempts API Idempotency Edge Cases", () => {
       headers: judgeHeaders,
       body: JSON.stringify(firstAttempt),
     })
-    
+
     const res2 = await app.request("/api/attempts", {
       method: "POST",
       headers: judgeHeaders,
@@ -52,10 +52,10 @@ describe("Attempts API Idempotency Edge Cases", () => {
 
     expect(res1.status).toBe(201)
     expect(res2.status).toBe(200)
-    
+
     const json1 = await res1.json()
     const json2 = await res2.json()
-    
+
     // Should return the first attempt, not the second
     expect(json2.data.id).toBe(json1.data.id)
     expect(json2.data.isTop).toBe(true)
@@ -64,7 +64,7 @@ describe("Attempts API Idempotency Edge Cases", () => {
 
   it("idempotencyKey with special characters works", async () => {
     const idempotencyKey = "test-key-with-special-chars!@#$%^&*()_+-=[]{}|;':\",./<>?"
-    
+
     const res1 = await app.request("/api/attempts", {
       method: "POST",
       headers: judgeHeaders,
@@ -76,7 +76,7 @@ describe("Attempts API Idempotency Edge Cases", () => {
         idempotencyKey,
       }),
     })
-    
+
     const res2 = await app.request("/api/attempts", {
       method: "POST",
       headers: judgeHeaders,
@@ -91,16 +91,16 @@ describe("Attempts API Idempotency Edge Cases", () => {
 
     expect(res1.status).toBe(201)
     expect(res2.status).toBe(200)
-    
+
     const json1 = await res1.json()
     const json2 = await res2.json()
-    
+
     expect(json2.data.id).toBe(json1.data.id)
   })
 
   it("very long idempotencyKey works", async () => {
     const idempotencyKey = "a".repeat(1000) // 1000 character key
-    
+
     const res1 = await app.request("/api/attempts", {
       method: "POST",
       headers: judgeHeaders,
@@ -112,7 +112,7 @@ describe("Attempts API Idempotency Edge Cases", () => {
         idempotencyKey,
       }),
     })
-    
+
     const res2 = await app.request("/api/attempts", {
       method: "POST",
       headers: judgeHeaders,
@@ -131,7 +131,7 @@ describe("Attempts API Idempotency Edge Cases", () => {
 
   it("idempotency with concurrent requests returns same result", async () => {
     const idempotencyKey = "test-concurrent-key-001"
-    
+
     const attemptData = {
       sectorId,
       athleteId,
@@ -156,10 +156,10 @@ describe("Attempts API Idempotency Edge Cases", () => {
     // One should be 201 (created), one should be 200 (existing)
     const statuses = [res1.status, res2.status].sort()
     expect(statuses).toEqual([200, 201])
-    
+
     const json1 = await res1.json()
     const json2 = await res2.json()
-    
+
     // Both should return the same attempt data
     expect(json1.data.id).toBe(json2.data.id)
   })

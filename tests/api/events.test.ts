@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeAll, beforeEach } from "vitest"
 import { createTestApp } from "@/lib/test/app"
-import { truncateTables, seedFixtures, seedSimpleAttempts, seedIfscAttempts, authHeaders, F } from "@/lib/test/helpers"
+import {
+  truncateTables,
+  seedFixtures,
+  seedSimpleAttempts,
+  seedIfscAttempts,
+  authHeaders,
+  F,
+} from "@/lib/test/helpers"
 
 vi.mock("@/lib/api/middleware/auth", () => import("@/lib/test/mock-auth"))
 

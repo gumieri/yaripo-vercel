@@ -14,7 +14,7 @@ export default function EventsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="text-foreground mb-8 text-3xl font-bold">{t('Events.title')}</h1>
+      <h1 className="text-foreground mb-8 text-3xl font-bold">{t("Events.title")}</h1>
 
       {isLoading && (
         <div className="space-y-4">
@@ -26,7 +26,7 @@ export default function EventsPage() {
 
       {!isLoading && (!events || events.length === 0) && (
         <div className="border-muted-foreground/25 rounded-lg border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">{t('Events.noEvents')}</p>
+          <p className="text-muted-foreground">{t("Events.noEvents")}</p>
         </div>
       )}
 
@@ -47,10 +47,10 @@ export default function EventsPage() {
                       }`}
                     >
                       {event.status === "active"
-                        ? t('Events.statusActive')
+                        ? t("Events.statusActive")
                         : event.status === "completed"
-                          ? t('Events.statusCompleted')
-                          : t('Events.statusUpcoming')}
+                          ? t("Events.statusCompleted")
+                          : t("Events.statusUpcoming")}
                     </span>
                     {event.scoringType === "ifsc" && (
                       <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700">

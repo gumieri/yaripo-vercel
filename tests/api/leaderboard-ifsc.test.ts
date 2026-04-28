@@ -95,9 +95,7 @@ describe("IFSC Leaderboard Edge Cases", () => {
     it("rejects invalid category_id format", async () => {
       await seedIfscAttempts()
 
-      const res = await app.request(
-        "/api/events/ifsc-event/leaderboard?category_id=invalid-uuid",
-      )
+      const res = await app.request("/api/events/ifsc-event/leaderboard?category_id=invalid-uuid")
       const json = await res.json()
 
       expect(res.status).toBe(200)
@@ -107,10 +105,7 @@ describe("IFSC Leaderboard Edge Cases", () => {
 
   describe("Draft event filtering", () => {
     it("returns 404 for draft IFSC events", async () => {
-      await db
-        .update(events)
-        .set({ status: "draft" })
-        .where(eq(events.id, F.ifscEvent.id))
+      await db.update(events).set({ status: "draft" }).where(eq(events.id, F.ifscEvent.id))
 
       const res = await app.request("/api/events/ifsc-event/leaderboard")
       const json = await res.json()

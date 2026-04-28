@@ -32,7 +32,9 @@ export const JudgeThankYouEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logo}>Yari<span style={logoHighlight}>po</span></Text>
+            <Text style={logo}>
+              Yari<span style={logoHighlight}>po</span>
+            </Text>
           </Section>
 
           <Heading style={heading}>Obrigado pelo seu trabalho!</Heading>
@@ -42,12 +44,11 @@ export const JudgeThankYouEmail = ({
           </Text>
 
           <Text style={text}>
-            A competição <strong>{eventName}</strong> foi finalizada. Muito obrigado por contribuir como juiz — o seu trabalho foi essencial para o sucesso do evento!
+            A competição <strong>{eventName}</strong> foi finalizada. Muito obrigado por contribuir
+            como juiz — o seu trabalho foi essencial para o sucesso do evento!
           </Text>
 
-          <Text style={text}>
-            A classificação final já está disponível.
-          </Text>
+          <Text style={text}>A classificação final já está disponível.</Text>
 
           <Section style={buttonSection}>
             <a href={eventUrl} style={button}>
@@ -59,9 +60,7 @@ export const JudgeThankYouEmail = ({
             Enviado por {organizerName} em nome da organização do evento.
           </Text>
 
-          <Text style={footer}>
-            Yaripo — Plataforma de Competições de Escalada
-          </Text>
+          <Text style={footer}>Yaripo — Plataforma de Competições de Escalada</Text>
         </Container>
       </Body>
     </Html>

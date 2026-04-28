@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const authMiddleware = async (c: any, next: any) => {
   const email = c.req.header("x-test-user-email") || null
   c.set("userId", c.req.header("x-test-user-id") || null)

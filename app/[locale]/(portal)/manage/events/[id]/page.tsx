@@ -30,49 +30,52 @@ function formatLocalDatetime(dateStr: string): string {
   return local.toISOString().slice(0, 16)
 }
 
-export default function AdminEventDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default function AdminEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: event, isLoading } = useManageEvent(id)
   const [tab, setTab] = useState<Tab>("settings")
-  const t = useTranslations('ManageEvent')
+  const t = useTranslations("ManageEvent")
 
   if (isLoading || !event) {
-    return <p className="text-muted-foreground p-4"><div className="space-y-2"><div className="h-4 w-24 animate-pulse rounded bg-secondary" /><div className="h-8 w-64 animate-pulse rounded bg-secondary" /><div className="h-64 w-full animate-pulse rounded-lg bg-secondary" /></div></p>
+    return (
+      <p className="text-muted-foreground p-4">
+        <div className="space-y-2">
+          <div className="bg-secondary h-4 w-24 animate-pulse rounded" />
+          <div className="bg-secondary h-8 w-64 animate-pulse rounded" />
+          <div className="bg-secondary h-64 w-full animate-pulse rounded-lg" />
+        </div>
+      </p>
+    )
   }
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "settings", label: t('settings') },
-    { key: "categories", label: `${t('categories')} (${event.categories?.length || 0})` },
-    { key: "sectors", label: `${t('sectors')} (${event.sectors?.length || 0})` },
-    { key: "athletes", label: `${t('athletes')} (${event.athletes?.length || 0})` },
+    { key: "settings", label: t("settings") },
+    { key: "categories", label: `${t("categories")} (${event.categories?.length || 0})` },
+    { key: "sectors", label: `${t("sectors")} (${event.sectors?.length || 0})` },
+    { key: "athletes", label: `${t("athletes")} (${event.athletes?.length || 0})` },
   ]
 
   return (
     <div>
       <div className="mb-6">
-        <Link
-          href="/manage/events"
-          className="text-muted-foreground hover:text-foreground text-sm"
-        >
-          &larr; {t('backToEvents')}
+        <Link href="/manage/events" className="text-muted-foreground hover:text-foreground text-sm">
+          &larr; {t("backToEvents")}
         </Link>
         <h1 className="text-foreground mt-2 text-2xl font-bold">{event.name}</h1>
-        <p className="text-muted-foreground mt-1 text-sm">{t('urlPreview', { slug: event.slug })}</p>
+        <p className="text-muted-foreground mt-1 text-sm">
+          {t("urlPreview", { slug: event.slug })}
+        </p>
       </div>
 
       <div className="mb-6 flex gap-1 border-b">
         {tabs.map((tabItem) => (
-<button
+          <button
             key={tabItem.key}
             onClick={() => setTab(tabItem.key)}
             className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
               tab === tabItem.key
-                ? "border-violet-600 text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "text-primary border-violet-600"
+                : "text-muted-foreground hover:text-foreground border-transparent"
             }`}
           >
             {tabItem.label}
@@ -90,7 +93,7 @@ export default function AdminEventDetailPage({
 
 function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }) {
   const updateEvent = useUpdateEvent()
-  const t = useTranslations('ManageEvent')
+  const t = useTranslations("ManageEvent")
   const [form, setForm] = useState({
     name: event.name,
     slug: event.slug,
@@ -105,11 +108,11 @@ function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }
   const statusOptions = ["draft", "published", "active", "completed", "archived"] as const
 
   const statusLabels: Record<string, string> = {
-    draft: t('statusDraft'),
-    published: t('statusPublished'),
-    active: t('statusActive'),
-    completed: t('statusCompleted'),
-    archived: t('statusArchived'),
+    draft: t("statusDraft"),
+    published: t("statusPublished"),
+    active: t("statusActive"),
+    completed: t("statusCompleted"),
+    archived: t("statusArchived"),
   }
 
   async function handleSave() {
@@ -121,12 +124,16 @@ function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }
         endsAt: form.endsAt || null,
         bestRoutesCount: form.bestRoutesCount !== "" ? Number(form.bestRoutesCount) : null,
       })
-      toast.success(t('eventUpdated'))
+      toast.success(t("eventUpdated"))
     } catch (error: unknown) {
-      if (error instanceof Error && 'code' in error && (error as { code: string }).code === "CONFLICT") {
-        toast.error(t('slugExists'))
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        (error as { code: string }).code === "CONFLICT"
+      ) {
+        toast.error(t("slugExists"))
       } else {
-        toast.error(t('updateError'))
+        toast.error(t("updateError"))
       }
     }
   }
@@ -134,34 +141,34 @@ function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }
   return (
     <div className="max-w-lg space-y-4">
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">{t('name')}</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t("name")}</label>
         <input
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
         />
       </div>
 
-       <div>
-         <label className="text-foreground mb-1 block text-sm font-medium">{t('slug')}</label>
-         <input
-           value={form.slug}
-           onChange={(e) => setForm({ ...form, slug: e.target.value })}
-           className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-         />
-         {form.slug && (
-           <p className="text-muted-foreground mt-1 text-sm">
-             {t('urlPreview', { slug: form.slug })}
-           </p>
-         )}
-       </div>
+      <div>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t("slug")}</label>
+        <input
+          value={form.slug}
+          onChange={(e) => setForm({ ...form, slug: e.target.value })}
+          className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
+        />
+        {form.slug && (
+          <p className="text-muted-foreground mt-1 text-sm">
+            {t("urlPreview", { slug: form.slug })}
+          </p>
+        )}
+      </div>
 
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">{t('status')}</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t("status")}</label>
         <select
           value={form.status}
           onChange={(e) => setForm({ ...form, status: e.target.value })}
-          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
         >
           {statusOptions.map((s) => (
             <option key={s} value={s}>
@@ -172,64 +179,62 @@ function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }
       </div>
 
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">{t('format')}</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t("format")}</label>
         <select
           value={form.scoringType}
           onChange={(e) => setForm({ ...form, scoringType: e.target.value })}
-          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
         >
-          <option value="simple">{t('simple')}</option>
-          <option value="ifsc">{t('ifsc')}</option>
-          <option value="redpoint">{t('redpoint')}</option>
+          <option value="simple">{t("simple")}</option>
+          <option value="ifsc">{t("ifsc")}</option>
+          <option value="redpoint">{t("redpoint")}</option>
         </select>
       </div>
 
       {form.scoringType === "redpoint" && (
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">
-            {t('bestRoutes')}
+            {t("bestRoutes")}
           </label>
           <input
             type="number"
             min={1}
             value={form.bestRoutesCount}
             onChange={(e) => setForm({ ...form, bestRoutesCount: e.target.value })}
-            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder={t('bestRoutesPlaceholder')}
+            className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
+            placeholder={t("bestRoutesPlaceholder")}
           />
-          <p className="text-muted-foreground mt-1 text-xs">
-            {t('bestRoutesDesc')}
-          </p>
+          <p className="text-muted-foreground mt-1 text-xs">{t("bestRoutesDesc")}</p>
         </div>
       )}
 
       <div>
-        <label className="text-foreground mb-1 block text-sm font-medium">{t('description')}</label>
+        <label className="text-foreground mb-1 block text-sm font-medium">{t("description")}</label>
         <textarea
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           rows={3}
-          className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('start')}</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("start")}</label>
           <input
             type="datetime-local"
             value={form.startsAt}
             onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
           />
         </div>
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('end')}</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("end")}</label>
           <input
             type="datetime-local"
             value={form.endsAt}
             onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
           />
         </div>
       </div>
@@ -239,7 +244,7 @@ function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }
         disabled={updateEvent.isPending}
         className="bg-primary hover:bg-primary/90"
       >
-        {updateEvent.isPending ? t('saving') : t('save')}
+        {updateEvent.isPending ? t("saving") : t("save")}
       </Button>
     </div>
   )
@@ -248,16 +253,16 @@ function SettingsTab({ eventId, event }: { eventId: string; event: EventDetail }
 function CategoriesTab({ eventId, event }: { eventId: string; event: EventDetail }) {
   const createCategory = useCreateCategory()
   const deleteCategory = useDeleteCategory()
-  const t = useTranslations('ManageEvent')
+  const t = useTranslations("ManageEvent")
   const [name, setName] = useState("")
   const [gender, setGender] = useState("open")
   const [minAge, setMinAge] = useState("")
   const [maxAge, setMaxAge] = useState("")
 
   const genderLabels: Record<string, string> = {
-    male: t('genderMale'),
-    female: t('genderFemale'),
-    open: t('genderOpen'),
+    male: t("genderMale"),
+    female: t("genderFemale"),
+    open: t("genderOpen"),
   }
 
   async function handleCreate() {
@@ -271,19 +276,19 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: EventDetail
         maxAge: maxAge ? Number(maxAge) : null,
       })
       setName("")
-      toast.success(t('categoryCreated'))
+      toast.success(t("categoryCreated"))
     } catch {
-      toast.error(t('categoryCreateError'))
+      toast.error(t("categoryCreateError"))
     }
   }
 
   async function handleDelete(catId: string, catName: string) {
-    if (!confirm(t('deleteCategoryConfirm', { name: catName }))) return
+    if (!confirm(t("deleteCategoryConfirm", { name: catName }))) return
     try {
       await deleteCategory.mutateAsync({ eventId, categoryId: catId })
-      toast.success(t('categoryDeleted'))
+      toast.success(t("categoryDeleted"))
     } catch {
-      toast.error(t('deleteCategoryError'))
+      toast.error(t("deleteCategoryError"))
     }
   }
 
@@ -291,43 +296,43 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: EventDetail
     <div>
       <div className="mb-4 flex items-end gap-3">
         <div className="flex-1">
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('name')}</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("name")}</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder={t('categoryPlaceholder')}
+            className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
+            placeholder={t("categoryPlaceholder")}
           />
         </div>
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('gender')}</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("gender")}</label>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
           >
-            <option value="open">{t('genderOpen')}</option>
-            <option value="male">{t('genderMale')}</option>
-            <option value="female">{t('genderFemale')}</option>
+            <option value="open">{t("genderOpen")}</option>
+            <option value="male">{t("genderMale")}</option>
+            <option value="female">{t("genderFemale")}</option>
           </select>
         </div>
         <div className="w-20">
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('minAge')}</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("minAge")}</label>
           <input
             type="number"
             value={minAge}
             onChange={(e) => setMinAge(e.target.value)}
-            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
           />
         </div>
         <div className="w-20">
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('maxAge')}</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("maxAge")}</label>
           <input
             type="number"
             value={maxAge}
             onChange={(e) => setMaxAge(e.target.value)}
-            className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
           />
         </div>
         <Button
@@ -335,12 +340,12 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: EventDetail
           disabled={createCategory.isPending || !name.trim()}
           className="bg-primary hover:bg-primary/90"
         >
-          {t('add')}
+          {t("add")}
         </Button>
       </div>
 
       {!event.categories?.length ? (
-        <p className="text-muted-foreground text-sm">{t('noCategories')}</p>
+        <p className="text-muted-foreground text-sm">{t("noCategories")}</p>
       ) : (
         <div className="space-y-2">
           {event.categories.map((cat: Category) => (
@@ -349,7 +354,9 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: EventDetail
                 <p className="text-foreground font-medium">{cat.name}</p>
                 <p className="text-muted-foreground text-xs">
                   {genderLabels[cat.gender] || cat.gender}
-                  {cat.minAge != null && cat.maxAge != null && ` | ${cat.minAge}-${cat.maxAge} ${t('years')}`}
+                  {cat.minAge != null &&
+                    cat.maxAge != null &&
+                    ` | ${cat.minAge}-${cat.maxAge} ${t("years")}`}
                 </p>
               </div>
               <Button
@@ -359,7 +366,7 @@ function CategoriesTab({ eventId, event }: { eventId: string; event: EventDetail
                 onClick={() => handleDelete(cat.id, cat.name)}
                 disabled={deleteCategory.isPending}
               >
-                {t('delete')}
+                {t("delete")}
               </Button>
             </div>
           ))}
@@ -373,7 +380,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail })
   const createSector = useCreateSector()
   const deleteSector = useDeleteSector()
   const updateSector = useUpdateSector()
-  const t = useTranslations('ManageEvent')
+  const t = useTranslations("ManageEvent")
   const [name, setName] = useState("")
   const isRedpoint = event.scoringType === "redpoint"
 
@@ -383,7 +390,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail })
       const payload: { eventId: string; [key: string]: unknown } = {
         eventId,
         name: name.trim(),
-        orderIndex: (event.sectors?.length || 0),
+        orderIndex: event.sectors?.length || 0,
       }
       if (isRedpoint) {
         payload.flashPoints = 1000
@@ -392,19 +399,19 @@ function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail })
       }
       await createSector.mutateAsync(payload)
       setName("")
-      toast.success(t('sectorCreated'))
+      toast.success(t("sectorCreated"))
     } catch {
-      toast.error(t('sectorCreateError'))
+      toast.error(t("sectorCreateError"))
     }
   }
 
   async function handleDelete(sectorId: string, sectorName: string) {
-    if (!confirm(t('deleteSectorConfirm', { name: sectorName }))) return
+    if (!confirm(t("deleteSectorConfirm", { name: sectorName }))) return
     try {
       await deleteSector.mutateAsync({ eventId, sectorId })
-      toast.success(t('sectorDeleted'))
+      toast.success(t("sectorDeleted"))
     } catch {
-      toast.error(t('deleteSectorError'))
+      toast.error(t("deleteSectorError"))
     }
   }
 
@@ -412,7 +419,7 @@ function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail })
     try {
       await updateSector.mutateAsync({ eventId, sectorId, ...updates })
     } catch {
-      toast.error(t('sectorUpdateError'))
+      toast.error(t("sectorUpdateError"))
     }
   }
 
@@ -423,13 +430,15 @@ function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail })
     <div>
       <div className="mb-4 flex items-end gap-3">
         <div className="flex-1">
-          <label className="text-foreground mb-1 block text-sm font-medium">{t('sectorName')}</label>
+          <label className="text-foreground mb-1 block text-sm font-medium">
+            {t("sectorName")}
+          </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             className={inputCls}
-            placeholder={t('sectorPlaceholder')}
+            placeholder={t("sectorPlaceholder")}
           />
         </div>
         <Button
@@ -437,19 +446,19 @@ function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail })
           disabled={createSector.isPending || !name.trim()}
           className="bg-primary hover:bg-primary/90"
         >
-          {t('add')}
+          {t("add")}
         </Button>
       </div>
 
       {!event.sectors?.length ? (
-        <p className="text-muted-foreground text-sm">{t('noSectors')}</p>
+        <p className="text-muted-foreground text-sm">{t("noSectors")}</p>
       ) : (
         <div className="space-y-2">
           {event.sectors.map((sector: Sector, idx: number) => (
             <div key={sector.id} className="rounded-lg border p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-sm font-bold">
+                  <span className="text-muted-foreground bg-secondary flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                     {idx + 1}
                   </span>
                   <p className="text-foreground font-medium">{sector.name}</p>
@@ -461,37 +470,47 @@ function SectorsTab({ eventId, event }: { eventId: string; event: EventDetail })
                   onClick={() => handleDelete(sector.id, sector.name)}
                   disabled={deleteSector.isPending}
                 >
-                  {t('delete')}
+                  {t("delete")}
                 </Button>
               </div>
               {isRedpoint && (
                 <div className="mt-3 grid grid-cols-3 gap-3 pl-11">
                   <div>
-                    <label className="text-muted-foreground mb-1 block text-xs">{t('flashPoints')}</label>
+                    <label className="text-muted-foreground mb-1 block text-xs">
+                      {t("flashPoints")}
+                    </label>
                     <input
                       type="number"
                       min={0}
                       defaultValue={sector.flashPoints ?? 1000}
                       onBlur={(e) =>
-                        handleUpdateSector(sector.id, { flashPoints: Number(e.target.value) || 1000 })
+                        handleUpdateSector(sector.id, {
+                          flashPoints: Number(e.target.value) || 1000,
+                        })
                       }
                       className={inputCls}
                     />
                   </div>
                   <div>
-                    <label className="text-muted-foreground mb-1 block text-xs">{t('pointsPerAttempt')}</label>
+                    <label className="text-muted-foreground mb-1 block text-xs">
+                      {t("pointsPerAttempt")}
+                    </label>
                     <input
                       type="number"
                       min={0}
                       defaultValue={sector.pointsPerAttempt ?? 100}
                       onBlur={(e) =>
-                        handleUpdateSector(sector.id, { pointsPerAttempt: Number(e.target.value) || 100 })
+                        handleUpdateSector(sector.id, {
+                          pointsPerAttempt: Number(e.target.value) || 100,
+                        })
                       }
                       className={inputCls}
                     />
                   </div>
                   <div>
-                    <label className="text-muted-foreground mb-1 block text-xs">{t('maxAttempts')}</label>
+                    <label className="text-muted-foreground mb-1 block text-xs">
+                      {t("maxAttempts")}
+                    </label>
                     <input
                       type="number"
                       min={1}
@@ -516,7 +535,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
   const createAthlete = useCreateAthlete()
   const bulkCreateAthletes = useBulkCreateAthletes()
   const deleteAthlete = useDeleteAthlete()
-  const t = useTranslations('ManageEvent')
+  const t = useTranslations("ManageEvent")
   const [name, setName] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [bulkNames, setBulkNames] = useState("")
@@ -534,15 +553,15 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
         categoryId: selectedCategory,
       })
       setName("")
-      toast.success(t('athleteRegistered'))
+      toast.success(t("athleteRegistered"))
     } catch {
-      toast.error(t('athleteRegisterError'))
+      toast.error(t("athleteRegisterError"))
     }
   }
 
   async function handleBulkCreate() {
     if (!bulkCategory) {
-      toast.error(t('selectCategoryError'))
+      toast.error(t("selectCategoryError"))
       return
     }
     const names = bulkNames
@@ -550,7 +569,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
       .map((n) => n.trim())
       .filter(Boolean)
     if (names.length === 0) {
-      toast.error(t('enterAtLeastOneName'))
+      toast.error(t("enterAtLeastOneName"))
       return
     }
     try {
@@ -560,19 +579,19 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
         names,
       })
       setBulkNames("")
-      toast.success(`${result.count} ${t('athleteRegistered')}`)
+      toast.success(`${result.count} ${t("athleteRegistered")}`)
     } catch {
-      toast.error(t('bulkRegisterError'))
+      toast.error(t("bulkRegisterError"))
     }
   }
 
   async function handleDelete(athleteId: string, athleteName: string) {
-    if (!confirm(t('deleteAthleteConfirm', { name: athleteName }))) return
+    if (!confirm(t("deleteAthleteConfirm", { name: athleteName }))) return
     try {
       await deleteAthlete.mutateAsync({ eventId, athleteId })
-      toast.success(t('athleteDeleted'))
+      toast.success(t("athleteDeleted"))
     } catch {
-      toast.error(t('deleteAthleteError'))
+      toast.error(t("deleteAthleteError"))
     }
   }
 
@@ -586,45 +605,45 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
         <button
           onClick={() => setShowBulk(false)}
           className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            !showBulk
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:text-foreground"
+            !showBulk ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {t('individual')}
+          {t("individual")}
         </button>
         <button
           onClick={() => setShowBulk(true)}
           className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            showBulk
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:text-foreground"
+            showBulk ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {t('bulk')}
+          {t("bulk")}
         </button>
       </div>
 
       {!showBulk ? (
         <div className="mb-4 flex items-end gap-3">
           <div className="flex-1">
-            <label className="text-foreground mb-1 block text-sm font-medium">{t('athleteName')}</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">
+              {t("athleteName")}
+            </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreateSingle()}
-              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder={t('athletePlaceholder')}
+              className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
+              placeholder={t("athletePlaceholder")}
             />
           </div>
           <div className="w-48">
-            <label className="text-foreground mb-1 block text-sm font-medium">{t('category')}</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">
+              {t("category")}
+            </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
             >
-              <option value="">{t('selectCategory')}</option>
+              <option value="">{t("selectCategory")}</option>
               {categories.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -637,19 +656,21 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
             disabled={createAthlete.isPending || !name.trim() || !selectedCategory}
             className="bg-primary hover:bg-primary/90"
           >
-            {t('add')}
+            {t("add")}
           </Button>
         </div>
       ) : (
         <div className="mb-4 space-y-3">
           <div className="w-48">
-            <label className="text-foreground mb-1 block text-sm font-medium">{t('category')}</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">
+              {t("category")}
+            </label>
             <select
               value={bulkCategory}
               onChange={(e) => setBulkCategory(e.target.value)}
-              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
             >
-              <option value="">{t('selectCategory')}</option>
+              <option value="">{t("selectCategory")}</option>
               {categories.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -659,30 +680,28 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
           </div>
           <div>
             <label className="text-foreground mb-1 block text-sm font-medium">
-              {t('namesOnePerLine')}
+              {t("namesOnePerLine")}
             </label>
             <textarea
               value={bulkNames}
               onChange={(e) => setBulkNames(e.target.value)}
               rows={6}
-              className="border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder={t('namesPlaceholder')}
+              className="border-input bg-background text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:ring-1 focus:outline-none"
+              placeholder={t("namesPlaceholder")}
             />
           </div>
           <Button
             onClick={handleBulkCreate}
-            disabled={
-              bulkCreateAthletes.isPending || !bulkCategory || !bulkNames.trim()
-            }
+            disabled={bulkCreateAthletes.isPending || !bulkCategory || !bulkNames.trim()}
             className="bg-primary hover:bg-primary/90"
           >
-            {bulkCreateAthletes.isPending ? t('registering') : t('registerBulk')}
+            {bulkCreateAthletes.isPending ? t("registering") : t("registerBulk")}
           </Button>
         </div>
       )}
 
       {!event.athletes?.length ? (
-        <p className="text-muted-foreground text-sm">{t('noAthletes')}</p>
+        <p className="text-muted-foreground text-sm">{t("noAthletes")}</p>
       ) : (
         <div className="space-y-1">
           {event.athletes.map((athlete: Athlete) => (
@@ -703,7 +722,7 @@ function AthletesTab({ eventId, event }: { eventId: string; event: EventDetail }
                 onClick={() => handleDelete(athlete.id, athlete.name)}
                 disabled={deleteAthlete.isPending}
               >
-                {t('remove')}
+                {t("remove")}
               </Button>
             </div>
           ))}

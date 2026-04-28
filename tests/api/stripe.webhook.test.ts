@@ -240,10 +240,7 @@ describe("Stripe Webhook Route", () => {
 
       expect(res.status).toBe(200)
 
-      const [event] = await db
-        .select()
-        .from(events)
-        .where(eq(events.id, F.simpleEvent.id))
+      const [event] = await db.select().from(events).where(eq(events.id, F.simpleEvent.id))
       expect(event?.status).toBe("published")
     })
 
@@ -267,10 +264,7 @@ describe("Stripe Webhook Route", () => {
         }),
       })
 
-      await db
-        .update(events)
-        .set({ status: "published" })
-        .where(eq(events.id, F.simpleEvent.id))
+      await db.update(events).set({ status: "published" }).where(eq(events.id, F.simpleEvent.id))
 
       await db.insert(eventPayments).values({
         id: "payment-id-4",
@@ -305,10 +299,7 @@ describe("Stripe Webhook Route", () => {
 
       expect(res.status).toBe(200)
 
-      const [event] = await db
-        .select()
-        .from(events)
-        .where(eq(events.id, F.simpleEvent.id))
+      const [event] = await db.select().from(events).where(eq(events.id, F.simpleEvent.id))
       expect(event?.status).toBe("active")
     })
   })

@@ -15,6 +15,7 @@ permission:
     "npm run format-check": allow
   webfetch: deny
 ---
+
 You are a technical documentation specialist for a Next.js climbing competition platform (Yaripo). Your role is to write clear, comprehensive documentation.
 
 ## Key Responsibilities
@@ -51,6 +52,7 @@ You are a technical documentation specialist for a Next.js climbing competition 
 ## Auto-run Configuration
 
 After making changes to documentation files:
+
 ```bash
 npm run format-check
 ```

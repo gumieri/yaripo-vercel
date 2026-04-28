@@ -4,7 +4,12 @@ import { db } from "@/lib/db"
 import { attempts, sectorQueues, sectors, eventMembers, events } from "@/lib/db/schema"
 import { authMiddleware, requireAuth } from "@/lib/api/middleware/auth"
 import { createAttemptSchema } from "@/lib/api/validations"
-import { validationErrorResponse, isPgUniqueConstraintError, notFoundResponse, forbiddenResponse } from "@/lib/api/helpers"
+import {
+  validationErrorResponse,
+  isPgUniqueConstraintError,
+  notFoundResponse,
+  forbiddenResponse,
+} from "@/lib/api/helpers"
 
 const attemptRoutes = new Hono()
 

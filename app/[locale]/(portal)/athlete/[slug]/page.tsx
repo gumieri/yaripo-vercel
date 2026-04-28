@@ -8,22 +8,18 @@ import { use } from "react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
-export default function AthleteEventPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
+export default function AthleteEventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const { data: event, isLoading } = useEvent(slug)
   const { data: sectors } = useEventSectors(slug)
-  const t = useTranslations('AthleteEvent')
+  const t = useTranslations("AthleteEvent")
 
-  if (isLoading) return <p className="text-muted-foreground p-4">{t('loading')}</p>
+  if (isLoading) return <p className="text-muted-foreground p-4">{t("loading")}</p>
 
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">{t('notFound')}</p>
+        <p className="text-muted-foreground">{t("notFound")}</p>
       </div>
     )
   }
@@ -34,29 +30,33 @@ export default function AthleteEventPage({
         href="/athlete"
         className="text-muted-foreground hover:text-foreground mb-6 inline-block text-sm"
       >
-        &larr; {t('backToEvents')}
+        &larr; {t("backToEvents")}
       </Link>
       <h1 className="text-foreground mb-2 text-2xl font-bold">{event.name}</h1>
       <p className="text-muted-foreground mb-8">
         {event.scoringType === "ifsc"
-          ? t('formatIFSC')
+          ? t("formatIFSC")
           : event.scoringType === "redpoint"
-            ? t('formatRedpoint')
-            : t('formatSimple')}
+            ? t("formatRedpoint")
+            : t("formatSimple")}
       </p>
 
       <div className="space-y-3">
         {sectors?.map((sector: Sector) => (
-          <SectorCard key={sector.id} sector={sector} isRedpoint={event.scoringType === "redpoint"} />
+          <SectorCard
+            key={sector.id}
+            sector={sector}
+            isRedpoint={event.scoringType === "redpoint"}
+          />
         ))}
       </div>
 
       <div className="mt-8">
         <Link
           href={`/events/${slug}`}
-          className="text-sm font-medium text-primary hover:text-primary/80"
+          className="text-primary hover:text-primary/80 text-sm font-medium"
         >
-          {t('viewRanking')} &rarr;
+          {t("viewRanking")} &rarr;
         </Link>
       </div>
     </div>
@@ -66,7 +66,7 @@ export default function AthleteEventPage({
 function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolean }) {
   const { data: queueData, isLoading } = useQueueStatus(sector.id)
   const joinQueue = useJoinQueue()
-  const t = useTranslations('AthleteEvent')
+  const t = useTranslations("AthleteEvent")
 
   const myQueueEntry = queueData?.find(
     (q: QueueEntry) => q.status === "waiting" || q.status === "active",
@@ -81,12 +81,16 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
   async function handleJoin() {
     try {
       await joinQueue.mutateAsync({ sectorId: sector.id })
-      toast.success(t('enterQueue'))
+      toast.success(t("enterQueue"))
     } catch (error: unknown) {
-      if (error instanceof Error && 'code' in error && (error as { code: string }).code === "CONFLICT") {
-        toast.error(t('alreadyInQueue'))
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        (error as { code: string }).code === "CONFLICT"
+      ) {
+        toast.error(t("alreadyInQueue"))
       } else {
-        toast.error(t('error'))
+        toast.error(t("error"))
       }
     }
   }
@@ -96,24 +100,34 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
       <div className="flex items-center justify-between">
         <div>
           <p className="text-foreground font-medium">{sector.name}</p>
-          <p className="text-muted-foreground text-sm">{t('sector')} {sector.orderIndex + 1}</p>
+          <p className="text-muted-foreground text-sm">
+            {t("sector")} {sector.orderIndex + 1}
+          </p>
           {isRedpoint && sector.flashPoints != null && (
             <p className="text-muted-foreground text-xs">
-              {t('flash')}: {sector.flashPoints} {t('points')}
+              {t("flash")}: {sector.flashPoints} {t("points")}
               {sector.pointsPerAttempt != null && sector.pointsPerAttempt > 0 && (
-                <> (-{sector.pointsPerAttempt}/{t('attempt')})</>
+                <>
+                  {" "}
+                  (-{sector.pointsPerAttempt}/{t("attempt")})
+                </>
               )}
-              {sector.maxAttempts != null && <> | {t('max')} {sector.maxAttempts} {t('attempts')}</>}
+              {sector.maxAttempts != null && (
+                <>
+                  {" "}
+                  | {t("max")} {sector.maxAttempts} {t("attempts")}
+                </>
+              )}
             </p>
           )}
         </div>
         {isActive ? (
           <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-            {t('yourTurn')}
+            {t("yourTurn")}
           </span>
         ) : isWaiting ? (
           <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
-            #{position} {t('inQueue')}
+            #{position} {t("inQueue")}
           </span>
         ) : (
           <Button
@@ -121,7 +135,7 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
             disabled={joinQueue.isPending || isLoading}
             className="bg-primary hover:bg-primary/90"
           >
-            {t('enterQueueButton')}
+            {t("enterQueueButton")}
           </Button>
         )}
       </div>

@@ -352,44 +352,35 @@ describe("Admin API", () => {
     })
 
     it("bulk creates athletes", async () => {
-      const res = await app.request(
-        `/api/manage/events/${F.simpleEvent.id}/athletes/bulk`,
-        {
-          method: "POST",
-          headers: adminHeaders,
-          body: JSON.stringify({
-            categoryId: F.catMale.id,
-            names: ["Athlete A", "Athlete B", "Athlete C"],
-          }),
-        },
-      )
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
+        method: "POST",
+        headers: adminHeaders,
+        body: JSON.stringify({
+          categoryId: F.catMale.id,
+          names: ["Athlete A", "Athlete B", "Athlete C"],
+        }),
+      })
       const json = await res.json()
       expect(res.status).toBe(201)
       expect(json.data.count).toBe(3)
     })
 
     it("returns 400 if bulk names is empty", async () => {
-      const res = await app.request(
-        `/api/manage/events/${F.simpleEvent.id}/athletes/bulk`,
-        {
-          method: "POST",
-          headers: adminHeaders,
-          body: JSON.stringify({ categoryId: F.catMale.id, names: [] }),
-        },
-      )
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
+        method: "POST",
+        headers: adminHeaders,
+        body: JSON.stringify({ categoryId: F.catMale.id, names: [] }),
+      })
       expect(res.status).toBe(400)
     })
 
     it("returns 400 if bulk exceeds 200", async () => {
       const names = Array.from({ length: 201 }, (_, i) => `Athlete ${i}`)
-      const res = await app.request(
-        `/api/manage/events/${F.simpleEvent.id}/athletes/bulk`,
-        {
-          method: "POST",
-          headers: adminHeaders,
-          body: JSON.stringify({ categoryId: F.catMale.id, names }),
-        },
-      )
+      const res = await app.request(`/api/manage/events/${F.simpleEvent.id}/athletes/bulk`, {
+        method: "POST",
+        headers: adminHeaders,
+        body: JSON.stringify({ categoryId: F.catMale.id, names }),
+      })
       expect(res.status).toBe(400)
     })
 

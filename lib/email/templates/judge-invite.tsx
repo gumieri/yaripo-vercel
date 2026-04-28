@@ -38,7 +38,9 @@ export const JudgeInviteEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logo}>Yari<span style={logoHighlight}>po</span></Text>
+            <Text style={logo}>
+              Yari<span style={logoHighlight}>po</span>
+            </Text>
           </Section>
 
           {/* Language Switcher */}
@@ -60,8 +62,8 @@ export const JudgeInviteEmail = ({
           <Heading style={heading}>You&apos;re invited to judge!</Heading>
 
           <Text style={text}>
-            <strong>{organizerName}</strong> has invited you to judge{" "}
-            <strong>{eventName}</strong> on Yaripo.
+            <strong>{organizerName}</strong> has invited you to judge <strong>{eventName}</strong>{" "}
+            on Yaripo.
           </Text>
 
           <Section style={buttonSection}>
@@ -74,9 +76,7 @@ export const JudgeInviteEmail = ({
             This link will take you to the invitation page where you can accept or decline.
           </Text>
 
-          <Text style={footer}>
-            Yaripo — Climbing Competition Platform
-          </Text>
+          <Text style={footer}>Yaripo — Climbing Competition Platform</Text>
         </Container>
       </Body>
     </Html>

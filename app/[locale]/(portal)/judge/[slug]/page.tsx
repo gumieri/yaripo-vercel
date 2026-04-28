@@ -1,29 +1,31 @@
 "use client"
 
 import { Link } from "@/i18n/routing"
-import { useEvent, useEventSectors, useQueueStatus, usePopQueue, useDropQueue } from "@/lib/api/hooks"
+import {
+  useEvent,
+  useEventSectors,
+  useQueueStatus,
+  usePopQueue,
+  useDropQueue,
+} from "@/lib/api/hooks"
 import type { Sector, QueueEntry } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { use } from "react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
-export default function JudgeEventPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
+export default function JudgeEventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const { data: event, isLoading } = useEvent(slug)
   const { data: sectors } = useEventSectors(slug)
-  const t = useTranslations('JudgeEvent')
+  const t = useTranslations("JudgeEvent")
 
-  if (isLoading) return <p className="text-muted-foreground p-4">{t('loading')}</p>
+  if (isLoading) return <p className="text-muted-foreground p-4">{t("loading")}</p>
 
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">{t('notFound')}</p>
+        <p className="text-muted-foreground">{t("notFound")}</p>
       </div>
     )
   }
@@ -34,20 +36,24 @@ export default function JudgeEventPage({
         href="/judge"
         className="text-muted-foreground hover:text-foreground mb-6 inline-block text-sm"
       >
-        &larr; {t('backToSectors')}
+        &larr; {t("backToSectors")}
       </Link>
       <h1 className="text-foreground mb-2 text-2xl font-bold">{event.name}</h1>
       <p className="text-muted-foreground mb-8">
         {event.scoringType === "ifsc"
-          ? t('formatIFSC')
+          ? t("formatIFSC")
           : event.scoringType === "redpoint"
-            ? t('formatRedpoint')
-            : t('formatSimple')}
+            ? t("formatRedpoint")
+            : t("formatSimple")}
       </p>
 
       <div className="space-y-3">
         {sectors?.map((sector: Sector) => (
-          <SectorCard key={sector.id} sector={sector} isRedpoint={event.scoringType === "redpoint"} />
+          <SectorCard
+            key={sector.id}
+            sector={sector}
+            isRedpoint={event.scoringType === "redpoint"}
+          />
         ))}
       </div>
     </div>
@@ -58,7 +64,7 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
   const { data: queueData, isLoading } = useQueueStatus(sector.id)
   const popQueue = usePopQueue()
   const dropQueue = useDropQueue()
-  const t = useTranslations('JudgeEvent')
+  const t = useTranslations("JudgeEvent")
 
   const activeEntry = queueData?.find((q: QueueEntry) => q.status === "active")
   const waitingCount = queueData?.filter((q: QueueEntry) => q.status === "waiting").length || 0
@@ -67,9 +73,9 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
   async function handleCallNext() {
     try {
       await popQueue.mutateAsync({ sectorId: sector.id })
-      toast.success(t('callNextSuccess'))
+      toast.success(t("callNextSuccess"))
     } catch {
-      toast.error(t('callNextError'))
+      toast.error(t("callNextError"))
     }
   }
 
@@ -77,9 +83,9 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
     if (!activeEntry) return
     try {
       await dropQueue.mutateAsync({ queueId: activeEntry.id })
-      toast.success(t('dropSuccess'))
+      toast.success(t("dropSuccess"))
     } catch {
-      toast.error(t('dropError'))
+      toast.error(t("dropError"))
     }
   }
 
@@ -88,14 +94,24 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
       <div className="flex items-center justify-between">
         <div>
           <p className="text-foreground font-medium">{sector.name}</p>
-          <p className="text-muted-foreground text-sm">{t('sector')} {sector.orderIndex + 1}</p>
+          <p className="text-muted-foreground text-sm">
+            {t("sector")} {sector.orderIndex + 1}
+          </p>
           {isRedpoint && sector.flashPoints != null && (
             <p className="text-muted-foreground text-xs">
-              {t('flashPoints')}: {sector.flashPoints} {t('points')}
+              {t("flashPoints")}: {sector.flashPoints} {t("points")}
               {sector.pointsPerAttempt != null && sector.pointsPerAttempt > 0 && (
-                <> (-{sector.pointsPerAttempt}/{t('attempt')})</>
+                <>
+                  {" "}
+                  (-{sector.pointsPerAttempt}/{t("attempt")})
+                </>
               )}
-              {sector.maxAttempts != null && <> | {t('max')} {sector.maxAttempts} {t('attempts')}</>}
+              {sector.maxAttempts != null && (
+                <>
+                  {" "}
+                  | {t("max")} {sector.maxAttempts} {t("attempts")}
+                </>
+              )}
             </p>
           )}
         </div>
@@ -111,15 +127,12 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
                 onClick={handleDrop}
                 disabled={dropQueue.isPending}
               >
-                {t('drop')}
+                {t("drop")}
               </Button>
             </>
           ) : (
-            <Button
-              onClick={handleCallNext}
-              disabled={popQueue.isPending || isLoading}
-            >
-              {t('callNext')}
+            <Button onClick={handleCallNext} disabled={popQueue.isPending || isLoading}>
+              {t("callNext")}
             </Button>
           )}
         </div>
@@ -127,7 +140,7 @@ function SectorCard({ sector, isRedpoint }: { sector: Sector; isRedpoint: boolea
       {activeEntry && (
         <div className="mt-4 border-t pt-4">
           <p className="text-muted-foreground text-sm">
-            {t('activeAthlete')}: {activeEntry.athleteName}
+            {t("activeAthlete")}: {activeEntry.athleteName}
           </p>
         </div>
       )}

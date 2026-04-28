@@ -90,10 +90,7 @@ describe("Redpoint Leaderboard API", () => {
   })
 
   it("bestRoutesCount=3: only best 3 routes count", async () => {
-    await db
-      .update(events)
-      .set({ bestRoutesCount: 3 })
-      .where(eq(events.id, F.redpointEvent.id))
+    await db.update(events).set({ bestRoutesCount: 3 }).where(eq(events.id, F.redpointEvent.id))
 
     const res = await app.request("/api/events/redpoint-event/leaderboard")
     const json = await res.json()
@@ -103,10 +100,7 @@ describe("Redpoint Leaderboard API", () => {
   })
 
   it("bestRoutesCount=2: only best 2 routes count", async () => {
-    await db
-      .update(events)
-      .set({ bestRoutesCount: 2 })
-      .where(eq(events.id, F.redpointEvent.id))
+    await db.update(events).set({ bestRoutesCount: 2 }).where(eq(events.id, F.redpointEvent.id))
 
     const res = await app.request("/api/events/redpoint-event/leaderboard")
     const json = await res.json()

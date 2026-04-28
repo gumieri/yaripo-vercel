@@ -13,9 +13,12 @@ describe("Auth Middleware", () => {
 
   describe("requireAuth", () => {
     it("returns 401 when no user-id header is set", async () => {
-      const res = await app.request("/api/queue/status?sector_id=00000000-0000-0000-0000-000000000001", {
-        headers: { "Content-Type": "application/json" },
-      })
+      const res = await app.request(
+        "/api/queue/status?sector_id=00000000-0000-0000-0000-000000000001",
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      )
       expect(res.status).toBe(401)
       const json = await res.json()
       expect(json.error.code).toBe("UNAUTHORIZED")

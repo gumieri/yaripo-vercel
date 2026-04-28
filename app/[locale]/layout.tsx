@@ -1,44 +1,40 @@
-import {NextIntlClientProvider} from 'next-intl';
-import {Inter} from 'next/font/google';
-import {Providers} from '../providers';
-import '../globals.css';
-import {routing} from '@/i18n/routing';
-import {getTranslations} from 'next-intl/server';
+import { NextIntlClientProvider } from "next-intl"
+import { Inter } from "next/font/google"
+import { Providers } from "../providers"
+import "../globals.css"
+import { routing } from "@/i18n/routing"
+import { getTranslations } from "next-intl/server"
 
 const inter = Inter({
-  variable: '--font-sans',
-  subsets: ['latin'],
-});
+  variable: "--font-sans",
+  subsets: ["latin"],
+})
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
+  return routing.locales.map((locale) => ({ locale }))
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Home' });
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "Home" })
 
   return {
-    title: t('footer'),
-    description: t('description'),
+    title: t("footer"),
+    description: t("description"),
     alternates: {
       canonical: `/${locale}`,
     },
-  };
+  }
 }
 
 export default async function LocaleLayout({
   children,
   params,
 }: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
-  const { locale } = await params;
+  const { locale } = await params
 
   return (
     <html lang={locale} className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
@@ -65,5 +61,5 @@ export default async function LocaleLayout({
         </Providers>
       </body>
     </html>
-  );
+  )
 }

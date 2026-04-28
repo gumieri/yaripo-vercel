@@ -35,15 +35,9 @@ describe("Events API Visibility (Draft Filtering)", () => {
     })
 
     it("includes published, active, and completed events", async () => {
-      await db
-        .update(events)
-        .set({ status: "published" })
-        .where(eq(events.slug, "simple-event"))
+      await db.update(events).set({ status: "published" }).where(eq(events.slug, "simple-event"))
 
-      await db
-        .update(events)
-        .set({ status: "completed" })
-        .where(eq(events.slug, "ifsc-event"))
+      await db.update(events).set({ status: "completed" }).where(eq(events.slug, "ifsc-event"))
 
       const res = await app.request("/api/events")
       const json = await res.json()
@@ -55,10 +49,7 @@ describe("Events API Visibility (Draft Filtering)", () => {
 
   describe("GET /api/events/:slug", () => {
     it("returns 404 for draft events", async () => {
-      await db
-        .update(events)
-        .set({ status: "draft" })
-        .where(eq(events.slug, "simple-event"))
+      await db.update(events).set({ status: "draft" }).where(eq(events.slug, "simple-event"))
 
       const res = await app.request("/api/events/simple-event")
       const json = await res.json()
@@ -69,10 +60,7 @@ describe("Events API Visibility (Draft Filtering)", () => {
     })
 
     it("returns published events", async () => {
-      await db
-        .update(events)
-        .set({ status: "published" })
-        .where(eq(events.slug, "simple-event"))
+      await db.update(events).set({ status: "published" }).where(eq(events.slug, "simple-event"))
 
       const res = await app.request("/api/events/simple-event")
       const json = await res.json()
@@ -92,10 +80,7 @@ describe("Events API Visibility (Draft Filtering)", () => {
     })
 
     it("returns completed events", async () => {
-      await db
-        .update(events)
-        .set({ status: "completed" })
-        .where(eq(events.slug, "simple-event"))
+      await db.update(events).set({ status: "completed" }).where(eq(events.slug, "simple-event"))
 
       const res = await app.request("/api/events/simple-event")
       const json = await res.json()
@@ -108,10 +93,7 @@ describe("Events API Visibility (Draft Filtering)", () => {
 
   describe("GET /api/events/:slug/leaderboard", () => {
     it("returns 404 for draft events", async () => {
-      await db
-        .update(events)
-        .set({ status: "draft" })
-        .where(eq(events.slug, "simple-event"))
+      await db.update(events).set({ status: "draft" }).where(eq(events.slug, "simple-event"))
 
       const res = await app.request("/api/events/simple-event/leaderboard")
       const json = await res.json()
@@ -133,10 +115,7 @@ describe("Events API Visibility (Draft Filtering)", () => {
 
   describe("GET /api/events/:slug/sectors", () => {
     it("returns 404 for draft events", async () => {
-      await db
-        .update(events)
-        .set({ status: "draft" })
-        .where(eq(events.slug, "simple-event"))
+      await db.update(events).set({ status: "draft" }).where(eq(events.slug, "simple-event"))
 
       const res = await app.request("/api/events/simple-event/sectors")
       const json = await res.json()
@@ -158,10 +137,7 @@ describe("Events API Visibility (Draft Filtering)", () => {
 
   describe("Slug enumeration protection", () => {
     it("does not expose draft events in public listing", async () => {
-      await db
-        .update(events)
-        .set({ status: "draft" })
-        .where(eq(events.id, F.simpleEvent.id))
+      await db.update(events).set({ status: "draft" }).where(eq(events.id, F.simpleEvent.id))
 
       const res = await app.request("/api/events")
       const json = await res.json()
@@ -173,10 +149,7 @@ describe("Events API Visibility (Draft Filtering)", () => {
     })
 
     it("returns 404 when accessing draft event by slug", async () => {
-      await db
-        .update(events)
-        .set({ status: "draft" })
-        .where(eq(events.id, F.simpleEvent.id))
+      await db.update(events).set({ status: "draft" }).where(eq(events.id, F.simpleEvent.id))
 
       const res = await app.request("/api/events/simple-event")
       const json = await res.json()

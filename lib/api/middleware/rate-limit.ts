@@ -19,7 +19,12 @@ export const rateLimitMiddleware = (maxRequests = 100, windowMs = 60000) =>
 
     const currentHits = hits.get(key) || 0
     if (currentHits >= maxRequests) {
-      return errorResponse(c, "RATE_LIMIT_EXCEEDED", "Too many requests, please try again later", 429)
+      return errorResponse(
+        c,
+        "RATE_LIMIT_EXCEEDED",
+        "Too many requests, please try again later",
+        429,
+      )
     }
 
     // Update hit count

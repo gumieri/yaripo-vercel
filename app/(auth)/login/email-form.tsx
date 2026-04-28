@@ -25,12 +25,12 @@ export function EmailForm() {
 
       if (res.ok) {
         setSent(true)
-        toast.success(t('Login.emailSent'))
+        toast.success(t("Login.emailSent"))
       } else {
-        toast.error(t('Login.emailError'))
+        toast.error(t("Login.emailError"))
       }
     } catch {
-      toast.error(t('Login.emailError'))
+      toast.error(t("Login.emailError"))
     } finally {
       setLoading(false)
     }
@@ -38,20 +38,20 @@ export function EmailForm() {
 
   if (sent) {
     return (
-      <div className="text-center space-y-2">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-          <Check className="h-6 w-6 text-primary" />
+      <div className="space-y-2 text-center">
+        <div className="bg-primary/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+          <Check className="text-primary h-6 w-6" />
         </div>
-        <p className="text-foreground text-sm font-medium">{t('Login.checkEmail')}</p>
+        <p className="text-foreground text-sm font-medium">{t("Login.checkEmail")}</p>
         <p className="text-muted-foreground text-xs">
-          {t('Login.emailSentDesc')} <span className="font-medium">{email}</span>
+          {t("Login.emailSentDesc")} <span className="font-medium">{email}</span>
         </p>
         <button
           type="button"
           onClick={() => setSent(false)}
-          className="text-primary hover:underline text-xs mt-2"
+          className="text-primary mt-2 text-xs hover:underline"
         >
-          {t('Login.useAnotherEmail')}
+          {t("Login.useAnotherEmail")}
         </button>
       </div>
     )
@@ -61,30 +61,26 @@ export function EmailForm() {
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="relative">
         <label htmlFor="email" className="sr-only">
-          {t('Login.emailPlaceholder')}
+          {t("Login.emailPlaceholder")}
         </label>
-        <Mail className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+        <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <input
           id="email"
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder={t('Login.emailPlaceholder')}
-          className="border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-primary/20 flex w-full rounded-lg border px-10 py-3 text-sm outline-none transition-colors focus:ring-2"
+          placeholder={t("Login.emailPlaceholder")}
+          className="border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-primary/20 flex w-full rounded-lg border px-10 py-3 text-sm transition-colors outline-none focus:ring-2"
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="bg-foreground hover:bg-foreground/80 text-background disabled:opacity-50 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors"
+        className="bg-foreground hover:bg-foreground/80 text-background flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors disabled:opacity-50"
       >
-        {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Mail className="h-4 w-4" />
-        )}
-        {loading ? t('Login.sending') : t('Login.email')}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+        {loading ? t("Login.sending") : t("Login.email")}
       </button>
     </form>
   )

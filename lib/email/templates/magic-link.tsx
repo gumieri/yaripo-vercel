@@ -30,7 +30,9 @@ export const MagicLinkEmail = ({ url, email }: MagicLinkEmailProps) => {
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logo}>Yari<span style={logoHighlight}>po</span></Text>
+            <Text style={logo}>
+              Yari<span style={logoHighlight}>po</span>
+            </Text>
           </Section>
 
           <Heading style={heading}>Sign in to Yaripo</Heading>
@@ -45,9 +47,7 @@ export const MagicLinkEmail = ({ url, email }: MagicLinkEmailProps) => {
             </Button>
           </Section>
 
-          <Text style={text}>
-            If you didn&apos;t request this email, you can safely ignore it.
-          </Text>
+          <Text style={text}>If you didn&apos;t request this email, you can safely ignore it.</Text>
 
           <Hr style={hr} />
 

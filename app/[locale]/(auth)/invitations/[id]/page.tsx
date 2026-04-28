@@ -37,9 +37,9 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
 
   if (!invitation) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <Card className="max-w-md p-8 text-center">
-          <Mountain className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+          <Mountain className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
           <h1 className="text-foreground mb-2 text-2xl font-bold">{t("notFound")}</h1>
           <p className="text-muted-foreground">
             This invitation doesn&apos;t exist or has been deleted.
@@ -55,13 +55,11 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
   if (!isPending) {
     const statusText = invitation.status === "accepted" ? t("accepted") : t("declined")
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <Card className="max-w-md p-8 text-center">
-          <Mountain className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+          <Mountain className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
           <h1 className="text-foreground mb-2 text-2xl font-bold">{t("alreadyResponded")}</h1>
-          <p className="text-muted-foreground">
-            {t("alreadyResponded", { status: statusText })}
-          </p>
+          <p className="text-muted-foreground">{t("alreadyResponded", { status: statusText })}</p>
         </Card>
       </div>
     )
@@ -98,16 +96,16 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="max-w-md w-full p-8">
+    <div className="bg-background flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md p-8">
         <div className="text-center">
-          <Mountain className="mx-auto mb-4 h-12 w-12 text-primary" />
+          <Mountain className="text-primary mx-auto mb-4 h-12 w-12" />
           <h1 className="text-foreground mb-2 text-2xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground mb-6">
             {t("invitedBy", { organizer: invitation.organizerName })}
           </p>
 
-          <div className="border-border mb-6 rounded-lg border bg-muted/50 p-4">
+          <div className="border-border bg-muted/50 mb-6 rounded-lg border p-4">
             <p className="text-muted-foreground text-sm">
               <span className="font-medium">{t("eventName")}:</span> {invitation.eventName}
             </p>
@@ -138,7 +136,11 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
             <div className="space-y-4">
               <p className="text-muted-foreground text-sm">{t("signInToAccept")}</p>
               <Button
-                onClick={() => redirect(`/${params.locale}/login?callbackUrl=/${params.locale}/invitations/${params.id}`)}
+                onClick={() =>
+                  redirect(
+                    `/${params.locale}/login?callbackUrl=/${params.locale}/invitations/${params.id}`,
+                  )
+                }
                 className="w-full"
                 size="lg"
               >

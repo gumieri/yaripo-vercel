@@ -59,10 +59,10 @@ describe("Gym Management Validation", () => {
     })
 
     it("rejects publishing non-draft event", async () => {
-      const res = await app.request(
-        `/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`,
-        { method: "POST", headers: ownerHeaders },
-      )
+      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/publish`, {
+        method: "POST",
+        headers: ownerHeaders,
+      })
       const json = await res.json()
 
       expect(res.status).toBe(400)
@@ -107,15 +107,12 @@ describe("Gym Management Validation", () => {
 
   describe("POST /api/gym/:gymSlug/events/:eventId/activate", () => {
     it("rejects activating draft event", async () => {
-      await db
-        .update(events)
-        .set({ status: "draft" })
-        .where(eq(events.id, F.simpleEvent.id))
+      await db.update(events).set({ status: "draft" }).where(eq(events.id, F.simpleEvent.id))
 
-      const res = await app.request(
-        `/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`,
-        { method: "POST", headers: ownerHeaders },
-      )
+      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`, {
+        method: "POST",
+        headers: ownerHeaders,
+      })
       const json = await res.json()
 
       expect(res.status).toBe(400)
@@ -125,15 +122,12 @@ describe("Gym Management Validation", () => {
     })
 
     it("activates published event with no extra athletes (no charge)", async () => {
-      await db
-        .update(events)
-        .set({ status: "published" })
-        .where(eq(events.id, F.simpleEvent.id))
+      await db.update(events).set({ status: "published" }).where(eq(events.id, F.simpleEvent.id))
 
-      const res = await app.request(
-        `/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`,
-        { method: "POST", headers: ownerHeaders },
-      )
+      const res = await app.request(`/api/gym/${F.gym.slug}/events/${F.simpleEvent.id}/activate`, {
+        method: "POST",
+        headers: ownerHeaders,
+      })
       const json = await res.json()
 
       expect(res.status).toBe(200)

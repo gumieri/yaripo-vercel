@@ -36,7 +36,9 @@ export const PaymentReceiptEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logo}>Yari<span style={logoHighlight}>po</span></Text>
+            <Text style={logo}>
+              Yari<span style={logoHighlight}>po</span>
+            </Text>
           </Section>
 
           <Heading style={heading}>Recibo de Pagamento</Heading>
@@ -46,8 +48,7 @@ export const PaymentReceiptEmail = ({
           </Text>
 
           <Text style={text}>
-            Confirmamos o recebimento do pagamento para o plano{" "}
-            <strong>{planName}</strong>.
+            Confirmamos o recebimento do pagamento para o plano <strong>{planName}</strong>.
           </Text>
 
           <Section style={receiptSection}>
@@ -56,12 +57,10 @@ export const PaymentReceiptEmail = ({
               <span style={receiptValue}>{eventName}</span>
             </Text>
             <Text style={receiptRow}>
-              <span style={receiptLabel}>Plano:</span>{" "}
-              <span style={receiptValue}>{planName}</span>
+              <span style={receiptLabel}>Plano:</span> <span style={receiptValue}>{planName}</span>
             </Text>
             <Text style={receiptRow}>
-              <span style={receiptLabel}>Valor:</span>{" "}
-              <span style={receiptValue}>{amount}</span>
+              <span style={receiptLabel}>Valor:</span> <span style={receiptValue}>{amount}</span>
             </Text>
             <Text style={receiptRow}>
               <span style={receiptLabel}>Data:</span>{" "}
@@ -79,9 +78,7 @@ export const PaymentReceiptEmail = ({
             Se você não reconhece este pagamento, entre em contato conosco.
           </Text>
 
-          <Text style={footer}>
-            Yaripo — Plataforma de Competições de Escalada
-          </Text>
+          <Text style={footer}>Yaripo — Plataforma de Competições de Escalada</Text>
         </Container>
       </Body>
     </Html>

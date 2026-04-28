@@ -13,20 +13,22 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-            <Mountain className="h-8 w-8 text-primary" />
+          <div className="bg-primary/10 mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
+            <Mountain className="text-primary h-8 w-8" />
           </div>
           <h1 className="text-foreground text-3xl font-bold">
             Yari<span className="text-primary">po</span>
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm">{t('Home.footer')}</p>
+          <p className="text-muted-foreground mt-2 text-sm">{t("Home.footer")}</p>
         </div>
 
-        <div className="border-border/50 rounded-xl border bg-card p-6 shadow-lg shadow-black/20">
-          <h2 className="text-foreground mb-6 text-center text-lg font-semibold">{t('Login.title')}</h2>
+        <div className="border-border/50 bg-card rounded-xl border p-6 shadow-lg shadow-black/20">
+          <h2 className="text-foreground mb-6 text-center text-lg font-semibold">
+            {t("Login.title")}
+          </h2>
 
           <form
             action={async () => {
@@ -57,25 +59,23 @@ export default async function LoginPage() {
                   fill="#EA4335"
                 />
               </svg>
-              {t('Login.google')}
+              {t("Login.google")}
             </button>
           </form>
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50" />
+              <div className="border-border/50 w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-card px-2 text-muted-foreground/60">{t('Login.or')}</span>
+              <span className="bg-card text-muted-foreground/60 px-2">{t("Login.or")}</span>
             </div>
           </div>
 
           <EmailForm />
         </div>
 
-        <p className="text-muted-foreground/60 mt-6 text-center text-xs">
-          {t('Login.subtitle')}
-        </p>
+        <p className="text-muted-foreground/60 mt-6 text-center text-xs">{t("Login.subtitle")}</p>
       </div>
     </div>
   )

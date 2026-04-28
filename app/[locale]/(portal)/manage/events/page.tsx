@@ -10,14 +10,14 @@ import { useTranslations } from "next-intl"
 export default function ManageEventsPage() {
   const { data: events, isLoading } = useManageEvents()
   const deleteEvent = useDeleteEvent()
-  const t = useTranslations('Manage')
+  const t = useTranslations("Manage")
 
   const statusLabels: Record<string, string> = {
-    draft: t('statusDraft'),
-    published: t('statusPublished'),
-    active: t('statusActive'),
-    completed: t('statusCompleted'),
-    archived: t('statusArchived'),
+    draft: t("statusDraft"),
+    published: t("statusPublished"),
+    active: t("statusActive"),
+    completed: t("statusCompleted"),
+    archived: t("statusArchived"),
   }
 
   const statusColors: Record<string, string> = {
@@ -29,37 +29,40 @@ export default function ManageEventsPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(t('deleteConfirm', { name }))) return
+    if (!confirm(t("deleteConfirm", { name }))) return
     try {
       await deleteEvent.mutateAsync(id)
-      toast.success(t('deleteSuccess'))
+      toast.success(t("deleteSuccess"))
     } catch {
-      toast.error(t('deleteError'))
+      toast.error(t("deleteError"))
     }
   }
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-foreground text-2xl font-bold">{t('events')}</h1>
+        <h1 className="text-foreground text-2xl font-bold">{t("events")}</h1>
         <Link href="/manage/events/new">
-          <Button>{t('newEvent')}</Button>
+          <Button>{t("newEvent")}</Button>
         </Link>
       </div>
 
       {isLoading && (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="border-border/50 bg-card h-20 animate-pulse rounded-lg border" />
+            <div
+              key={i}
+              className="border-border/50 bg-card h-20 animate-pulse rounded-lg border"
+            />
           ))}
         </div>
       )}
 
       {!isLoading && (!events || events.length === 0) && (
         <div className="border-border/50 rounded-lg border border-dashed p-8 text-center">
-          <p className="text-muted-foreground">{t('noEvents')}</p>
+          <p className="text-muted-foreground">{t("noEvents")}</p>
           <Link href="/manage/events/new" className="text-primary mt-2 inline-block text-sm">
-            {t('createFirstEvent')}
+            {t("createFirstEvent")}
           </Link>
         </div>
       )}
@@ -81,9 +84,7 @@ export default function ManageEventsPage() {
                 <p className="text-muted-foreground mt-1 text-sm">
                   {event.slug}
                   {event.startsAt && (
-                    <span className="ml-3">
-                      {new Date(event.startsAt).toLocaleDateString()}
-                    </span>
+                    <span className="ml-3">{new Date(event.startsAt).toLocaleDateString()}</span>
                   )}
                 </p>
               </div>
@@ -100,7 +101,7 @@ export default function ManageEventsPage() {
                   onClick={() => handleDelete(event.id, event.name)}
                   disabled={deleteEvent.isPending}
                 >
-                  {t('delete')}
+                  {t("delete")}
                 </Button>
               </div>
             </div>

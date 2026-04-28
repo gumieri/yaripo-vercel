@@ -28,7 +28,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">{t('Common.noResults')}</p>
+        <p className="text-muted-foreground">{t("Common.noResults")}</p>
       </div>
     )
   }
@@ -39,7 +39,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         href="/events"
         className="text-muted-foreground hover:text-foreground mb-6 inline-block text-sm"
       >
-        &larr; {t('EventDetail.backToEvents')}
+        &larr; {t("EventDetail.backToEvents")}
       </Link>
 
       <div className="mb-8">
@@ -48,7 +48,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         <div className="text-muted-foreground mt-3 flex gap-3 text-sm">
           {event.startsAt && (
             <span>
-              {t('EventDetail.start')}:{" "}
+              {t("EventDetail.start")}:{" "}
               {new Date(event.startsAt).toLocaleDateString(locale, {
                 day: "2-digit",
                 month: "long",
@@ -69,13 +69,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         </div>
       </div>
 
-      <h2 className="text-foreground mb-4 text-xl font-semibold">{t('Leaderboard.title')}</h2>
+      <h2 className="text-foreground mb-4 text-xl font-semibold">{t("Leaderboard.title")}</h2>
 
       {lbLoading && <Skeleton className="h-64 w-full" />}
 
       {!lbLoading && (!leaderboard?.rankings || leaderboard.rankings.length === 0) && (
         <div className="border-muted-foreground/25 rounded-lg border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">{t('Leaderboard.noResults')}</p>
+          <p className="text-muted-foreground">{t("Leaderboard.noResults")}</p>
         </div>
       )}
 
@@ -85,19 +85,29 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             <thead>
               <tr className="bg-muted/50 border-b">
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">#</th>
-                <th className="text-muted-foreground px-4 py-3 text-left font-medium">{t('EventDetail.athlete')}</th>
-                <th className="text-muted-foreground px-4 py-3 text-left font-medium">{t('EventDetail.category')}</th>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">
+                  {t("EventDetail.athlete")}
+                </th>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">
+                  {t("EventDetail.category")}
+                </th>
                 <th className="text-muted-foreground px-4 py-3 text-right font-medium">
-                  {leaderboard.scoringType === "redpoint" ? t('EventDetail.points') : t('EventDetail.tops')}
+                  {leaderboard.scoringType === "redpoint"
+                    ? t("EventDetail.points")
+                    : t("EventDetail.tops")}
                 </th>
                 {leaderboard.scoringType === "ifsc" && (
-                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">{t('EventDetail.zones')}</th>
+                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">
+                    {t("EventDetail.zones")}
+                  </th>
                 )}
                 {leaderboard.scoringType === "redpoint" && (
-                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">{t('EventDetail.flash')}</th>
+                  <th className="text-muted-foreground px-4 py-3 text-right font-medium">
+                    {t("EventDetail.flash")}
+                  </th>
                 )}
                 <th className="text-muted-foreground px-4 py-3 text-right font-medium">
-                  {t('EventDetail.attempts')}
+                  {t("EventDetail.attempts")}
                 </th>
               </tr>
             </thead>

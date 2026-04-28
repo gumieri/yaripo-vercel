@@ -68,8 +68,9 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
       ? sql`${athletes.categoryId} = ${validCategoryId}::uuid`
       : sql`true`
 
-    const rawSql = brc !== null && brc > 0
-      ? sql`
+    const rawSql =
+      brc !== null && brc > 0
+        ? sql`
         WITH best_per_route AS (
           SELECT DISTINCT ON (a.athlete_id, s.id)
             a.athlete_id,
@@ -110,7 +111,7 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
         FROM aggregated
         ORDER BY total_points DESC, flash_count DESC, total_attempts ASC
       `
-      : sql`
+        : sql`
         WITH best_per_route AS (
           SELECT DISTINCT ON (a.athlete_id, s.id)
             a.athlete_id,
@@ -165,7 +166,11 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
       totalAttempts: Number(row.total_attempts),
     }))
 
-    return c.json({ success: true, data: { rankings, scoringType: "redpoint" } }, 200, cacheHeaders(15, 30))
+    return c.json(
+      { success: true, data: { rankings, scoringType: "redpoint" } },
+      200,
+      cacheHeaders(15, 30),
+    )
   }
 
   if (event.scoringType === "ifsc") {
@@ -207,7 +212,11 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
       totalAttempts: Number(row.totalAttempts),
     }))
 
-    return c.json({ success: true, data: { rankings: ranked, scoringType: "ifsc" } }, 200, cacheHeaders(15, 30))
+    return c.json(
+      { success: true, data: { rankings: ranked, scoringType: "ifsc" } },
+      200,
+      cacheHeaders(15, 30),
+    )
   }
 
   const rankings = await db
@@ -237,7 +246,11 @@ eventRoutes.get("/:slug/leaderboard", async (c) => {
     totalAttempts: Number(row.totalAttempts),
   }))
 
-  return c.json({ success: true, data: { rankings: ranked, scoringType: "simple" } }, 200, cacheHeaders(15, 30))
+  return c.json(
+    { success: true, data: { rankings: ranked, scoringType: "simple" } },
+    200,
+    cacheHeaders(15, 30),
+  )
 })
 
 eventRoutes.get("/:slug/sectors", async (c) => {

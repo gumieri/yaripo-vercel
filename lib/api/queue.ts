@@ -4,7 +4,13 @@ import { db } from "@/lib/db"
 import { sectorQueues, athletes, sectors, categories, eventMembers } from "@/lib/db/schema"
 import { authMiddleware, requireAuth } from "@/lib/api/middleware/auth"
 import { joinQueueSchema, popQueueSchema, dropQueueSchema } from "@/lib/api/validations"
-import { validationErrorResponse, notFoundResponse, conflictResponse, forbiddenResponse, cacheHeaders } from "@/lib/api/helpers"
+import {
+  validationErrorResponse,
+  notFoundResponse,
+  conflictResponse,
+  forbiddenResponse,
+  cacheHeaders,
+} from "@/lib/api/helpers"
 
 const queueRoutes = new Hono()
 
@@ -207,10 +213,7 @@ queueRoutes.get("/status", authMiddleware, requireAuth, async (c) => {
     .from(sectorQueues)
     .innerJoin(athletes, eq(sectorQueues.athleteId, athletes.id))
     .where(
-      and(
-        eq(sectorQueues.sectorId, sectorId),
-        inArray(sectorQueues.status, ["waiting", "active"]),
-      ),
+      and(eq(sectorQueues.sectorId, sectorId), inArray(sectorQueues.status, ["waiting", "active"])),
     )
     .orderBy(asc(sectorQueues.createdAt))
 

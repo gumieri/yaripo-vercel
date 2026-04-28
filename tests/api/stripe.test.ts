@@ -84,10 +84,7 @@ describe("Stripe Webhook Handlers", () => {
         stripeCustomerId: "cus_test",
       })
 
-      await db
-        .update(events)
-        .set({ status: "published" })
-        .where(eq(events.id, F.simpleEvent.id))
+      await db.update(events).set({ status: "published" }).where(eq(events.id, F.simpleEvent.id))
 
       await db.insert(eventPayments).values({
         eventId: F.simpleEvent.id,

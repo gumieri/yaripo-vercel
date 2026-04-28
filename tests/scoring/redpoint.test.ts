@@ -9,55 +9,109 @@ import {
 describe("calculateRoutePoints", () => {
   it("flash = full points", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 1000, pointsPerAttempt: 100, maxAttempts: 5, attemptCount: 1, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 1000,
+        pointsPerAttempt: 100,
+        maxAttempts: 5,
+        attemptCount: 1,
+        isTop: true,
+      }),
     ).toBe(1000)
   })
 
   it("2nd attempt top = flashPoints - penalty", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 1000, pointsPerAttempt: 100, maxAttempts: 5, attemptCount: 2, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 1000,
+        pointsPerAttempt: 100,
+        maxAttempts: 5,
+        attemptCount: 2,
+        isTop: true,
+      }),
     ).toBe(900)
   })
 
   it("5th attempt top = flashPoints - 4*penalty", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 1000, pointsPerAttempt: 100, maxAttempts: 5, attemptCount: 5, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 1000,
+        pointsPerAttempt: 100,
+        maxAttempts: 5,
+        attemptCount: 5,
+        isTop: true,
+      }),
     ).toBe(600)
   })
 
   it("no top = 0", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 1000, pointsPerAttempt: 100, maxAttempts: 5, attemptCount: 3, isTop: false }),
+      calculateRoutePoints({
+        flashPoints: 1000,
+        pointsPerAttempt: 100,
+        maxAttempts: 5,
+        attemptCount: 3,
+        isTop: false,
+      }),
     ).toBe(0)
   })
 
   it("attempt exceeds maxAttempts = 0", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 1000, pointsPerAttempt: 100, maxAttempts: 5, attemptCount: 6, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 1000,
+        pointsPerAttempt: 100,
+        maxAttempts: 5,
+        attemptCount: 6,
+        isTop: true,
+      }),
     ).toBe(0)
   })
 
   it("points floor at 0", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 100, pointsPerAttempt: 200, maxAttempts: 5, attemptCount: 5, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 100,
+        pointsPerAttempt: 200,
+        maxAttempts: 5,
+        attemptCount: 5,
+        isTop: true,
+      }),
     ).toBe(0)
   })
 
   it("exactly at maxAttempts = valid", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 1000, pointsPerAttempt: 100, maxAttempts: 3, attemptCount: 3, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 1000,
+        pointsPerAttempt: 100,
+        maxAttempts: 3,
+        attemptCount: 3,
+        isTop: true,
+      }),
     ).toBe(800)
   })
 
   it("custom flashPoints and penalty", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 500, pointsPerAttempt: 50, maxAttempts: 10, attemptCount: 3, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 500,
+        pointsPerAttempt: 50,
+        maxAttempts: 10,
+        attemptCount: 3,
+        isTop: true,
+      }),
     ).toBe(400)
   })
 
   it("penalty 0 means all tops get full points", () => {
     expect(
-      calculateRoutePoints({ flashPoints: 1000, pointsPerAttempt: 0, maxAttempts: 10, attemptCount: 5, isTop: true }),
+      calculateRoutePoints({
+        flashPoints: 1000,
+        pointsPerAttempt: 0,
+        maxAttempts: 10,
+        attemptCount: 5,
+        isTop: true,
+      }),
     ).toBe(1000)
   })
 })

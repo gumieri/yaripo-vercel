@@ -355,6 +355,159 @@ manageRoutes.get("/venues", authMiddleware, requirePlatformAdmin, async (c) => {
   return c.json({ success: true, data: venueList })
 })
 
+manageRoutes.post("/venues", authMiddleware, requirePlatformAdmin, async (c) => {
+  const userId = c.get("userId")!
+  const body = await c.req.json()
+
+  const {
+    name,
+    slug,
+    type,
+    description,
+    city,
+    state,
+    country,
+    address,
+    latitude,
+    longitude,
+    photoUrl,
+    socialLinks,
+  } = body
+
+  if (!name || !slug) {
+    return validationErrorResponse(c, "Name and slug are required")
+  }
+
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    return validationErrorResponse(c, "Slug must be lowercase alphanumeric with dashes only")
+  }
+
+  if (type && !["gym", "outdoor", "public", "other"].includes(type)) {
+    return validationErrorResponse(c, "Invalid venue type")
+  }
+
+  if (latitude != null && (latitude < -90 || latitude > 90)) {
+    return validationErrorResponse(c, "Invalid latitude")
+  }
+
+  if (longitude != null && (longitude < -180 || longitude > 180)) {
+    return validationErrorResponse(c, "Invalid longitude")
+  }
+
+  const [existing] = await db.select({ id: venues.id }).from(venues).where(eq(venues.slug, slug))
+  if (existing) {
+    return conflictResponse(c, "Venue slug already exists")
+  }
+
+  const [created] = await db
+    .insert(venues)
+    .values({
+      name,
+      slug,
+      type: type || "gym",
+      description: description || null,
+      city: city || null,
+      state: state || null,
+      country: country || null,
+      address: address || null,
+      latitude: latitude ?? null,
+      longitude: longitude ?? null,
+      photoUrl: photoUrl || null,
+      socialLinks: socialLinks || null,
+      createdBy: userId,
+    })
+    .returning()
+
+  await logAudit({
+    userId,
+    action: "venue.create",
+    resourceType: "venue",
+    resourceId: created.id,
+    newValues: created,
+  })
+
+  return c.json({ success: true, data: created }, 201)
+})
+
+manageRoutes.patch("/venues/:id", authMiddleware, requirePlatformAdmin, async (c) => {
+  const userId = c.get("userId")!
+  const venueId = c.req.param("id")
+  const body = await c.req.json()
+
+  const {
+    slug,
+    name,
+    type,
+    description,
+    city,
+    state,
+    country,
+    address,
+    latitude,
+    longitude,
+    photoUrl,
+    socialLinks,
+  } = body
+
+  if (slug) {
+    return validationErrorResponse(c, "Slug cannot be updated")
+  }
+
+  const [existing] = await db.select().from(venues).where(eq(venues.id, venueId))
+  if (!existing) {
+    return notFoundResponse(c, "Venue")
+  }
+
+  const updates: Record<string, unknown> = {}
+  if (name !== undefined) updates.name = name
+  if (type !== undefined) updates.type = type
+  if (description !== undefined) updates.description = description
+  if (city !== undefined) updates.city = city
+  if (state !== undefined) updates.state = state
+  if (country !== undefined) updates.country = country
+  if (address !== undefined) updates.address = address
+  if (latitude !== undefined) updates.latitude = latitude
+  if (longitude !== undefined) updates.longitude = longitude
+  if (photoUrl !== undefined) updates.photoUrl = photoUrl
+  if (socialLinks !== undefined) updates.socialLinks = socialLinks
+  updates.updatedAt = new Date()
+
+  const [updated] = await db.update(venues).set(updates).where(eq(venues.id, venueId)).returning()
+
+  await logAudit({
+    userId,
+    action: "venue.update",
+    resourceType: "venue",
+    resourceId: venueId,
+    oldValues: existing,
+    newValues: updated,
+  })
+
+  return c.json({ success: true, data: updated })
+})
+
+manageRoutes.delete("/venues/:id", authMiddleware, requirePlatformAdmin, async (c) => {
+  const userId = c.get("userId")!
+  const venueId = c.req.param("id")
+
+  const [existing] = await db.select().from(venues).where(eq(venues.id, venueId))
+  if (!existing) {
+    return notFoundResponse(c, "Venue")
+  }
+
+  await db.delete(venues).where(eq(venues.id, venueId))
+
+  await logAudit({
+    userId,
+    action: "venue.delete",
+    resourceType: "venue",
+    resourceId: venueId,
+    oldValues: existing,
+  })
+
+  return c.json({ success: true, data: { id: venueId } })
+})
+
 manageRoutes.get(
   "/events/:eventId/judges",
   authMiddleware,

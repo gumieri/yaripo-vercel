@@ -18,9 +18,55 @@ export interface EventDetail extends EventSummary {
   updatedAt: string
   rules: string | null
   bestRoutesCount: number | null
-  categories: Category[]
-  sectors: Sector[]
-  athletes: Athlete[]
+  createdBy: string
+  categories?: Array<{
+    id: string
+    name: string
+    gender: string
+    eventId: string
+    minAge: number | null
+    maxAge: number | null
+  }>
+  sectors?: Array<{
+    id: string
+    name: string
+    orderIndex: number
+    eventId: string
+    flashPoints: number
+    pointsPerAttempt: number
+    maxAttempts: number
+    createdAt: string
+  }>
+  athletes?: Array<{
+    id: string
+    name: string
+    categoryId: string
+    userId: string | null
+    externalId: string | null
+    createdAt: string
+  }>
+}
+
+export interface VenueSummary {
+  id: string
+  name: string
+  slug: string
+  city: string | null
+  state: string | null
+  type: string
+  photoUrl: string | null
+  description: string | null
+}
+
+export interface VenueDetail extends VenueSummary {
+  address: string | null
+  country: string | null
+  latitude: number | null
+  longitude: number | null
+  socialLinks: Record<string, string> | null
+  createdBy: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Category {
@@ -458,6 +504,68 @@ export function useUpdatePhaseMetadata() {
       }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["manage", "events", variables.eventId, "phase"] })
+    },
+  })
+}
+
+export function useVenues() {
+  return useQuery({
+    queryKey: ["venues"],
+    queryFn: () => apiFetch<VenueSummary[]>("/api/venues"),
+  })
+}
+
+export function useVenue(slug: string) {
+  return useQuery({
+    queryKey: ["venue", slug],
+    queryFn: () => apiFetch<VenueDetail>(`/api/venues/${slug}`),
+    enabled: !!slug,
+  })
+}
+
+export function useManageVenues() {
+  return useQuery({
+    queryKey: ["manage", "venues"],
+    queryFn: () => apiFetch<VenueSummary[]>("/api/manage/venues"),
+  })
+}
+
+export function useCreateVenue() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) =>
+      apiFetch<VenueDetail>("/api/manage/venues", { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["manage", "venues"] })
+      qc.invalidateQueries({ queryKey: ["venues"] })
+    },
+  })
+}
+
+export function useUpdateVenue() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: Record<string, unknown> }) =>
+      apiFetch<VenueDetail>(`/api/manage/venues/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["manage", "venues"] })
+      qc.invalidateQueries({ queryKey: ["venues"] })
+      qc.invalidateQueries({ queryKey: ["venue", variables.id] })
+    },
+  })
+}
+
+export function useDeleteVenue() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<{ id: string }>(`/api/manage/venues/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["manage", "venues"] })
+      qc.invalidateQueries({ queryKey: ["venues"] })
     },
   })
 }

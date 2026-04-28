@@ -3,6 +3,41 @@ import { z } from "zod"
 export const eventScoringTypeEnum = z.enum(["simple", "ifsc", "redpoint"])
 export const eventStatusEnum = z.enum(["draft", "published", "active", "completed", "archived"])
 export const eventPhaseEnum = z.enum(["prep", "onboard", "engage", "live", "wrapup"])
+export const venueTypeEnum = z.enum(["gym", "outdoor", "public", "other"])
+
+export const createVenueSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(200, "Name too long"),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Slug is required")
+    .max(100, "Slug too long")
+    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes only"),
+  type: venueTypeEnum.default("gym"),
+  description: z.string().trim().max(2000, "Description too long").nullish(),
+  city: z.string().trim().max(100, "City too long").nullish(),
+  state: z.string().trim().max(100, "State too long").nullish(),
+  country: z.string().trim().max(100, "Country too long").nullish(),
+  address: z.string().trim().max(500, "Address too long").nullish(),
+  latitude: z.number().min(-90).max(90).nullish(),
+  longitude: z.number().min(-180).max(180).nullish(),
+  photoUrl: z.string().url().nullish(),
+  socialLinks: z.record(z.string(), z.string()).nullish(),
+})
+
+export const updateVenueSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(200, "Name too long").optional(),
+  type: venueTypeEnum.optional(),
+  description: z.string().trim().max(2000, "Description too long").nullish().optional(),
+  city: z.string().trim().max(100, "City too long").nullish().optional(),
+  state: z.string().trim().max(100, "State too long").nullish().optional(),
+  country: z.string().trim().max(100, "Country too long").nullish().optional(),
+  address: z.string().trim().max(500, "Address too long").nullish().optional(),
+  latitude: z.number().min(-90).max(90).nullish().optional(),
+  longitude: z.number().min(-180).max(180).nullish().optional(),
+  photoUrl: z.string().url().nullish().optional(),
+  socialLinks: z.record(z.string(), z.string()).nullish().optional(),
+})
 export const gymMemberRoleEnum = z.enum(["owner", "admin", "judge"])
 export const categoryGenderEnum = z.enum(["male", "female", "open"])
 export const queueStatusEnum = z.enum(["waiting", "active", "completed", "dropped"])

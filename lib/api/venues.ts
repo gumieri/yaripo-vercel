@@ -1,8 +1,13 @@
 import { Hono } from "hono"
-import { eq } from "drizzle-orm"
+import { eq, desc } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { venues } from "@/lib/db/schema"
-import { notFoundResponse, cacheHeaders } from "@/lib/api/helpers"
+import { venues, venueMembers, users } from "@/lib/db/schema"
+import {
+  notFoundResponse,
+  cacheHeaders,
+  validationErrorResponse,
+  conflictResponse,
+} from "@/lib/api/helpers"
 import { rateLimitMiddleware } from "@/lib/api/middleware/rate-limit"
 
 const venueRoutes = new Hono()
@@ -18,8 +23,11 @@ venueRoutes.get("/", async (c) => {
       city: venues.city,
       state: venues.state,
       type: venues.type,
+      photoUrl: venues.photoUrl,
+      description: venues.description,
     })
     .from(venues)
+    .orderBy(desc(venues.createdAt))
 
   return c.json({ success: true, data: venueList }, 200, cacheHeaders(120, 240))
 })

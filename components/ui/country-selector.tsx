@@ -1,17 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useGeoCountry } from "@/lib/api/hooks"
 import { countries, type Country } from "@/lib/data/countries"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import { Globe, Check, MapPin } from "lucide-react"
+import { Globe, Check, MapPin, X } from "lucide-react"
 import { cn } from "@/lib/utils/cn"
 import { useTranslations } from "next-intl"
 
@@ -26,12 +18,34 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const t = useTranslations("VenueSearch")
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (geoData?.country && !value) {
       onChange(geoData.country.toLowerCase())
     }
   }, [geoData, value, onChange])
+
+  useEffect(() => {
+    if (open && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [open])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false)
+        setSearch("")
+      }
+    }
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [open])
 
   const selectedCountry = countries.find((c) => c.code === value)
   const detectedCountry = geoData?.country
@@ -46,7 +60,7 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
   )
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-2", className)} ref={dropdownRef}>
       <div className="flex items-center gap-2">
         <label className="text-foreground text-sm font-medium">{t("country")}</label>
         {isDetected && (
@@ -60,7 +74,10 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
       <div className="relative">
         <button
           type="button"
-          onClick={() => setOpen(!open)}
+          onClick={() => {
+            setOpen(!open)
+            if (!open) setSearch("")
+          }}
           className="border-input bg-background hover:bg-accent hover:text-accent-foreground flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm"
           disabled={isLoading}
         >
@@ -81,41 +98,58 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
 
         {open && (
           <div className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full rounded-md border shadow-md">
-            <Command loop={false}>
-              <CommandInput
+            <div className="flex items-center border-b px-3">
+              <Globe className="text-muted-foreground mr-2 h-4 w-4" />
+              <input
+                ref={inputRef}
+                type="text"
                 placeholder={t("searchCountries")}
                 value={search}
-                onValueChange={setSearch}
-                className="border-none"
+                onChange={(e) => setSearch(e.target.value)}
+                className="placeholder:text-muted-foreground flex-1 border-none bg-transparent py-3 text-sm outline-none"
               />
-              <CommandList>
-                <CommandEmpty>{t("noCountries")}</CommandEmpty>
-                <CommandGroup>
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <div className="max-h-[300px] overflow-y-auto">
+              {filteredCountries.length === 0 ? (
+                <div className="text-muted-foreground py-6 text-center text-sm">
+                  {t("noCountries")}
+                </div>
+              ) : (
+                <div className="p-1">
                   {filteredCountries.map((country) => (
-                    <CommandItem
+                    <button
+                      type="button"
                       key={country.code}
-                      value={country.name}
-                      onSelect={() => {
+                      onClick={() => {
                         onChange(country.code)
                         setOpen(false)
                         setSearch("")
                       }}
+                      className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm"
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-base">{country.flag}</span>
-                        <span>{country.name}</span>
-                      </div>
-                      {value === country.code && <Check className="ml-auto h-4 w-4" />}
-                    </CommandItem>
+                      <span className="text-base">{country.flag}</span>
+                      <span>{country.name}</span>
+                      {value === country.code && <Check className="text-primary ml-auto h-4 w-4" />}
+                    </button>
                   ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
+                </div>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => {
                 onChange(null)
                 setOpen(false)
+                setSearch("")
               }}
               className="border-muted hover:bg-muted text-muted-foreground w-full rounded-b-md border-t px-3 py-2 text-sm transition-colors"
             >

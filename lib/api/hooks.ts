@@ -515,6 +515,21 @@ export function useVenues() {
   })
 }
 
+export function useVenuesByCountry(country: string | null) {
+  return useQuery({
+    queryKey: ["venues", country],
+    queryFn: () => apiFetch<VenueSummary[]>(`/api/manage/venues?country=${country}`),
+    enabled: !!country,
+  })
+}
+
+export function useGeoCountry() {
+  return useQuery({
+    queryKey: ["geo"],
+    queryFn: () => apiFetch<{ country: string | null }>("/api/geo"),
+  })
+}
+
 export function useVenue(slug: string) {
   return useQuery({
     queryKey: ["venue", slug],

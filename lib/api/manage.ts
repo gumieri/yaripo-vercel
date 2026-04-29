@@ -340,7 +340,9 @@ manageRoutes.post("/events/boulder-festival", authMiddleware, requireAuth, async
 })
 
 manageRoutes.get("/venues", authMiddleware, requirePlatformAdmin, async (c) => {
-  const venueList = await db
+  const country = c.req.query("country")
+
+  const query = db
     .select({
       id: venues.id,
       name: venues.name,
@@ -350,7 +352,10 @@ manageRoutes.get("/venues", authMiddleware, requirePlatformAdmin, async (c) => {
       type: venues.type,
     })
     .from(venues)
-    .orderBy(asc(venues.name))
+
+  const venueList = country
+    ? await query.where(and(eq(venues.country, country.toUpperCase()))).orderBy(asc(venues.name))
+    : await query.orderBy(asc(venues.name))
 
   return c.json({ success: true, data: venueList })
 })

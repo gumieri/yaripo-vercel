@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { eq, desc } from "drizzle-orm"
+import { eq, desc, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { venues, venueMembers, users } from "@/lib/db/schema"
 import {
@@ -15,7 +15,9 @@ const venueRoutes = new Hono()
 venueRoutes.use("/*", rateLimitMiddleware(100, 60_000))
 
 venueRoutes.get("/", async (c) => {
-  const venueList = await db
+  const country = c.req.query("country")
+
+  const query = db
     .select({
       id: venues.id,
       name: venues.name,
@@ -27,7 +29,12 @@ venueRoutes.get("/", async (c) => {
       description: venues.description,
     })
     .from(venues)
-    .orderBy(desc(venues.createdAt))
+
+  const venueList = country
+    ? await query
+        .where(and(eq(venues.country, country.toUpperCase())))
+        .orderBy(desc(venues.createdAt))
+    : await query.orderBy(desc(venues.createdAt))
 
   return c.json({ success: true, data: venueList }, 200, cacheHeaders(120, 240))
 })

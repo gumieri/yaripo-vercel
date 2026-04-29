@@ -4,12 +4,14 @@ import { useRouter, Link } from "@/i18n/routing"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useCreateEvent, useManageVenues } from "@/lib/api/hooks"
-import type { VenueSummary } from "@/lib/api/hooks"
+import { useCreateEvent } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useState } from "react"
 import { useTranslations } from "next-intl"
+import { CountrySelector } from "@/components/ui/country-selector"
+import { VenueSearchBox } from "@/components/ui/venue-search-box"
+import { InlineVenueForm } from "@/components/ui/inline-venue-form"
 
 const eventSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -32,13 +34,16 @@ const inputCls =
 export default function NewEventPage() {
   const router = useRouter()
   const createEvent = useCreateEvent()
-  const { data: venues } = useManageVenues()
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null)
+  const [showVenueForm, setShowVenueForm] = useState(false)
   const [slugPreview, setSlugPreview] = useState("")
   const t = useTranslations("Manage")
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<EventForm>({
     resolver: zodResolver(eventSchema),
@@ -46,6 +51,15 @@ export default function NewEventPage() {
       scoringType: "simple",
     },
   })
+
+  function onVenueChange(venueId: string | null) {
+    setSelectedVenueId(venueId)
+    setValue("venueId", venueId || undefined)
+  }
+
+  function onVenueCreated(venueId: string) {
+    onVenueChange(venueId)
+  }
 
   async function onSubmit(data: EventForm) {
     try {
@@ -101,17 +115,13 @@ export default function NewEventPage() {
           {errors.slug && <p className="text-destructive mt-1 text-sm">{errors.slug.message}</p>}
         </div>
 
-        <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t("venue")}</label>
-          <select {...register("venueId")} className={inputCls}>
-            <option value="">{t("noVenue")}</option>
-            {venues?.map((venue: VenueSummary) => (
-              <option key={venue.id} value={venue.id}>
-                {venue.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CountrySelector value={selectedCountry} onChange={setSelectedCountry} />
+        <VenueSearchBox
+          country={selectedCountry}
+          value={selectedVenueId}
+          onChange={onVenueChange}
+          onCreateVenue={() => setShowVenueForm(true)}
+        />
 
         <div>
           <label className="text-foreground mb-1 block text-sm font-medium">{t("format")}</label>
@@ -151,6 +161,15 @@ export default function NewEventPage() {
           </Link>
         </div>
       </form>
+
+      {selectedCountry && (
+        <InlineVenueForm
+          country={selectedCountry}
+          open={showVenueForm}
+          onClose={() => setShowVenueForm(false)}
+          onSuccess={onVenueCreated}
+        />
+      )}
     </div>
   )
 }

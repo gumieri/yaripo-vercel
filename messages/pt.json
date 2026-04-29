@@ -24,7 +24,7 @@
   },
   "Nav": {
     "events": "Eventos",
-    "gyms": "Ginásios",
+    "venues": "Locais",
     "manage": "Gerenciar",
     "judge": "Juiz",
     "athlete": "Atleta"
@@ -35,7 +35,7 @@
     "titleHighlight": "simplificadas.",
     "description": "Gerencie competições de escalada com simplicidade e precisão. Classificações em tempo real, gerenciamento de filas e acompanhamento de desempenho.",
     "viewEvents": "Ver Eventos",
-    "viewGyms": "Ver Ginásios",
+    "viewVenues": "Ver Locais",
     "footer": "Yaripo — Plataforma de Competições de Escalada"
   },
   "Events": {
@@ -60,6 +60,13 @@
   },
   "Gyms": {
     "title": "Ginásios"
+  },
+  "Venues": {
+    "title": "Locais",
+    "typeGym": "Ginásio",
+    "typeOutdoor": "Ao ar livre",
+    "typePublic": "Espaço público",
+    "typeOther": "Outro"
   },
   "Leaderboard": {
     "title": "Classificação",
@@ -109,8 +116,8 @@
     "eventName": "Nome do evento",
     "slug": "Slug",
     "slugPlaceholder": "boulder-open-2026",
-    "gymOptional": "Ginásio (opcional)",
-    "noGym": "Nenhum",
+    "venueOptional": "Local (opcional)",
+    "noVenue": "Nenhum",
     "format": "Formato",
     "simpleFormat": "Formato simples (tops + tentativas)",
     "ifscFormat": "Formato IFSC (tops + zonas + tentativas)",
@@ -127,7 +134,7 @@
     "nameRequired": "Nome é obrigatório",
     "slugRequired": "Slug é obrigatório",
     "slugInvalid": "Slug deve ser apenas letras minúsculas, números e hífens",
-    "gym": "Ginásio",
+    "venue": "Local",
     "startsAt": "Data de início",
     "endsAt": "Data de encerramento",
     "submit": "Criar Evento",

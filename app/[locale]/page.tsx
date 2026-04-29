@@ -27,10 +27,10 @@ export default async function Home() {
               {t("Nav.events")}
             </Link>
             <Link
-              href="/gyms"
+              href="/venues"
               className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
             >
-              {t("Nav.gyms")}
+              {t("Nav.venues")}
             </Link>
             {session?.user ? (
               <div className="flex items-center gap-3">
@@ -104,10 +104,10 @@ export default async function Home() {
               {t("Home.viewEvents")}
             </Link>
             <Link
-              href="/gyms"
+              href="/venues"
               className="border-border hover:border-primary/50 hover:text-primary text-muted-foreground rounded-full border px-6 py-3 text-sm font-semibold transition-colors"
             >
-              {t("Home.viewGyms")}
+              {t("Home.viewVenues")}
             </Link>
           </div>
 

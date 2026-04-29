@@ -24,7 +24,7 @@
   },
   "Nav": {
     "events": "Events",
-    "gyms": "Gyms",
+    "venues": "Venues",
     "manage": "Manage",
     "judge": "Judge",
     "athlete": "Athlete"
@@ -35,7 +35,7 @@
     "titleHighlight": "simplified.",
     "description": "Manage climbing competitions with simplicity and precision. Real-time rankings, queue management and performance tracking.",
     "viewEvents": "View Events",
-    "viewGyms": "View Gyms",
+    "viewVenues": "View Venues",
     "footer": "Yaripo — Climbing Competition Platform"
   },
   "Events": {
@@ -60,6 +60,13 @@
   },
   "Gyms": {
     "title": "Gyms"
+  },
+  "Venues": {
+    "title": "Venues",
+    "typeGym": "Gym",
+    "typeOutdoor": "Outdoor",
+    "typePublic": "Public Space",
+    "typeOther": "Other"
   },
   "Leaderboard": {
     "title": "Ranking",
@@ -109,8 +116,8 @@
     "eventName": "Event name",
     "slug": "Slug",
     "slugPlaceholder": "boulder-open-2026",
-    "gymOptional": "Gym (optional)",
-    "noGym": "None",
+    "venueOptional": "Venue (optional)",
+    "noVenue": "None",
     "format": "Format",
     "simpleFormat": "Simple (tops + attempts)",
     "ifscFormat": "IFSC (tops + zones + attempts)",
@@ -127,7 +134,7 @@
     "nameRequired": "Name is required",
     "slugRequired": "Slug is required",
     "slugInvalid": "Slug must be lowercase alphanumeric with dashes only",
-    "gym": "Gym",
+    "venue": "Venue",
     "startsAt": "Start date",
     "endsAt": "End date",
     "submit": "Create Event",

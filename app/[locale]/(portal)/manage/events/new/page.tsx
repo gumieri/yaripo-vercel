@@ -4,8 +4,8 @@ import { useRouter, Link } from "@/i18n/routing"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useCreateEvent, useManageGyms } from "@/lib/api/hooks"
-import type { GymSummary } from "@/lib/api/hooks"
+import { useCreateEvent, useManageVenues } from "@/lib/api/hooks"
+import type { VenueSummary } from "@/lib/api/hooks"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -17,7 +17,7 @@ const eventSchema = z.object({
     .string()
     .min(1, "Slug is required")
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes only"),
-  gymId: z.string().optional(),
+  venueId: z.string().optional(),
   scoringType: z.enum(["simple", "ifsc", "redpoint"]),
   description: z.string().optional(),
   startsAt: z.string().optional(),
@@ -32,7 +32,7 @@ const inputCls =
 export default function NewEventPage() {
   const router = useRouter()
   const createEvent = useCreateEvent()
-  const { data: gyms } = useManageGyms()
+  const { data: venues } = useManageVenues()
   const [slugPreview, setSlugPreview] = useState("")
   const t = useTranslations("Manage")
 
@@ -102,12 +102,12 @@ export default function NewEventPage() {
         </div>
 
         <div>
-          <label className="text-foreground mb-1 block text-sm font-medium">{t("gym")}</label>
-          <select {...register("gymId")} className={inputCls}>
-            <option value="">{t("noGym")}</option>
-            {gyms?.map((gym: GymSummary) => (
-              <option key={gym.id} value={gym.id}>
-                {gym.name}
+          <label className="text-foreground mb-1 block text-sm font-medium">{t("venue")}</label>
+          <select {...register("venueId")} className={inputCls}>
+            <option value="">{t("noVenue")}</option>
+            {venues?.map((venue: VenueSummary) => (
+              <option key={venue.id} value={venue.id}>
+                {venue.name}
               </option>
             ))}
           </select>

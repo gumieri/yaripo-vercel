@@ -518,7 +518,7 @@ export function useVenues() {
 export function useVenuesByCountry(country: string | null) {
   return useQuery({
     queryKey: ["venues", country],
-    queryFn: () => apiFetch<VenueSummary[]>(`/api/manage/venues?country=${country}`),
+    queryFn: () => apiFetch<VenueSummary[]>(`/manage/venues?country=${country}`),
     enabled: !!country,
   })
 }
@@ -526,7 +526,7 @@ export function useVenuesByCountry(country: string | null) {
 export function useGeoCountry() {
   return useQuery({
     queryKey: ["geo"],
-    queryFn: () => apiFetch<{ country: string | null }>("/api/geo"),
+    queryFn: () => apiFetch<{ country: string | null }>("/geo"),
   })
 }
 

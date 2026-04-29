@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils/cn"
 import { Building2, Trees, Globe as GlobeIcon, MapPin } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const venueFormSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(200, "Name too long"),
@@ -49,6 +50,7 @@ interface InlineVenueFormProps {
 
 export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVenueFormProps) {
   const createVenue = useCreateVenue()
+  const t = useTranslations("VenueSearch")
   const {
     register,
     handleSubmit,
@@ -68,7 +70,7 @@ export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVen
   async function onSubmit(data: VenueForm) {
     try {
       const result = await createVenue.mutateAsync(data)
-      toast.success("Venue created successfully")
+      toast.success(t("createSuccess"))
       onSuccess(result.id)
       onClose()
     } catch (error: unknown) {
@@ -77,9 +79,9 @@ export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVen
         "code" in error &&
         (error as { code: string }).code === "CONFLICT"
       ) {
-        toast.error("A venue with this slug already exists")
+        toast.error(t("slugExists"))
       } else {
-        toast.error("Error creating venue. Please try again.")
+        toast.error(t("createError"))
       }
     }
   }
@@ -92,17 +94,24 @@ export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVen
     setValue("slug", slug)
   }
 
+  const venueTypes: Array<"gym" | "outdoor" | "public" | "other"> = [
+    "gym",
+    "outdoor",
+    "public",
+    "other",
+  ]
+
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Register New Venue</SheetTitle>
-          <SheetDescription>Create a new venue for your competition</SheetDescription>
+          <SheetTitle>{t("registerTitle")}</SheetTitle>
+          <SheetDescription>{t("registerDescription")}</SheetDescription>
         </SheetHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Country</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t("country")}</label>
             <div className="border-input bg-muted flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
               <GlobeIcon className="text-muted-foreground h-4 w-4" />
               <span>{country.toUpperCase()}</span>
@@ -110,29 +119,33 @@ export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVen
           </div>
 
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Venue name *</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">
+              {t("venueName")}
+            </label>
             <Input
               {...register("name", { onChange: (e) => updateSlug(e.target.value) })}
-              placeholder="Ex: Boulder Gym São Paulo"
+              placeholder={t("venueNamePlaceholder")}
               className={cn(errors.name && "border-destructive")}
             />
             {errors.name && <p className="text-destructive mt-1 text-xs">{errors.name.message}</p>}
           </div>
 
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Slug *</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">{t("slug")}</label>
             <Input
               {...register("slug")}
-              placeholder="boulder-gym-sao-paulo"
+              placeholder={t("slugPlaceholder")}
               className={cn(errors.slug && "border-destructive")}
             />
             {errors.slug && <p className="text-destructive mt-1 text-xs">{errors.slug.message}</p>}
           </div>
 
           <div>
-            <label className="text-foreground mb-1 block text-sm font-medium">Venue type</label>
+            <label className="text-foreground mb-1 block text-sm font-medium">
+              {t("venueType")}
+            </label>
             <div className="grid grid-cols-2 gap-2">
-              {(["gym", "outdoor", "public", "other"] as const).map((type) => (
+              {venueTypes.map((type) => (
                 <button
                   key={type}
                   type="button"
@@ -143,7 +156,7 @@ export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVen
                   )}
                 >
                   {venueTypeIcons[type]}
-                  <span className="capitalize">{type}</span>
+                  <span>{t(`type${type.charAt(0).toUpperCase() + type.slice(1)}`)}</span>
                 </button>
               ))}
             </div>
@@ -151,15 +164,15 @@ export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVen
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-foreground mb-1 block text-sm font-medium">City</label>
-              <Input {...register("city")} placeholder="São Paulo" />
+              <label className="text-foreground mb-1 block text-sm font-medium">{t("city")}</label>
+              <Input {...register("city")} placeholder={t("cityPlaceholder")} />
               {errors.city && (
                 <p className="text-destructive mt-1 text-xs">{errors.city.message}</p>
               )}
             </div>
             <div>
-              <label className="text-foreground mb-1 block text-sm font-medium">State</label>
-              <Input {...register("state")} placeholder="SP" />
+              <label className="text-foreground mb-1 block text-sm font-medium">{t("state")}</label>
+              <Input {...register("state")} placeholder={t("statePlaceholder")} />
               {errors.state && (
                 <p className="text-destructive mt-1 text-xs">{errors.state.message}</p>
               )}
@@ -168,10 +181,10 @@ export function InlineVenueForm({ country, open, onClose, onSuccess }: InlineVen
 
           <div className="flex gap-3 pt-4">
             <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? "Creating..." : "Create Venue"}
+              {isSubmitting ? t("creating") : t("createVenue")}
             </Button>
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
+              {t("cancel")}
             </Button>
           </div>
         </form>

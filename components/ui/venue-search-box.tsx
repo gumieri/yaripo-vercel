@@ -13,6 +13,7 @@ import {
 import { Building2, Trees, Globe as GlobeIcon, MapPin, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils/cn"
+import { useTranslations } from "next-intl"
 
 interface VenueSearchBoxProps {
   country: string | null
@@ -39,6 +40,7 @@ export function VenueSearchBox({
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const { data: venues, isLoading } = useVenuesByCountry(country)
+  const t = useTranslations("VenueSearch")
 
   const selectedVenue = venues?.find((v) => v.id === value)
   const filteredVenues =
@@ -54,7 +56,7 @@ export function VenueSearchBox({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <label className="text-foreground text-sm font-medium">Venue</label>
+      <label className="text-foreground text-sm font-medium">{t("venue")}</label>
 
       <div className="relative">
         <button
@@ -78,7 +80,7 @@ export function VenueSearchBox({
               <>
                 <MapPin className="text-muted-foreground h-4 w-4" />
                 <span className="text-muted-foreground">
-                  {country ? "Search venues (min 3 chars)" : "Select a country first"}
+                  {country ? t("searchVenues") : t("selectCountryFirst")}
                 </span>
               </>
             )}
@@ -89,7 +91,7 @@ export function VenueSearchBox({
           <div className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full rounded-md border shadow-md">
             <Command loop={false}>
               <CommandInput
-                placeholder="Search venues..."
+                placeholder={t("searchVenuesPlaceholder")}
                 value={search}
                 onValueChange={setSearch}
                 disabled={isLoading}
@@ -97,13 +99,13 @@ export function VenueSearchBox({
               />
               <CommandList>
                 {search.length < 3 ? (
-                  <CommandEmpty>Type at least 3 characters to search</CommandEmpty>
+                  <CommandEmpty>{t("minChars")}</CommandEmpty>
                 ) : isLoading ? (
-                  <CommandEmpty>Loading venues...</CommandEmpty>
+                  <CommandEmpty>{t("loadingVenues")}</CommandEmpty>
                 ) : !hasResults ? (
                   <div className="p-4">
                     <p className="text-muted-foreground mb-3 text-center text-sm">
-                      No venues found
+                      {t("noVenues")}
                     </p>
                     <Button
                       type="button"
@@ -112,7 +114,7 @@ export function VenueSearchBox({
                       onClick={onCreateVenue}
                     >
                       <Plus className="mr-2 h-4 w-4" />
-                      Register new venue
+                      {t("registerNew")}
                     </Button>
                   </div>
                 ) : (
@@ -142,7 +144,7 @@ export function VenueSearchBox({
                         </div>
                         {value === venue.id && (
                           <span className="bg-primary text-primary-foreground ml-auto rounded-full px-2 py-0.5 text-xs">
-                            Selected
+                            {t("selected")}
                           </span>
                         )}
                       </CommandItem>
@@ -160,7 +162,7 @@ export function VenueSearchBox({
               }}
               className="border-muted hover:bg-muted text-muted-foreground w-full rounded-b-md border-t px-3 py-2 text-sm transition-colors"
             >
-              Clear selection
+              {t("clearSelection")}
             </button>
           </div>
         )}

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/command"
 import { Globe, Check, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils/cn"
+import { useTranslations } from "next-intl"
 
 interface CountrySelectorProps {
   value: string | null
@@ -24,6 +25,7 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
   const { data: geoData, isLoading } = useGeoCountry()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
+  const t = useTranslations("VenueSearch")
 
   useEffect(() => {
     if (geoData?.country && !value) {
@@ -46,11 +48,11 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-2">
-        <label className="text-foreground text-sm font-medium">Country</label>
+        <label className="text-foreground text-sm font-medium">{t("country")}</label>
         {isDetected && (
           <span className="bg-primary/10 text-primary text-muted-foreground border-primary/20 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
             <MapPin className="h-3 w-3" />
-            Detected
+            {t("detected")}
           </span>
         )}
       </div>
@@ -71,7 +73,7 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
             ) : (
               <>
                 <Globe className="text-muted-foreground h-4 w-4" />
-                <span className="text-muted-foreground">Select country</span>
+                <span className="text-muted-foreground">{t("selectCountry")}</span>
               </>
             )}
           </span>
@@ -81,13 +83,13 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
           <div className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full rounded-md border shadow-md">
             <Command loop={false}>
               <CommandInput
-                placeholder="Search countries..."
+                placeholder={t("searchCountries")}
                 value={search}
                 onValueChange={setSearch}
                 className="border-none"
               />
               <CommandList>
-                <CommandEmpty>No countries found.</CommandEmpty>
+                <CommandEmpty>{t("noCountries")}</CommandEmpty>
                 <CommandGroup>
                   {filteredCountries.map((country) => (
                     <CommandItem
@@ -117,7 +119,7 @@ export function CountrySelector({ value, onChange, className }: CountrySelectorP
               }}
               className="border-muted hover:bg-muted text-muted-foreground w-full rounded-b-md border-t px-3 py-2 text-sm transition-colors"
             >
-              Clear selection
+              {t("clearSelection")}
             </button>
           </div>
         )}

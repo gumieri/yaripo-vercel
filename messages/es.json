@@ -24,7 +24,7 @@
   },
   "Nav": {
     "events": "Eventos",
-    "gyms": "Gimnasios",
+    "venues": "Lugares",
     "manage": "Gestionar",
     "judge": "Juez",
     "athlete": "Atleta"
@@ -35,7 +35,7 @@
     "titleHighlight": "simplificadas.",
     "description": "Gestiona competiciones de escalada con simplicidad y precisión. Clasificaciones en tiempo real, gestión de colas y seguimiento de rendimiento.",
     "viewEvents": "Ver Eventos",
-    "viewGyms": "Ver Gimnasios",
+    "viewVenues": "Ver Lugares",
     "footer": "Yaripo — Plataforma de Competiciones de Escalada"
   },
   "Events": {
@@ -60,6 +60,51 @@
   },
   "Gyms": {
     "title": "Gimnasios"
+  },
+  "Venues": {
+    "title": "Lugares",
+    "typeGym": "Gimnasio",
+    "typeOutdoor": "Al aire libre",
+    "typePublic": "Espacio público",
+    "typeOther": "Otro"
+  },
+  "VenueSearch": {
+    "country": "País",
+    "detected": "Detectado",
+    "selectCountry": "Seleccionar país",
+    "searchCountries": "Buscar países...",
+    "noCountries": "No se encontraron países.",
+    "clearSelection": "Limpiar selección",
+    "venue": "Lugar",
+    "selectCountryFirst": "Selecciona un país primero",
+    "searchVenues": "Buscar lugares (mín 3 caracteres)",
+    "searchVenuesPlaceholder": "Buscar lugares...",
+    "minChars": "Escribe al menos 3 caracteres para buscar",
+    "loadingVenues": "Cargando lugares...",
+    "noVenues": "No se encontraron lugares",
+    "registerNew": "Registrar nuevo lugar",
+    "selected": "Seleccionado",
+    "registerTitle": "Registrar Nuevo Lugar",
+    "registerDescription": "Crea un nuevo lugar para tu competición",
+    "venueName": "Nombre del lugar",
+    "venueNamePlaceholder": "Ej: Gimnasio de Boulder São Paulo",
+    "slug": "Slug",
+    "slugPlaceholder": "gimnasio-boulder-sao-paulo",
+    "venueType": "Tipo de lugar",
+    "typeGym": "Gimnasio",
+    "typeOutdoor": "Al aire libre",
+    "typePublic": "Público",
+    "typeOther": "Otro",
+    "city": "Ciudad",
+    "cityPlaceholder": "São Paulo",
+    "state": "Estado",
+    "statePlaceholder": "SP",
+    "createVenue": "Crear Lugar",
+    "creating": "Creando...",
+    "cancel": "Cancelar",
+    "createSuccess": "Lugar creado exitosamente",
+    "slugExists": "Ya existe un lugar con este slug",
+    "createError": "Error al crear lugar. Por favor intenta de nuevo."
   },
   "Leaderboard": {
     "title": "Clasificación",
